@@ -10,7 +10,8 @@ SOURCES += main.cpp \
     myutils.cpp \
     columngenerator.cpp \
     glcipinstance.cpp \
-    glcipsolution.cpp
+    glcipsolution.cpp \
+    covmodel.cpp
 
 HEADERS += \
     main.h \
@@ -23,4 +24,5 @@ HEADERS += \
     star.h \
     glcipinstance.h \
     glcipsolution.h \
-    glcipsolution.h
+    glcipsolution.h \
+    covmodel.h
