@@ -14,13 +14,16 @@ class GLCIPInstance
 {
 public:
     Digraph g;
+    DNodePosMap posx;
+    DNodePosMap posy;
     ArcValueMap influence;
     DNodeValueMap threshold;
     DNodeValueMap incentives;
     DNodeValueMap costs;
     double alpha;
 
-    GLCIPInstance();
+    GLCIPInstance(Digraph g, DNodePosMap posx, DNodePosMap posy, ArcValueMap influence, DNodeValueMap threshold,
+        DNodeValueMap incentives, DNodeValueMap costs, double alpha);
 };
 
 #endif // GLCIPINSTANCE_H

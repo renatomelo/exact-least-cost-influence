@@ -9,7 +9,8 @@ SOURCES += main.cpp \
     geompack.cpp \
     myutils.cpp \
     columngenerator.cpp \
-    glcipinstance.cpp
+    glcipinstance.cpp \
+    glcipsolution.cpp
 
 HEADERS += \
     main.h \
@@ -20,4 +21,6 @@ HEADERS += \
     easyscip.h \
     columngenerator.h \
     star.h \
-    glcipinstance.h
+    glcipinstance.h \
+    glcipsolution.h \
+    glcipsolution.h
