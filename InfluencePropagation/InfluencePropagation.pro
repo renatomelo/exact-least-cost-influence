@@ -11,7 +11,8 @@ SOURCES += main.cpp \
     columngenerator.cpp \
     glcipinstance.cpp \
     glcipsolution.cpp \
-    covmodel.cpp
+    covmodel.cpp \
+    arcmodel.cpp
 
 HEADERS += \
     main.h \
@@ -25,4 +26,5 @@ HEADERS += \
     glcipinstance.h \
     glcipsolution.h \
     glcipsolution.h \
-    covmodel.h
+    covmodel.h \
+    arcmodel.h

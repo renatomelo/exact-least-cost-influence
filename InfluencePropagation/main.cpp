@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
 
     // read instance from file
     readInstance(g, posx, posy, influence, threshold, incentives, costs, n, m, "in/" + params.inputFile);
-    GLCIPInstance instance(g, posx, posy, influence, threshold, incentives, costs, params.alpha);
+    GLCIPInstance instance(g, posx, posy, influence, threshold, incentives, costs, params.alpha, n, m);
 
     // solve it
     GLCIPSolution solution(g);
