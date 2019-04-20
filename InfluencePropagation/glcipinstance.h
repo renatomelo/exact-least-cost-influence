@@ -18,13 +18,21 @@ public:
     DNodePosMap posy;
     ArcValueMap influence;
     DNodeValueMap threshold;
-    DNodeValueMap incentives;
-    DNodeValueMap costs;
+    DNodeListOfValuesMap incentives;
+    DNodeListOfValuesMap costs;
     double alpha;
     int n, m;
 
-    GLCIPInstance(Digraph g, DNodePosMap posx, DNodePosMap posy, ArcValueMap influence, DNodeValueMap threshold,
-        DNodeValueMap incentives, DNodeValueMap costs, double alpha, int n, int m);
+    GLCIPInstance(Digraph g, 
+                DNodePosMap posx, 
+                DNodePosMap posy, 
+                ArcValueMap influence, 
+                DNodeValueMap threshold,
+                DNodeListOfValuesMap incentives, 
+                DNodeListOfValuesMap costs, 
+                double alpha, 
+                int n, 
+                int m);
 };
 
 #endif // GLCIPINSTANCE_H

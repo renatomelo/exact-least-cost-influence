@@ -14,7 +14,10 @@
 class ColumnGenerator
 {
 private:
-    static pair<double, vector<Arc>> solveKnapsack(vector<Arc> edges, vector<double> sizes, vector<double> costs, int capacity);
+    static pair<double, vector<Arc>> solveKnapsack(vector<Arc> edges, 
+                                                vector<double> sizes, 
+                                                vector<double> costs, 
+                                                int capacity);
 
 public:
     static Star getNewStar(GLCIPInstance instance, DNode root, ArcValueMap reducedCosts, double p);

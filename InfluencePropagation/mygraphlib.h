@@ -129,6 +129,9 @@ typedef Digraph::NodeMap<string> DNodeStringMap;
 typedef Digraph::NodeMap<bool> DNodeBoolMap;
 typedef Digraph::NodeMap<Arc> DNodeArcMap;
 
+// used to storage a list of values for a node
+typedef Digraph::NodeMap<vector<double>> DNodeListOfValuesMap;
+
 // Used to obtain the node/dnode/edge/arc of a table
 typedef vector<Node> LineToNodeMap;
 typedef vector<DNode> LineToDNodeMap;

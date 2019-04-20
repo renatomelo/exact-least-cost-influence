@@ -25,6 +25,7 @@ using namespace scip;
 
 typedef Digraph::NodeMap<SCIP_VAR*> DNodeSCIPVarMap;
 typedef Digraph::ArcMap<SCIP_VAR*> ArcSCIPVarMap;
+typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPListOfVarMap;
 
 
 class ArcModel

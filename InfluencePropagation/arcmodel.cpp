@@ -42,16 +42,32 @@ void ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     DNodeSCIPVarMap x(instance.g);
     ArcSCIPVarMap z(instance.g);
 
+    // binary variable to indicate whether a incentive p is associated to an vertex i or not
+    DNodeSCIPListOfVarMap xip(instance.g);
+
+    // creates a variable to associate the incentives to each vertex
+    for(DNodeIt v(instance.g); v != INVALID; ++v){
+        xip[v].reserve(instance.incentives[v].size());
+        for(int p = 0; p < instance.incentives[v].size(); ++p){
+            ScipVar* var;
+            string var_name = "x_" + to_string(instance.g.id(v)) + to_string(p);
+            var = new ScipBinVar(scip, var_name, instance.incentives[v][j]);
+            xip[v][p] = var->var;
+        }
+    }
+
     for(DNodeIt v(instance.g); v != INVALID; ++v){
         ScipVar* var;
-        var = new ScipIntVar(scip, "x_" + to_string(instance.g.id(v)), 0.0, 1.0, instance.incentives[v]);
+        var = new ScipIntVar(scip, "x_" + to_string(instance.g.id(v)), 0.0, 1.0, 0.0);
         x[v] = var->var;
     }
 
     for(ArcIt a(instance.g); a != INVALID; ++a){
         ScipVar* var;
-        var = new ScipIntVar(scip, "z_" + to_string(instance.g.id(instance.g.source(a))) + "," + to_string(instance.g.id(instance.g.target(a))),
-                             0.0, 1.0, 0.0);
+        var = new ScipIntVar(scip, 
+                            "z_" + to_string(instance.g.id(instance.g.source(a))) + "," 
+                            + to_string(instance.g.id(instance.g.target(a))),
+                            0.0, 1.0, 0.0);
         z[a] = var->var;
     }
 
@@ -60,11 +76,13 @@ void ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         ScipCons *cons = new ScipCons(scip, 0.0, SCIPinfinity(scip));
 
         // \sum_{p \in P_i} p x_{v, p}
-        cons->addVar(x[v], instance.incentives[v]);
+        for (p = 0; p < instance.incentives[v].size(); ++p){
+            cons->addVar(xip[v][p], instance.incentives[v][p]);
+        }
 
         // \sum_{(j, i) \in A} d_{j,i} z_{j, i}
         for(InArcIt a(instance.g, v); a != INVALID; ++a){
-            cons->addVar(z[a], instance.influence[z]);
+            cons->addVar(z[a], instance.influence[a]);
         }
 
         // - h_v x_v
@@ -72,6 +90,20 @@ void ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
         cons->commit();
     }
+
+    // These constraints ensure that exactly one incentive is atributted to an active vertex
+    for(DNodeIt v(instance.g); v != INVALID; ++v){
+        ScipCons* cons = new ScipCons(scip, 0.0, 0.0);
+
+        // go throug the incentives of the vertex v
+        for(int p = 0; p < instance.incentives[v].size(); ++p){
+            cons->addVar(xip[v][p], instance.incentives[v][p]);
+        }
+
+        cons->addVar(x[v], -1);
+        cons->commit();
+    }
+    
 
     // add z and x coupling constraints
     for(ArcIt a(instance.g); a != INVALID; ++a){

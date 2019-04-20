@@ -97,8 +97,16 @@ void readCheckParams(Params &params,int argc, char *argv[])
 }
 
 // read file and create corresponding graph on the instance variable
-void readInstance(Digraph &g, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence, DNodeValueMap &threshold,
-    DNodeValueMap &incentives, DNodeValueMap &costs, int &n, int &m, string filename){
+void readInstance(Digraph &g, 
+                DNodePosMap &posx, 
+                DNodePosMap &posy, 
+                ArcValueMap &influence, 
+                DNodeValueMap &threshold,
+                DNodeValueMap &incentives, 
+                DNodeValueMap &costs, 
+                int &n, 
+                int &m, 
+                string filename){
 
     // Read the graph (only nodes and edges)
     GraphTable GT(filename, g);
