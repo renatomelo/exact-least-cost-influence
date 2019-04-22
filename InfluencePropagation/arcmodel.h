@@ -19,14 +19,13 @@
 #include <scip/pub_misc.h>
 #include "glcipinstance.h"
 #include "glcipsolution.h"
+#include "cyclecutsgenerator.h"
 
 using namespace easyscip;
 using namespace scip;
 
-typedef Digraph::NodeMap<SCIP_VAR*> DNodeSCIPVarMap;
 typedef Digraph::ArcMap<SCIP_VAR*> ArcSCIPVarMap;
-typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPListOfVarMap;
-
+typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPVarsMap;
 
 class ArcModel
 {

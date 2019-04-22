@@ -15,19 +15,20 @@
 #include <stack>
 #include <scip/scip_sol.h>
 #include <scip/lp.h>
-#include <glcipinstance.h>
 #include <lemon/dijkstra.h>
+#include "glcipinstance.h"
 
 using namespace easyscip;
 using namespace scip;
 
-typedef Digraph::NodeMap<SCIP_VAR*> DNodeSCIPVarMap;
+typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPVarsMap;
 typedef Digraph::ArcMap<SCIP_VAR*> ArcSCIPVarMap;
+typedef lemon::Dijkstra<Digraph, ArcValueMap> SptSolver;
 
 class CycleCutsGenerator: public scip::ObjConshdlr{
     public:
         GLCIPInstance &instance;
-        DNodeSCIPVarMap &x;
+        DNodeSCIPVarsMap &x;
         ArcSCIPVarMap &z;
 
         virtual SCIP_DECL_CONSTRANS(scip_trans);
@@ -38,7 +39,7 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         virtual SCIP_DECL_CONSCHECK(scip_check);
         virtual SCIP_DECL_CONSLOCK(scip_lock);
 
-        CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+        CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z);
         ~CycleCutsGenerator();
 
         SCIP_RETCODE createCycleCuts(
@@ -57,8 +58,9 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
            );
 
     private:
+        double getXValue(SCIP* scip, SCIP_SOL* sol, DNode v);
         bool isValid(SCIP* scip, SCIP_SOL* sol);
-        SCIP_RETCODE addCycleInequality(SCIP* scip, SCIP_CONSHDLR* conshdlr, list<int> &cycle);
+        SCIP_RETCODE addCycleInequality(SCIP* scip, SCIP_SOL* sol, SCIP_CONSHDLR* conshdlr, vector<DNode> &cycle);
         SCIP_RETCODE findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshdlr, SCIP_SOL* sol, SCIP_RESULT* result, bool feasible);
 };
 #endif // CUTGENERATOR_H

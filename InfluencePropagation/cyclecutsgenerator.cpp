@@ -2,7 +2,7 @@
 
 #define SCIP_DEBUG
 
-CycleCutsGenerator::CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z) :
+CycleCutsGenerator::CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z) :
     instance(instance), x(x), z(z),
     ObjConshdlr(scip, "GLCIP Cycle Cuts", "GLCIP Cycle callback constraints", 10000, 10000, 10000, 1, -1, 1, 0,
         FALSE, FALSE, TRUE, SCIP_PROPTIMING_BEFORELP, SCIP_PRESOLTIMING_FAST) {}
@@ -142,22 +142,32 @@ SCIP_DECL_CONSLOCK(CycleCutsGenerator::scip_lock){
 
     // round x down may cause cycle inequalities to be infeasible
     for(DNodeIt v(instance.g); v != INVALID; ++v){
-        SCIP_CALL(SCIPaddVarLocksType(scip, x[v], locktype, nlockspos, nlocksneg));
+        for(int p = 0; p < x[v].size(); p++){
+            SCIP_CALL(SCIPaddVarLocksType(scip, x[v][p], locktype, nlockspos, nlocksneg));
+        }
     }
 
     return SCIP_OKAY;
 } /*lint !e715*/
 
+// get value of x_i
+double CycleCutsGenerator::getXValue(SCIP* scip, SCIP_SOL* sol, DNode v){
+    double total = 0;
+
+    for(int p = 0; p < x[v].size(); p++){
+        total += SCIPgetSolVal(scip, sol, x[v][p]);
+    }
+
+    return total;
+}
+
 // check if current solution respect cycle constraints
 bool CycleCutsGenerator::isValid(SCIP* scip, SCIP_SOL* sol){
-    assert(result != NULL);
-    *result = SCIP_DIDNOTFIND;
-
     ArcValueMap weight(instance.g);
 
     // construct edges weights according to w[(i, j)] = x_i - z_{i,j}
     for(ArcIt a(instance.g); a != INVALID; ++a){
-        weight[a] = SCIPgetSolVal(scip, sol, x[instance.g.source(a)]) - SCIPgetSolVal(scip, sol, z[a]);
+        weight[a] = getXValue(scip, sol, instance.g.source(a)) - SCIPgetSolVal(scip, sol, z[a]);
     }
 
     // for each node u in the graph, we will run dijkstra to get the shortest path from u to its neighbors
@@ -171,7 +181,7 @@ bool CycleCutsGenerator::isValid(SCIP* scip, SCIP_SOL* sol){
             DNode v = instance.g.source(a);
 
             // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
-            if(spt.dist(v) + weight[a] < SCIPgetSolVal(scip, sol, x[u])){
+            if(spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
                 return false;
             }
         }
@@ -182,7 +192,7 @@ bool CycleCutsGenerator::isValid(SCIP* scip, SCIP_SOL* sol){
 
 // add capacity cuts
 // \sum_{(i, j) \in C} z_{i, j} - \sum_{i \in V(C) \backslash \{k\}} x_i <= 0 \forall k \in V(C), \text{cycle } C \subseteq A,
-SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_CONSHDLR* conshdlr, list<int> &cycle){
+SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_SOL* sol, SCIP_CONSHDLR* conshdlr, vector<DNode> &cycle){
     SCIP_ROW* row;
 
     // (the bounds in SCIP are in the following format LHS <= expr <= RHS)
@@ -206,7 +216,9 @@ SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_CONSHDLR* c
 
         // add x and z to the constraint
         if(i > 0){
-            SCIPaddVarToRow(scip, row, x[u], -1.0);
+            for(int p = 0; p < x[u].size(); p++){
+                SCIPaddVarToRow(scip, row, x[u][p], -1.0);
+            }
         }
         SCIPaddVarToRow(scip, row, z[a], 1.0);
     }
@@ -228,7 +240,7 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
 
     // construct edges weights according to w[(i, j)] = x_i - z_{i,j}
     for(ArcIt a(instance.g); a != INVALID; ++a){
-        weight[a] = SCIPgetSolVal(scip, sol, x[instance.g.source(a)]) - SCIPgetSolVal(scip, sol, z[a]);
+        weight[a] = getXValue(scip, sol, instance.g.source(a)) - SCIPgetSolVal(scip, sol, z[a]);
     }
 
     // for each node u in the graph, we will run dijkstra to get the shortest path from u to its neighbors
@@ -242,9 +254,9 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
             DNode v = instance.g.source(a);
 
             // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
-            if(spt.dist(v) + weight[a] < SCIPgetSolVal(scip, sol, x[u])){
+            if(spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
                 // pick the nodes in the violated cycle
-                list<DNode> cycle;
+                vector<DNode> cycle;
 
                 for (DNode curr = v; curr != u; curr = spt.predNode(curr)){
                     if (curr != INVALID && spt.reached(curr)){
@@ -256,7 +268,7 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
                 cycle.push_back(u);
 
                 // now that we have a cycle, add the corresponding inequality
-                addCycleInequality(scip, conshdlr, cycle);
+                addCycleInequality(scip, sol, conshdlr, cycle);
             }
         }
     }

@@ -4,10 +4,9 @@ int main(int argc, char *argv[]){
     Digraph g;
     DNodePosMap posx(g);
     DNodePosMap posy(g);
-    ArcValueMap influence;
-    DNodeValueMap threshold;
-    DNodeValueMap incentives;
-    DNodeValueMap costs;
+    ArcValueMap influence(g);
+    DNodeValueMap threshold(g);
+    DNodeValueVectorMap incentives(g);
     int n, m;
 
     // read parameters from command line
@@ -15,18 +14,19 @@ int main(int argc, char *argv[]){
     readCheckParams(params, argc, argv);
 
     // read instance from file
-    readInstance(g, posx, posy, influence, threshold, incentives, costs, n, m, "in/" + params.inputFile);
-    GLCIPInstance instance(g, posx, posy, influence, threshold, incentives, costs, params.alpha, n, m);
+    readInstance(g, posx, posy, influence, threshold, incentives, n, m, "in/" + params.inputFile);
+    GLCIPInstance instance(g, posx, posy, influence, threshold, incentives, params.alpha, n, m);
 
     // solve it
     GLCIPSolution solution(g);
 
     auto started = chrono::high_resolution_clock::now();
-    Measures measures;
+    /*
     if(params.alg.compare("cov") == 0)
         GurobiBCP::run(instance, solution, measures, params.timeLimit);
+    */
     if(params.alg.compare("arc") == 0)
-        SCIPBCP::run(instance, solution, measures, params.timeLimit);
+        ArcModel::run(instance, solution, params.timeLimit);
 
     auto done = chrono::high_resolution_clock::now();
     int time = chrono::duration_cast<chrono::milliseconds>(done-started).count();
@@ -41,8 +41,6 @@ void readCheckParams(Params &params,int argc, char *argv[])
     params.timeLimit  = 3600;
     params.inputFile  = "";
     params.graph = false;
-    params.initialSolution = false;
-    params.shouldPrice = false;
     params.alpha = 0.5;
 
     // Read
@@ -102,21 +100,26 @@ void readInstance(Digraph &g,
                 DNodePosMap &posy, 
                 ArcValueMap &influence, 
                 DNodeValueMap &threshold,
-                DNodeValueMap &incentives, 
-                DNodeValueMap &costs, 
+                DNodeValueVectorMap &incentives,
                 int &n, 
                 int &m, 
                 string filename){
 
     // Read the graph (only nodes and edges)
-    GraphTable GT(filename, g);
-    n = GT.getNNodes();
-    m = GT.getNEdges();
+    DigraphTable GT(filename, g);
+    n = GT.getNDNodes();
+    m = GT.getNArcs();
 
     // get nodes and arcs parameters
-    GT.GetColumn("influece", influence);
+    GT.GetColumn("influence", influence);
     GT.GetColumn("threshold", threshold);
-    GT.GetColumn("incentives", incentives);
-    GT.GetColumn("costs", costs);
-    GT.GetNodeCoordinates("posx", posx, "posy", posy);
+    //GT.GetColumn("incentives1", incentives1);
+    GT.GetColumn("posx", posx);
+    GT.GetColumn("posy", posy);
+
+    // put thresholds into incentives vector
+    for(DNodeIt v(g); v != INVALID; ++v){
+        incentives[v].push_back(0.0);
+        incentives[v].push_back(threshold[v]);
+    }
 }

@@ -9,6 +9,7 @@
 #include "glcipinstance.h"
 #include "mygraphlib.h"
 #include "glcipsolution.h"
+#include "arcmodel.h"
 
 typedef struct structParams
 {
@@ -21,6 +22,6 @@ typedef struct structParams
 } Params;
 
 void readCheckParams(Params &params, int argc, char *argv[]);
-void readInstance(Digraph &dg, DNodePosMap &dposx, DNodePosMap &dposy, ArcValueMap &dweight, DNodeIntMap &disTerminal,
-                  vector<DNode> &terminals, int &n, int &m, string filename);
+void readInstance(Digraph &g, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence, DNodeValueMap &threshold,
+    DNodeValueVectorMap &incentives, int &n, int &m, string filename);
 #endif // MAIN_H

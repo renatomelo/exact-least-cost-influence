@@ -15,6 +15,8 @@ class GLCIPSolution
 public:
     ArcBoolMap influence;
     DNodeValueMap incentives;
+
+    GLCIPSolution(Digraph &g);
 };
 
 #endif // GLCIPSOLUTION_H

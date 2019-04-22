@@ -125,6 +125,7 @@ typedef Digraph::NodeMap<double> DNodeValueMap;
 typedef Digraph::NodeMap<int> DNodeColorMap;
 typedef Digraph::NodeMap<bool> DCutMap;
 typedef Digraph::NodeMap<double> DNodePosMap;
+typedef Digraph::NodeMap<vector<double>> DNodeValueVectorMap;
 typedef Digraph::NodeMap<string> DNodeStringMap;
 typedef Digraph::NodeMap<bool> DNodeBoolMap;
 typedef Digraph::NodeMap<Arc> DNodeArcMap;
@@ -483,6 +484,8 @@ class DigraphTable {
 public:
   DigraphTable(string filename,Digraph &graph);
   ~DigraphTable();
+  int getNDNodes();
+  int getNArcs();
   bool GetColumn(string colname,DNodeValueMap &col);
   bool GetColumn(string colname,DNodeIntMap &col);
   bool GetColumn(string colname,DNodeStringMap &col);
@@ -495,6 +498,8 @@ public:
   LineToDNodeMap line2node;
   LineToArcMap line2arc;
   StringToDNodeMap name2node;
+  int n;
+  int m;
 };
 // Constructor to read graph given by list of nodes and
 // list of arcs
@@ -512,6 +517,8 @@ inline DigraphTable::DigraphTable(string filename,Digraph &graph):
   if(type=="digraph"){
     int nnodes=StringToInt(Header->first("nnodes"));
     int narcs=StringToInt(Header->first("narcs"));
+    this->n = nnodes;
+    this->m = narcs;
 
     this->NodeTable = new StringTable(nnodes,file);
     if (!this->NodeTable) {cout<<"Error: Memory allocation for NodeTable problem.\n";exit(0);}
@@ -574,8 +581,13 @@ inline void DigraphTable::print(){
   this->ArcTable->print();
 }
 
+inline int DigraphTable::getNDNodes(){
+    return this->n;
+}
 
-
+inline int DigraphTable::getNArcs(){
+    return this->m;
+}
 
 bool GetNodeCoordinates(DigraphTable &GT, string colx, DNodePosMap &posx, string coly, DNodePosMap &posy);
 
