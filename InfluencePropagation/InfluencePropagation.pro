@@ -12,7 +12,8 @@ SOURCES += main.cpp \
     glcipinstance.cpp \
     glcipsolution.cpp \
     covmodel.cpp \
-    arcmodel.cpp
+    arcmodel.cpp \
+    cyclecutsgenerator.cpp
 
 HEADERS += \
     main.h \
@@ -27,4 +28,5 @@ HEADERS += \
     glcipsolution.h \
     glcipsolution.h \
     covmodel.h \
-    arcmodel.h
+    arcmodel.h \
+    cyclecutsgenerator.h
