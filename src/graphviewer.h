@@ -5,7 +5,6 @@
 #include "mygraphlib.h"
 #include <string>
 #include <vector>
-#include <gurobi_c++.h>
 #include "glcipinstance.h"
 #include "glcipsolution.h"
 
