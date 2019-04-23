@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     glcipsolution.cpp \
     covmodel.cpp \
     arcmodel.cpp \
-    cyclecutsgenerator.cpp
+    cyclecutsgenerator.cpp \
+    graphviewer.cpp
 
 HEADERS += \
     main.h \
@@ -29,4 +30,5 @@ HEADERS += \
     glcipsolution.h \
     covmodel.h \
     arcmodel.h \
-    cyclecutsgenerator.h
+    cyclecutsgenerator.h \
+    graphviewer.h

@@ -45,15 +45,15 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // creates a variables x for the incentives of each vertex
     for(DNodeIt v(instance.g); v != INVALID; ++v){
         for(int p = 0; p < instance.incentives[v].size(); p++){
-            ScipVar* var  = new ScipBinVar(scip, "x_" + to_string(instance.g.id(v)) + to_string(p), instance.incentives[v][p]);
+            ScipVar* var  = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
             x[v].push_back(var->var);
         }
     }
 
     // creates variables z for each arc
     for(ArcIt a(instance.g); a != INVALID; ++a){
-        ScipVar* var = new ScipIntVar(scip, "z_" + to_string(instance.g.id(instance.g.source(a))) + "," +
-            to_string(instance.g.id(instance.g.target(a))), 0.0, 1.0, 0.0);
+        ScipVar* var = new ScipIntVar(scip, "z_" + instance.nodeName[instance.g.source(a)] + "," +
+            instance.nodeName[instance.g.target(a)], 0.0, 1.0, 0.0);
         z[a] = var->var;
     }
 
@@ -61,19 +61,14 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     for(DNodeIt v(instance.g); v != INVALID; ++v){
         ScipCons *cons = new ScipCons(scip, 0.0, SCIPinfinity(scip));
 
-        // \sum_{p \in P_i} p x_{v, p}
+        // \sum_{p \in P_i} (p - h_v) x_{v, p}
         for (int p = 0; p < instance.incentives[v].size(); ++p){
-            cons->addVar(x[v][p], instance.incentives[v][p]);
+            cons->addVar(x[v][p], instance.incentives[v][p] - instance.threshold[v]);
         }
 
         // \sum_{(j, i) \in A} d_{j,i} z_{j, i}
         for(InArcIt a(instance.g, v); a != INVALID; ++a){
             cons->addVar(z[a], instance.influence[a]);
-        }
-
-        // - h_v x_v
-        for (int p = 0; p < instance.incentives[v].size(); ++p){
-            cons->addVar(x[v][p], -instance.threshold[v]);
         }
 
         cons->commit();
@@ -91,7 +86,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         cons->commit();
     }    
 
-    // add z and x coupling constraints (z_{i, j} <= x_i)
+    // add z and x coupling constraints (z_{s, t} <= x_s)
     for(ArcIt a(instance.g); a != INVALID; ++a){
         DNode s = instance.g.source(a);
         DNode t = instance.g.target(a);
@@ -147,11 +142,26 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         // get measures
         SCIP_SOL* sol = SCIPgetBestSol(scip);
 
+        for(DNodeIt v(instance.g); v != INVALID; ++v){
+            for(int p = 0; p < instance.incentives[v].size(); p++){
+                double aux = SCIPgetSolVal(scip, sol, x[v][p]);
+
+                if(aux > 0.1){
+                    cout << "x[" << instance.nodeName[v] << "," << instance.incentives[v][p] << "] = " << aux << endl;
+                    solution.incentives[v] = instance.incentives[v][p];
+                }
+                else{
+                    solution.incentives[v] = 0.0;
+                }
+            }
+        }
+        cout << endl;
+
         for(ArcIt a(instance.g); a != INVALID; ++a){
             double aux = SCIPgetSolVal(scip, sol, z[a]);
 
             if(aux > 0.1){
-                cout << "z[" << instance.g.id(instance.g.source(a)) << "," << instance.g.id(instance.g.target(a)) << "] = " << aux << endl;
+                cout << "z[" << instance.nodeName[instance.g.source(a)] << "," << instance.nodeName[instance.g.target(a)] << "] = " << aux << endl;
                 solution.influence[a] = true;
             }
             else{

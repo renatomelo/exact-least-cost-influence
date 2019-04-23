@@ -2,6 +2,7 @@
 
 int main(int argc, char *argv[]){
     Digraph g;
+    DNodeStringMap nodeName(g);
     DNodePosMap posx(g);
     DNodePosMap posy(g);
     ArcValueMap influence(g);
@@ -14,8 +15,8 @@ int main(int argc, char *argv[]){
     readCheckParams(params, argc, argv);
 
     // read instance from file
-    readInstance(g, posx, posy, influence, threshold, incentives, n, m, "in/" + params.inputFile);
-    GLCIPInstance instance(g, posx, posy, influence, threshold, incentives, params.alpha, n, m);
+    readInstance(g, nodeName, posx, posy, influence, threshold, incentives, n, m, "in/" + params.inputFile);
+    GLCIPInstance instance(g, nodeName, posx, posy, influence, threshold, incentives, params.alpha, n, m);
 
     // solve it
     GLCIPSolution solution(g);
@@ -25,8 +26,10 @@ int main(int argc, char *argv[]){
     if(params.alg.compare("cov") == 0)
         GurobiBCP::run(instance, solution, measures, params.timeLimit);
     */
-    if(params.alg.compare("arc") == 0)
+    if(params.alg.compare("arc") == 0){
         ArcModel::run(instance, solution, params.timeLimit);
+        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Arc Model");
+    }
 
     auto done = chrono::high_resolution_clock::now();
     int time = chrono::duration_cast<chrono::milliseconds>(done-started).count();
@@ -67,6 +70,12 @@ void readCheckParams(Params &params,int argc, char *argv[])
             continue;
         }
 
+        if(arg.find("-alpha") == 0 && next.size() > 0){
+            params.alpha = atof(next.c_str());
+            i++;
+            continue;
+        }
+
         if(arg.find("-a") == 0 && next.size() > 0){
             params.alg = next;
             i++;
@@ -75,11 +84,6 @@ void readCheckParams(Params &params,int argc, char *argv[])
 
         if(arg.find("-g") == 0){
             params.graph = true;
-            continue;
-        }
-
-        if(arg.find("-alpha") == 0){
-            params.alpha = atof(next.c_str());
             continue;
         }
 
@@ -95,7 +99,8 @@ void readCheckParams(Params &params,int argc, char *argv[])
 }
 
 // read file and create corresponding graph on the instance variable
-void readInstance(Digraph &g, 
+void readInstance(Digraph &g,
+                DNodeStringMap &nodeName,
                 DNodePosMap &posx, 
                 DNodePosMap &posy, 
                 ArcValueMap &influence, 
@@ -114,6 +119,7 @@ void readInstance(Digraph &g,
     GT.GetColumn("influence", influence);
     GT.GetColumn("threshold", threshold);
     //GT.GetColumn("incentives1", incentives1);
+    GT.GetColumn("nodename", nodeName);
     GT.GetColumn("posx", posx);
     GT.GetColumn("posy", posy);
 

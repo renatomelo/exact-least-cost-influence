@@ -14,6 +14,7 @@ class GLCIPInstance
 {
 public:
     Digraph &g;
+    DNodeStringMap &nodeName;
     DNodePosMap &posx;
     DNodePosMap &posy;
     ArcValueMap &influence;
@@ -22,7 +23,7 @@ public:
     double alpha;
     int n, m;
 
-    GLCIPInstance(Digraph &g, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence, DNodeValueMap &threshold,
+    GLCIPInstance(Digraph &g, DNodeStringMap &nodeName, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence, DNodeValueMap &threshold,
         DNodeValueVectorMap &incentives, double alpha, int n, int m);
 };
 

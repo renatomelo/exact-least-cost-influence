@@ -67,7 +67,7 @@ LIB = $(CC_LIB) $(GUROBI_LIB) $(SCIPLIB) -lemon
 # g++ -m64 -g -o exe readgraph.cpp viewgraph.cpp adjacencymatrix.cpp ex_fractional_packing.o -I/Library/gurobi600/mac64/include/ -L/Library/gurobi600/mac64/lib/ -lgurobi_c++ -lgurobi60 -stdlib=libstdc++ -lpthread -lm
 # g++ -m64 -g -c adjacencymatrix.cpp -o adjacencymatrix.o -I/Library/gurobi600/mac64/include/  -stdlib=libstdc++ 
 
-MYLIBSOURCES = main.cpp mycolor.cpp mygraphlib.cpp myutils.cpp geompack.cpp glcipinstance.cpp arcmodel.cpp glcipsolution.cpp cyclecutsgenerator.cpp
+MYLIBSOURCES = main.cpp mycolor.cpp mygraphlib.cpp myutils.cpp geompack.cpp glcipinstance.cpp arcmodel.cpp glcipsolution.cpp cyclecutsgenerator.cpp graphviewer.cpp
 MYOBJLIB = $(MYLIBSOURCES:.cpp=.o)
 
 EX =  main.cpp

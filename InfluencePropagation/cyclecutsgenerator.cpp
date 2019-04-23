@@ -181,7 +181,7 @@ bool CycleCutsGenerator::isValid(SCIP* scip, SCIP_SOL* sol){
             DNode v = instance.g.source(a);
 
             // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
-            if(spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
+            if(spt.reached(v) && spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
                 return false;
             }
         }
@@ -254,10 +254,11 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
             DNode v = instance.g.source(a);
 
             // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
-            if(spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
+            if(spt.reached(v) && spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
                 // pick the nodes in the violated cycle
                 vector<DNode> cycle;
 
+                cout << "from " << instance.nodeName[u] << " to " << instance.nodeName[v] << endl;
                 for (DNode curr = v; curr != u; curr = spt.predNode(curr)){
                     if (curr != INVALID && spt.reached(curr)){
                         cycle.push_back(curr);

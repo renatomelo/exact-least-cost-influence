@@ -10,6 +10,7 @@
 #include "mygraphlib.h"
 #include "glcipsolution.h"
 #include "arcmodel.h"
+#include "graphviewer.h"
 
 typedef struct structParams
 {
@@ -22,6 +23,6 @@ typedef struct structParams
 } Params;
 
 void readCheckParams(Params &params, int argc, char *argv[]);
-void readInstance(Digraph &g, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence, DNodeValueMap &threshold,
+void readInstance(Digraph &g, DNodeStringMap &nodeName, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence, DNodeValueMap &threshold,
     DNodeValueVectorMap &incentives, int &n, int &m, string filename);
 #endif // MAIN_H
