@@ -38,3 +38,26 @@ void GraphViewer::ViewGLCIPSolution(GLCIPInstance &instance, GLCIPSolution &solu
     GA.SetLabel(title);
     GA.View();
 }
+
+void GraphViewer::ViewGLCIPFracSolution(GLCIPInstance &instance, ArcValueMap &weight, string title){
+    // assign names to the nodes
+    DNodeStringMap nodeNames(instance.g);
+    for(DNodeIt v(instance.g); v != INVALID; ++v){
+        nodeNames[v] = "\"" + instance.nodeName[v] + "\"";
+    }
+
+    // set graph attributes for the visualizer
+    DigraphAttributes GA(instance.g, nodeNames, instance.posx, instance.posy);
+
+    GA.SetDefaultDNodeAttrib("color = Gray shape = ellipse style = bold fontsize = 20");
+
+    // set arcs label according to weights
+    for(ArcIt a(instance.g); a != INVALID; ++a){
+        if(weight[a] > 0.001){
+            GA.SetLabel(a, to_string(weight[a]));
+        }
+    }
+
+    GA.SetLabel(title);
+    GA.View();
+}

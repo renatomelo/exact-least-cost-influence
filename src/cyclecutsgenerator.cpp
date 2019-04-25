@@ -5,7 +5,9 @@
 CycleCutsGenerator::CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z) :
     instance(instance), x(x), z(z),
     ObjConshdlr(scip, "GLCIP Cycle Cuts", "GLCIP Cycle callback constraints", 10000, 10000, 10000, 1, -1, 1, 0,
-        FALSE, FALSE, TRUE, SCIP_PROPTIMING_BEFORELP, SCIP_PRESOLTIMING_FAST) {}
+        FALSE, FALSE, TRUE, SCIP_PROPTIMING_BEFORELP, SCIP_PRESOLTIMING_FAST) {
+    EpsForIntegrality = 0.0001;
+}
 
 // may be used to free data structures
 CycleCutsGenerator::~CycleCutsGenerator(){}
@@ -68,7 +70,6 @@ SCIP_DECL_CONSSEPASOL(CycleCutsGenerator::scip_sepasol)
 {
     //cout << "consepasol\n";
     bool feasible = true;
-    *result = SCIP_DIDNOTFIND;
     SCIP_CALL(findCycleCuts(scip, conshdlr, sol, result, &feasible));
     return SCIP_OKAY;
 }
@@ -182,21 +183,23 @@ bool CycleCutsGenerator::isValid(SCIP* scip, SCIP_SOL* sol){
 
             // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
             if(spt.reached(v) && spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
+                //cout << "not valid!" << endl;
                 return false;
             }
         }
     }
 
+    //cout << "valid!" << endl;
     return true;
 }
 
 // add capacity cuts
 // \sum_{(i, j) \in C} z_{i, j} - \sum_{i \in V(C) \backslash \{k\}} x_i <= 0 \forall k \in V(C), \text{cycle } C \subseteq A,
-SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_SOL* sol, SCIP_CONSHDLR* conshdlr, vector<DNode> &cycle){
+SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_RESULT* result, SCIP_SOL* sol, SCIP_CONSHDLR* conshdlr, vector<DNode> &cycle){
     SCIP_ROW* row;
 
     // (the bounds in SCIP are in the following format LHS <= expr <= RHS)
-    SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "greater1Cut", -SCIPinfinity(scip), 0.0, FALSE, FALSE, FALSE));
+    SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "cycleRemoval", -SCIPinfinity(scip), 0.0, FALSE, FALSE, FALSE));
     SCIP_CALL(SCIPcacheRowExtensions(scip, row));
 
     // traverse the cycle adding the x and z variables
@@ -227,6 +230,12 @@ SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_SOL* sol, S
     SCIP_CALL(SCIPflushRowExtensions(scip, row));
     SCIP_Bool infeasible;
     SCIP_CALL(SCIPaddCut(scip, sol, row, TRUE, &infeasible));
+    //SCIPprintRow(scip, row, NULL);
+
+    if(infeasible){
+        //cout << "CUTOFF" << endl;
+        *result = SCIP_CUTOFF;
+    }
 
     return SCIP_OKAY;
 }
@@ -243,6 +252,8 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
         weight[a] = getXValue(scip, sol, instance.g.source(a)) - SCIPgetSolVal(scip, sol, z[a]);
     }
 
+    //GraphViewer::ViewGLCIPFracSolution(instance, weight, "Fractional Solution");
+
     // for each node u in the graph, we will run dijkstra to get the shortest path from u to its neighbors
     for(DNodeIt u(instance.g); u != INVALID; ++u){
         // run dijkstra starting from u
@@ -254,22 +265,31 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
             DNode v = instance.g.source(a);
 
             // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
-            if(spt.reached(v) && spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
+            if(spt.reached(v) && spt.dist(v) + weight[a] + EpsForIntegrality < getXValue(scip, sol, u)){
+                // tell SCIP we found a cut in current iteration
+                *result = SCIP_SEPARATED;
+
                 // pick the nodes in the violated cycle
                 vector<DNode> cycle;
 
-                cout << "from " << instance.nodeName[u] << " to " << instance.nodeName[v] << endl;
+                //cout << "from " << instance.nodeName[u] << " to " << instance.nodeName[v] << endl;
                 for (DNode curr = v; curr != u; curr = spt.predNode(curr)){
                     if (curr != INVALID && spt.reached(curr)){
                         cycle.push_back(curr);
-                        //cout << g.id(curr) << ", ";
+                        //cout << instance.nodeName[curr] << ", " << endl;
                     }
                 }
 
                 cycle.push_back(u);
+                //cout << instance.nodeName[u] << ", " << endl;
 
                 // now that we have a cycle, add the corresponding inequality
-                addCycleInequality(scip, sol, conshdlr, cycle);
+                addCycleInequality(scip, result, sol, conshdlr, cycle);
+
+                // node has become infeasible
+                if(*result == SCIP_CUTOFF){
+                    return SCIP_OKAY;
+                }
             }
         }
     }

@@ -17,6 +17,7 @@
 #include <scip/lp.h>
 #include <lemon/dijkstra.h>
 #include "glcipinstance.h"
+#include "graphviewer.h"
 
 using namespace easyscip;
 using namespace scip;
@@ -30,6 +31,7 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         GLCIPInstance &instance;
         DNodeSCIPVarsMap &x;
         ArcSCIPVarMap &z;
+        double EpsForIntegrality;
 
         virtual SCIP_DECL_CONSTRANS(scip_trans);
         virtual SCIP_DECL_CONSSEPALP(scip_sepalp);
@@ -60,7 +62,7 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
     private:
         double getXValue(SCIP* scip, SCIP_SOL* sol, DNode v);
         bool isValid(SCIP* scip, SCIP_SOL* sol);
-        SCIP_RETCODE addCycleInequality(SCIP* scip, SCIP_SOL* sol, SCIP_CONSHDLR* conshdlr, vector<DNode> &cycle);
+        SCIP_RETCODE addCycleInequality(SCIP* scip, SCIP_RESULT* result, SCIP_SOL* sol, SCIP_CONSHDLR* conshdlr, vector<DNode> &cycle);
         SCIP_RETCODE findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshdlr, SCIP_SOL* sol, SCIP_RESULT* result, bool feasible);
 };
 #endif // CUTGENERATOR_H
