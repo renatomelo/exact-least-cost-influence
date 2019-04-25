@@ -492,6 +492,7 @@ public:
   bool GetColumn(string colname,ArcValueMap &col);
   bool GetColumn(string colname,ArcIntMap &col);
   bool GetColumn(string colname,ArcStringMap &col);
+  bool GetColumn(string colname, DNodeValueVectorMap &column);
   void print();
   StringTable *Header,*NodeTable,*ArcTable;
   Digraph &g;
@@ -573,6 +574,26 @@ inline bool DigraphTable::GetColumn(string colname,ArcStringMap &column){
   if (col==-1) {cout << "Error: Column name \""+colname+"\" missing.\n";exit(0);}
   for (int i=0;i<this->ArcTable->nrows;i++)
     this->ArcTable->entry(i,col,column[this->line2arc[i]]);
+  return(true);}
+inline bool DigraphTable::GetColumn(string colname, DNodeValueVectorMap &column){
+  int col = this->NodeTable->columnindex(colname);
+  if (col==-1) {cout << "Error: Column name \""+colname+"\" missing.\n";exit(0);}
+  for (int i=0;i<this->NodeTable->nrows;i++){
+    string entry;
+    this->NodeTable->entry(i,col,entry);
+
+    std::string delim = ",";
+    auto start = 0;
+    auto end = entry.find(delim);
+    while (end != std::string::npos)
+    {
+      column[this->line2node[i]].push_back(stod(entry.substr(start, end - start)));
+      start = end + delim.length();
+      end = entry.find(delim, start);
+    }
+
+    column[this->line2node[i]].push_back(stod(entry.substr(start, end)));
+  }
   return(true);}
 
 inline void DigraphTable::print(){

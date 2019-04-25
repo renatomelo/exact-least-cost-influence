@@ -118,7 +118,7 @@ void readInstance(Digraph &g,
     // get nodes and arcs parameters
     GT.GetColumn("influence", influence);
     GT.GetColumn("threshold", threshold);
-    //GT.GetColumn("incentives1", incentives1);
+    GT.GetColumn("incentives", incentives);
     GT.GetColumn("nodename", nodeName);
     GT.GetColumn("posx", posx);
     GT.GetColumn("posy", posy);
@@ -126,6 +126,6 @@ void readInstance(Digraph &g,
     // put thresholds into incentives vector
     for(DNodeIt v(g); v != INVALID; ++v){
         incentives[v].push_back(0.0);
-        incentives[v].push_back(threshold[v]);
+        //incentives[v].push_back(threshold[v]);
     }
 }
