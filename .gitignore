@@ -5,3 +5,6 @@
 *.opt
 *.swp
 .viewdigraphtempname
+*.config
+*.creator
+*.includes
