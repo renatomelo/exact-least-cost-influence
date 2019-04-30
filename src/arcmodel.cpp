@@ -1,5 +1,100 @@
 #include "arcmodel.h"
 
+// add a cycle founded by the bfs algorithm
+void ArcModel::addCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z, DNodeIntMap &predMap, Arc &backArc){
+    DNode s = instance.g.source(backArc);
+    DNode t = instance.g.target(backArc);
+
+    // walk from s to t adding corresponding nodes and arcs
+    std::vector<Arc> arcs;
+    std::vector<DNode> nodes;
+
+    DNode v = s;
+    nodes.push_back(v);
+    arcs.push_back(backArc);
+
+    do {
+        DNode u = instance.g.nodeFromId(predMap[v]);
+        Arc a = findArc(instance.g, u, v);
+        arcs.push_back(a);
+        nodes.push_back(u);
+        v = u;
+    } while(v != t);
+
+    // now add the corresponding constraints
+    for(int i = 0; i < nodes.size(); i++){
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+
+        // add arcs in the cycle
+        for(auto a: arcs){
+            cons->addVar(z[a], 1.0);
+        }
+
+        // add all vertices except one
+        for(int j = 0; j < nodes.size(); j++){
+            if(j != i){
+                DNode v = nodes[j];
+
+                for(int p = 0; p < instance.incentives[v].size(); ++p){
+                    cons->addVar(x[v][p], -1.0);
+                }
+            }
+        }
+
+        cons->commit();
+    }
+}
+// add cycle removal constraints for cycles of size up to 4
+void ArcModel::addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z){
+    for(DNodeIt r(instance.g); r != INVALID; ++r){
+        std::deque<DNode> *currList = new deque<DNode>();
+        std::deque<DNode> *nextList = new deque<DNode>();
+        std::deque<DNode> *tmp;
+
+        // run bfs algorithm for 3 levels
+        DNodeIntMap predMap(instance.g);
+        DNodeIntMap levelMap(instance.g);
+        mapFill(instance.g, predMap, -1);
+        mapFill(instance.g, levelMap, -1);
+
+        int currLevel = 0;
+
+        currList->push_back(r);
+        predMap[r] = instance.g.id(r);
+        levelMap[r] = 0;
+
+        while(currList->size() > 0 && currLevel < 3){
+            // process current level
+            while(currList->size() > 0){
+                DNode v = currList->front();
+                currList->pop_front();
+
+                for(OutArcIt a(instance.g, v); a != INVALID; ++a){
+                    DNode u = instance.g.target(a);
+
+                    // found a backward arc (goes to an already visited node)
+                    if(predMap[u] != -1 && levelMap[u] < levelMap[v]){
+                        addCycleConstraints(scip, instance, x, z, predMap, a);
+                    }
+
+                    // this vertex is in the next level (unvisited)
+                    else if (predMap[u] == -1){
+                        nextList->push_back(u);
+                        predMap[u] = instance.g.id(v);
+                        levelMap[u] = levelMap[v] + 1;
+                    }
+                }
+            }
+
+            // now we set the next list to be the current list
+            tmp = currList;
+            currList = nextList;
+            nextList = tmp;
+            currLevel++;
+        }
+    }
+}
+
 bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     //set initial clock
@@ -114,6 +209,9 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     }
     consAlpha->commit();
 
+    // add small cycle constraints
+    addSmallCycleConstraints(scip, instance, x, z);
+
     //include cycle removal cuts
     CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
@@ -149,6 +247,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                 if(aux > 0.1){
                     cout << "x[" << instance.nodeName[v] << "," << instance.incentives[v][p] << "] = " << aux << endl;
                     solution.incentives[v] = instance.incentives[v][p];
+                    //cout << "node incentive " << solution.incentives[v] << endl;
                 }
                 else{
                     solution.incentives[v] = 0.0;

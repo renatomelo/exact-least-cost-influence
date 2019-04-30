@@ -20,6 +20,7 @@
 #include "glcipinstance.h"
 #include "glcipsolution.h"
 #include "cyclecutsgenerator.h"
+#include <deque>
 
 using namespace easyscip;
 using namespace scip;
@@ -30,6 +31,8 @@ typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPVarsMap;
 class ArcModel
 {
     public:
+        static void addCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z, DNodeIntMap &predMap, Arc &backArc);
+        static void addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z);
         static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 
