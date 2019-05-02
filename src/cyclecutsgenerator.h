@@ -25,11 +25,12 @@ using namespace scip;
 typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPVarsMap;
 typedef Digraph::ArcMap<SCIP_VAR*> ArcSCIPVarMap;
 typedef lemon::Dijkstra<Digraph, ArcValueMap> SptSolver;
+typedef Digraph::NodeMap<SCIP_VAR*> DNodeSCIPVarMap;
 
 class CycleCutsGenerator: public scip::ObjConshdlr{
     public:
         GLCIPInstance &instance;
-        DNodeSCIPVarsMap &x;
+        DNodeSCIPVarMap &x;
         ArcSCIPVarMap &z;
         double EpsForIntegrality;
 
@@ -41,7 +42,7 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         virtual SCIP_DECL_CONSCHECK(scip_check);
         virtual SCIP_DECL_CONSLOCK(scip_lock);
 
-        CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z);
+        CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
         ~CycleCutsGenerator();
 
         SCIP_RETCODE createCycleCuts(

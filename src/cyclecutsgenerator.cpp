@@ -2,9 +2,9 @@
 
 #define SCIP_DEBUG
 
-CycleCutsGenerator::CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z) :
+CycleCutsGenerator::CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z) :
     instance(instance), x(x), z(z),
-    ObjConshdlr(scip, "GLCIP Cycle Cuts", "GLCIP Cycle callback constraints", 10000, 10000, 10000, 1, -1, 1, 0,
+    ObjConshdlr(scip, "GLCIP Cycle Cuts", "GLCIP Cycle callback constraints", -1, -1, -1, 1, -1, 1, 0,
         FALSE, FALSE, TRUE, SCIP_PROPTIMING_BEFORELP, SCIP_PRESOLTIMING_FAST) {
     EpsForIntegrality = 0.0001;
 }
@@ -143,9 +143,7 @@ SCIP_DECL_CONSLOCK(CycleCutsGenerator::scip_lock){
 
     // round x down may cause cycle inequalities to be infeasible
     for(DNodeIt v(instance.g); v != INVALID; ++v){
-        for(int p = 0; p < x[v].size(); p++){
-            SCIP_CALL(SCIPaddVarLocksType(scip, x[v][p], locktype, nlockspos, nlocksneg));
-        }
+        SCIP_CALL(SCIPaddVarLocksType(scip, x[v], locktype, nlockspos, nlocksneg));
     }
 
     return SCIP_OKAY;
@@ -153,13 +151,7 @@ SCIP_DECL_CONSLOCK(CycleCutsGenerator::scip_lock){
 
 // get value of x_i
 double CycleCutsGenerator::getXValue(SCIP* scip, SCIP_SOL* sol, DNode v){
-    double total = 0;
-
-    for(int p = 0; p < x[v].size(); p++){
-        total += SCIPgetSolVal(scip, sol, x[v][p]);
-    }
-
-    return total;
+    return SCIPgetSolVal(scip, sol, x[v]);
 }
 
 // check if current solution respect cycle constraints
@@ -168,23 +160,26 @@ bool CycleCutsGenerator::isValid(SCIP* scip, SCIP_SOL* sol){
 
     // construct edges weights according to w[(i, j)] = x_i - z_{i,j}
     for(ArcIt a(instance.g); a != INVALID; ++a){
+        // compute weight in support graph
         weight[a] = getXValue(scip, sol, instance.g.source(a)) - SCIPgetSolVal(scip, sol, z[a]);
     }
 
     // for each node u in the graph, we will run dijkstra to get the shortest path from u to its neighbors
     for(DNodeIt u(instance.g); u != INVALID; ++u){
-        // run dijkstra starting from u
-        SptSolver spt(instance.g, weight);
-        spt.run(u);
+        if(getXValue(scip, sol, u) > 1 - EpsForIntegrality){
+            // run dijkstra starting from u
+            SptSolver spt(instance.g, weight);
+            spt.run(u);
 
-        // for each neighbor of u, we check if it violates the cycle inequality
-        for(InArcIt a(instance.g, u); a != INVALID; ++a){
-            DNode v = instance.g.source(a);
+            // for each neighbor of u, we check if it violates the cycle inequality
+            for(InArcIt a(instance.g, u); a != INVALID; ++a){
+                DNode v = instance.g.source(a);
 
-            // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
-            if(spt.reached(v) && spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
-                //cout << "not valid!" << endl;
-                return false;
+                // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
+                if(spt.reached(v) && spt.dist(v) + weight[a] < getXValue(scip, sol, u)){
+                    //cout << "not valid!" << endl;
+                    return false;
+                }
             }
         }
     }
@@ -219,9 +214,7 @@ SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_RESULT* res
 
         // add x and z to the constraint
         if(i > 0){
-            for(int p = 0; p < x[u].size(); p++){
-                SCIPaddVarToRow(scip, row, x[u][p], -1.0);
-            }
+            SCIPaddVarToRow(scip, row, x[u], -1.0);
         }
         SCIPaddVarToRow(scip, row, z[a], 1.0);
     }
@@ -256,39 +249,41 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
 
     // for each node u in the graph, we will run dijkstra to get the shortest path from u to its neighbors
     for(DNodeIt u(instance.g); u != INVALID; ++u){
-        // run dijkstra starting from u
-        SptSolver spt(instance.g, weight);
-        spt.run(u);
+        if(getXValue(scip, sol, u) > 1 - EpsForIntegrality){
+            // run dijkstra starting from u
+            SptSolver spt(instance.g, weight);
+            spt.run(u);
 
-        // for each neighbor of u, we check if it violates the cycle inequality
-        for(InArcIt a(instance.g, u); a != INVALID; ++a){
-            DNode v = instance.g.source(a);
+            // for each neighbor of u, we check if it violates the cycle inequality
+            for(InArcIt a(instance.g, u); a != INVALID; ++a){
+                DNode v = instance.g.source(a);
 
-            // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
-            if(spt.reached(v) && spt.dist(v) + weight[a] + EpsForIntegrality < getXValue(scip, sol, u)){
-                // tell SCIP we found a cut in current iteration
-                *result = SCIP_SEPARATED;
+                // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
+                if(spt.reached(v) && spt.dist(v) + weight[a] < EpsForIntegrality){
+                    // tell SCIP we found a cut in current iteration
+                    *result = SCIP_SEPARATED;
 
-                // pick the nodes in the violated cycle
-                vector<DNode> cycle;
+                    // pick the nodes in the violated cycle
+                    vector<DNode> cycle;
 
-                //cout << "from " << instance.nodeName[u] << " to " << instance.nodeName[v] << endl;
-                for (DNode curr = v; curr != u; curr = spt.predNode(curr)){
-                    if (curr != INVALID && spt.reached(curr)){
-                        cycle.push_back(curr);
-                        //cout << instance.nodeName[curr] << ", " << endl;
+                    //cout << "from " << instance.nodeName[u] << " to " << instance.nodeName[v] << endl;
+                    for (DNode curr = v; curr != u; curr = spt.predNode(curr)){
+                        if (curr != INVALID && spt.reached(curr)){
+                            cycle.push_back(curr);
+                            //cout << instance.nodeName[curr] << ", " << endl;
+                        }
                     }
-                }
 
-                cycle.push_back(u);
-                //cout << instance.nodeName[u] << ", " << endl;
+                    cycle.push_back(u);
+                    //cout << instance.nodeName[u] << ", " << endl;
 
-                // now that we have a cycle, add the corresponding inequality
-                addCycleInequality(scip, result, sol, conshdlr, cycle);
+                    // now that we have a cycle, add the corresponding inequality
+                    addCycleInequality(scip, result, sol, conshdlr, cycle);
 
-                // node has become infeasible
-                if(*result == SCIP_CUTOFF){
-                    return SCIP_OKAY;
+                    // node has become infeasible
+                    if(*result == SCIP_CUTOFF){
+                        return SCIP_OKAY;
+                    }
                 }
             }
         }

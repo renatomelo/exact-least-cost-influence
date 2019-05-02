@@ -1,7 +1,7 @@
 #include "arcmodel.h"
 
 // add a cycle founded by the bfs algorithm
-void ArcModel::addCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z, DNodeIntMap &predMap, Arc &backArc){
+void ArcModel::addCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z, DNodeIntMap &predMap, Arc &backArc){
     DNode s = instance.g.source(backArc);
     DNode t = instance.g.target(backArc);
 
@@ -34,64 +34,51 @@ void ArcModel::addCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCI
         for(int j = 0; j < nodes.size(); j++){
             if(j != i){
                 DNode v = nodes[j];
-
-                for(int p = 0; p < instance.incentives[v].size(); ++p){
-                    cons->addVar(x[v][p], -1.0);
-                }
+                cons->addVar(x[v], -1.0);
             }
         }
 
         cons->commit();
     }
 }
-// add cycle removal constraints for cycles of size up to 4
-void ArcModel::addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarsMap &x, ArcSCIPVarMap &z){
-    for(DNodeIt r(instance.g); r != INVALID; ++r){
-        std::deque<DNode> *currList = new deque<DNode>();
-        std::deque<DNode> *nextList = new deque<DNode>();
-        std::deque<DNode> *tmp;
 
-        // run bfs algorithm for 3 levels
-        DNodeIntMap predMap(instance.g);
-        DNodeIntMap levelMap(instance.g);
-        mapFill(instance.g, predMap, -1);
-        mapFill(instance.g, levelMap, -1);
+// run a depth first search with maximum height 3
+void ArcModel::dfsSmallCycles(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z, DNodeIntMap &colors,
+                              DNodeIntMap &predMap, DNode curr, int level, int rootId){
+    // visit current node (grey color)
+    colors[curr] = 1;
 
-        int currLevel = 0;
+    // pass through current node neighbors
+    for(OutArcIt a(instance.g, curr); a != INVALID; ++a){
+        DNode next = instance.g.target(a);
 
-        currList->push_back(r);
-        predMap[r] = instance.g.id(r);
-        levelMap[r] = 0;
-
-        while(currList->size() > 0 && currLevel < 3){
-            // process current level
-            while(currList->size() > 0){
-                DNode v = currList->front();
-                currList->pop_front();
-
-                for(OutArcIt a(instance.g, v); a != INVALID; ++a){
-                    DNode u = instance.g.target(a);
-
-                    // found a backward arc (goes to an already visited node)
-                    if(predMap[u] != -1 && levelMap[u] < levelMap[v]){
-                        addCycleConstraints(scip, instance, x, z, predMap, a);
-                    }
-
-                    // this vertex is in the next level (unvisited)
-                    else if (predMap[u] == -1){
-                        nextList->push_back(u);
-                        predMap[u] = instance.g.id(v);
-                        levelMap[u] = levelMap[v] + 1;
-                    }
-                }
-            }
-
-            // now we set the next list to be the current list
-            tmp = currList;
-            currList = nextList;
-            nextList = tmp;
-            currLevel++;
+        // if next is grey, then we found a cycle
+        if(colors[next] == 1){
+            addCycleConstraints(scip, instance, x, z, predMap, a);
         }
+
+        // if next is white, then we check the level
+        if(colors[next] == 0 && level < 3 && instance.g.id(next) > rootId){
+            predMap[next] = instance.g.id(curr);
+            dfsSmallCycles(scip, instance, x, z, colors, predMap, next, level + 1, rootId);
+        }
+    }
+
+    // close this vertex (black color)
+    colors[curr] = 2;
+}
+
+// add cycle removal constraints for cycles of size up to 4
+void ArcModel::addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z){
+    for(DNodeIt r(instance.g); r != INVALID; ++r){
+        // run dfs algorithm for 3 levels
+        DNodeIntMap predMap(instance.g);
+        DNodeIntMap colors(instance.g);
+        mapFill(instance.g, predMap, -1);
+        mapFill(instance.g, colors, 0);
+
+        predMap[r] = instance.g.id(r);
+        dfsSmallCycles(scip, instance, x, z, colors, predMap, r, 0, instance.g.id(r));
     }
 }
 
@@ -134,14 +121,18 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
 
     // add variables to the model
-    DNodeSCIPVarsMap x(instance.g);
+    DNodeSCIPVarMap x(instance.g);
+    DNodeSCIPVarsMap xip(instance.g);
     ArcSCIPVarMap z(instance.g);
 
-    // creates a variables x for the incentives of each vertex
+    // creates variables x and xip for the incentives of each vertex
     for(DNodeIt v(instance.g); v != INVALID; ++v){
+        ScipVar* var  = new ScipBinVar(scip, "x_" + instance.nodeName[v], 0.0);
+        x[v] = var->var;
+
         for(int p = 0; p < instance.incentives[v].size(); p++){
-            ScipVar* var  = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
-            x[v].push_back(var->var);
+            var  = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
+            xip[v].push_back(var->var);
         }
     }
 
@@ -158,7 +149,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
         // \sum_{p \in P_i} (p - h_v) x_{v, p}
         for (int p = 0; p < instance.incentives[v].size(); ++p){
-            cons->addVar(x[v][p], instance.incentives[v][p] - instance.threshold[v]);
+            cons->addVar(xip[v][p], instance.incentives[v][p]);
         }
 
         // \sum_{(j, i) \in A} d_{j,i} z_{j, i}
@@ -166,20 +157,22 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
             cons->addVar(z[a], instance.influence[a]);
         }
 
+        cons->addVar(x[v], -instance.threshold[v]);
+
         cons->commit();
     }
 
-    // These constraints ensure that exactly one incentive is atributted to an active vertex
+    // coupling variables xip and x
     for(DNodeIt v(instance.g); v != INVALID; ++v){
-        ScipCons* cons = new ScipCons(scip, 0.0, 1.0);
+        ScipCons* cons = new ScipCons(scip, 0.0, 0.0);
 
-        // go through the incentives of the vertex v
         for(int p = 0; p < instance.incentives[v].size(); ++p){
-            cons->addVar(x[v][p], 1.0);
+            cons->addVar(xip[v][p], 1.0);
         }
 
+        cons->addVar(x[v], -1.0);
         cons->commit();
-    }    
+    }
 
     // add z and x coupling constraints (z_{s, t} <= x_s)
     for(ArcIt a(instance.g); a != INVALID; ++a){
@@ -190,10 +183,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         if(a2 == INVALID){
             ScipCons *cons = new ScipCons(scip, 0.0, SCIPinfinity(scip));
 
-            for(int p = 0; p < instance.incentives[s].size(); ++p){
-                cons->addVar(x[s][p], 1.0);
-            }
-
+            cons->addVar(x[s], 1.0);
             cons->addVar(z[a], -1.0);
 
             cons->commit();
@@ -203,9 +193,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // add alpha constraints
     ScipCons *consAlpha = new ScipCons(scip, ceil(instance.alpha * instance.n), SCIPinfinity(scip));
     for(DNodeIt v(instance.g); v != INVALID; ++v){
-        for(int p = 0; p < instance.incentives[v].size(); ++p){
-            consAlpha->addVar(x[v][p], 1.0);
-        }
+        consAlpha->addVar(x[v], 1.0);
     }
     consAlpha->commit();
 
@@ -242,10 +230,10 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
         for(DNodeIt v(instance.g); v != INVALID; ++v){
             for(int p = 0; p < instance.incentives[v].size(); p++){
-                double aux = SCIPgetSolVal(scip, sol, x[v][p]);
+                double aux = SCIPgetSolVal(scip, sol, xip[v][p]);
 
                 if(aux > 0.1){
-                    cout << "x[" << instance.nodeName[v] << "," << instance.incentives[v][p] << "] = " << aux << endl;
+                    cout << "xip[" << instance.nodeName[v] << "," << instance.incentives[v][p] << "] = " << aux << endl;
                     solution.incentives[v] = instance.incentives[v][p];
                     //cout << "node incentive " << solution.incentives[v] << endl;
                 }
