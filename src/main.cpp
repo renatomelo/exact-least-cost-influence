@@ -30,6 +30,10 @@ int main(int argc, char *argv[]){
         ArcModel::run(instance, solution, params.timeLimit);
         GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Arc Model");
     }
+    if(params.alg.compare("cov") == 0){
+        CovModelAllVariables::run(instance, solution, params.timeLimit);
+        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
+    }
 
     auto done = chrono::high_resolution_clock::now();
     int time = chrono::duration_cast<chrono::milliseconds>(done-started).count();

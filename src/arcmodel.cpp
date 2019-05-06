@@ -82,6 +82,16 @@ void ArcModel::addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNo
     }
 }
 
+/*void ArcModel::addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z){
+    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
+
+    SCIP_CONS* cons;
+    SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
+    SCIP_CALL(SCIPaddCons(scip, cons));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons));
+}*/
+
 bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     //set initial clock
@@ -158,7 +168,6 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         }
 
         cons->addVar(x[v], -instance.threshold[v]);
-
         cons->commit();
     }
 
@@ -201,6 +210,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     addSmallCycleConstraints(scip, instance, x, z);
 
     //include cycle removal cuts
+    //addCuttingPlanes(scip, instance, x, z);
     CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
@@ -233,7 +243,8 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                 double aux = SCIPgetSolVal(scip, sol, xip[v][p]);
 
                 if(aux > 0.1){
-                    cout << "xip[" << instance.nodeName[v] << "," << instance.incentives[v][p] << "] = " << aux << endl;
+                    cout << "xip[" << instance.nodeName[v] << "," << 
+                    instance.incentives[v][p] << "] = " << aux << endl;
                     solution.incentives[v] = instance.incentives[v][p];
                     //cout << "node incentive " << solution.incentives[v] << endl;
                 }

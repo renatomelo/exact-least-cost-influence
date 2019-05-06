@@ -11,6 +11,7 @@
 #include "glcipsolution.h"
 #include "arcmodel.h"
 #include "graphviewer.h"
+#include "covmodelallvariables.h"
 
 typedef struct structParams
 {

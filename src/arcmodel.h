@@ -36,6 +36,7 @@ class ArcModel
         static void dfsSmallCycles(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z, DNodeIntMap &colors,
                                    DNodeIntMap &predMap, DNode curr, int level, int rootId);
         static void addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+ //       static void addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
         static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 
