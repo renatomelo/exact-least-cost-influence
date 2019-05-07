@@ -53,8 +53,15 @@ void GraphViewer::ViewGLCIPFracSolution(GLCIPInstance &instance, ArcValueMap &we
 
     // set arcs label according to weights
     for(ArcIt a(instance.g); a != INVALID; ++a){
-        if(weight[a] > 0.001){
-            GA.SetLabel(a, to_string(weight[a]));
+        if(weight[a] > 0.00001){
+            stringstream stream;
+            stream << fixed << setprecision(4) << weight[a];
+            string s = stream.str();
+
+            GA.SetLabel(a, s);
+        }
+        else{
+            GA.SetColor(a, "Invis");
         }
     }
 

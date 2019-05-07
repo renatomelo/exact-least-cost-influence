@@ -4,6 +4,8 @@ columngenerator.cpp
 columngenerator.h
 covmodel.cpp
 covmodel.h
+covmodelallvariables.cpp
+covmodelallvariables.h
 cyclecutsgenerator.cpp
 cyclecutsgenerator.h
 easyscip.h

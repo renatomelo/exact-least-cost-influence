@@ -33,6 +33,7 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         DNodeSCIPVarMap &x;
         ArcSCIPVarMap &z;
         double EpsForIntegrality;
+        int vizCount;
 
         virtual SCIP_DECL_CONSTRANS(scip_trans);
         virtual SCIP_DECL_CONSSEPALP(scip_sepalp);

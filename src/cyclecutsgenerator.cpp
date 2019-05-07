@@ -7,6 +7,7 @@ CycleCutsGenerator::CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNod
     ObjConshdlr(scip, "GLCIP Cycle Cuts", "GLCIP Cycle callback constraints", -1, -1, -1, 1, -1, 1, 0,
         FALSE, FALSE, TRUE, SCIP_PROPTIMING_BEFORELP, SCIP_PRESOLTIMING_FAST) {
     EpsForIntegrality = 0.0001;
+    vizCount = 0;
 }
 
 // may be used to free data structures
@@ -245,8 +246,6 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
         weight[a] = getXValue(scip, sol, instance.g.source(a)) - SCIPgetSolVal(scip, sol, z[a]);
     }
 
-    //GraphViewer::ViewGLCIPFracSolution(instance, weight, "Fractional Solution");
-
     // for each node u in the graph, we will run dijkstra to get the shortest path from u to its neighbors
     for(DNodeIt u(instance.g); u != INVALID; ++u){
         if(getXValue(scip, sol, u) > 1 - EpsForIntegrality){
@@ -289,5 +288,11 @@ SCIP_RETCODE CycleCutsGenerator::findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshd
         }
     }
 
+    /*
+    if(*result == SCIP_DIDNOTFIND && vizCount == 0){
+        GraphViewer::ViewGLCIPFracSolution(instance, weight, "Fractional Solution");
+        vizCount++;
+    }
+    */
     return SCIP_OKAY;
 }
