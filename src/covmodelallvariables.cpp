@@ -1,5 +1,4 @@
-#include "covmodelallvariables.h"
-#include "arcmodel.h"
+#include "GLCIPBase.h"
 
 vector<influencingSet> CovModelAllVariables::powerSet(vector<DNode> neighbors){
     unsigned int pSize = pow(2, neighbors.size());
@@ -45,6 +44,54 @@ double CovModelAllVariables::costInfluencingSet(GLCIPInstance &instance, DNode v
     }
 }
 
+/**
+ * exactly one influencing set needs to be selected for each active node
+ */
+void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
+                                                     GLCIPInstance &instance, 
+                                                     DNodeSCIPVarMap &x, 
+                                                     DNodeSCIPVarsMap &infSet, 
+                                                     DNodeInfSetsMap &infSets) {
+    for (DNodeIt v(instance.g); v != INVALID; ++v){
+        ScipCons* cons = new ScipCons(scip, 0, 0);
+
+        // summation of all influencing-set varialbes related to a vertex v
+        for (int i = 0; i < infSet[v].size(); i++) {
+            cons->addVar(infSet[v][i], 1);
+        }
+        cons->addVar(x[v], -1);
+        cons->commit();
+    }
+}
+
+/**
+ * all arcs on which influence is exerted are chosen as well
+ */
+void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
+                                                    GLCIPInstance &instance, 
+                                                    ArcSCIPVarMap &z, 
+                                                    DNodeSCIPVarsMap &infSet, 
+                                                    DNodeInfSetsMap &infSets) {
+    for (ArcIt a(instance.g); a != INVALID; ++a) {
+        ScipCons* cons = new ScipCons(scip, 0, 0);
+        DNode u = instance.g.source(a);
+        DNode v = instance.g.target(a);
+
+        // summation
+        for (int i = 0; i < infSet[v].size(); i++){
+            // add variable if u belongs to the influencing set of v
+            if (infSets[v][i].elements.count(u)){
+               //std::cout << instance.nodeName[u] + " is in the " + to_string(i) +
+               //             "th influencing set of " + instance.nodeName[v] << std::endl;
+                cons->addVar(infSet[v][i], 1);
+            }
+        }
+
+        cons->addVar(z[a], -1);
+        cons->commit();
+    }
+}
+
 bool CovModelAllVariables::run (GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     Digraph &graph = instance.g;
@@ -58,7 +105,6 @@ bool CovModelAllVariables::run (GLCIPInstance &instance, GLCIPSolution &solution
     
     SCIP_CALL( SCIPincludeDefaultPlugins(scip) );
     SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
-
 
     // create empty problem
     SCIP_CALL( SCIPcreateProb(scip, "GLCIP ColGeneration", 0, 0, 0, 0, 0, 0, 0) );
@@ -107,65 +153,19 @@ bool CovModelAllVariables::run (GLCIPInstance &instance, GLCIPSolution &solution
     }
 
     // Propagation constraints: 
-    // exactly one influencing set needs to be selected for each active node
-    for (DNodeIt v(graph); v != INVALID; ++v){
-        ScipCons* cons = new ScipCons(scip, 0, 0);
+    addPropagationConstraints(scip, instance, x, infSet, infSets);
 
-        // summation of all influencing-set varialbes related to a vertex v
-        for (int i = 0; i < infSet[v].size(); i++) {
-            cons->addVar(infSet[v][i], 1);
-        }
-        cons->addVar(x[v], -1);
-        cons->commit();
-    }
+    // add the chosen arcs constraints
+    addChosenArcsConstraints(scip, instance, z, infSet, infSets);
 
-    // all arcs on which influence is exerted are chosen as well
-    for (ArcIt a(graph); a != INVALID; ++a){
-        ScipCons* cons = new ScipCons(scip, 0, 0);
-        DNode u = graph.source(a);
-        DNode v = graph.target(a);
-
-        // summation
-        for (int i = 0; i < infSet[v].size(); i++){
-            // add variable if u belongs to the influencing set of v
-            if (infSets[v][i].elements.count(u)){
-               //std::cout << instance.nodeName[u] + " is in the " + to_string(i) +
-//                             "th influencing set of " + instance.nodeName[v] << std::endl;
-                cons->addVar(infSet[v][i], 1);
-            }
-        }
-
-        cons->addVar(z[a], -1);
-        cons->commit();
-    }
-    
     // add linking constraints 
-    // add arc-influence constraints - a vertex v needs to be active to send influence to w
-    for (ArcIt a(graph); a != INVALID; ++a) {
-        DNode v = graph.source(a);
-        DNode w = graph.target(a);
-        Arc back = findArc(graph, w, v);
-
-        if (back == INVALID){
-            ScipCons* cons = new ScipCons(scip, 0, SCIPinfinity(scip));
-
-            cons->addVar(x[v], 1);
-            cons->addVar(z[a], -1);
-
-            cons->commit();
-        }
-    }
+    addLinkingConstraints(scip, instance, x, z);
     
     // add coverage constraints:
-    //  the number of activated vertices is at least (alpha * num_vertices) 
-    ScipCons* covConstraint = new ScipCons(scip, ceil(instance.alpha * instance.n), SCIPinfinity(scip));
-    for (DNodeIt v(graph); v != INVALID; ++v){
-        covConstraint->addVar(x[v], 1);
-    }
-    covConstraint->commit();
+    addCoverageConstraints(scip, instance, x);
 
     // add all cycles of size up to 4
-    ArcModel::addSmallCycleConstraints(scip, instance, x, z);
+    addSmallCycleConstraints(scip, instance, x, z);
 
     // add cutting planes
     //ArcModel::addCuttingPlanes(scip, instance, x, z);

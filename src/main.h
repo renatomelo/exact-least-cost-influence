@@ -9,9 +9,8 @@
 #include "glcipinstance.h"
 #include "mygraphlib.h"
 #include "glcipsolution.h"
-#include "arcmodel.h"
 #include "graphviewer.h"
-#include "covmodelallvariables.h"
+#include "GLCIPBase.h"
 
 typedef struct structParams
 {
