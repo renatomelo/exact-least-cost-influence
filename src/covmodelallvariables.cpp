@@ -19,7 +19,7 @@ vector<influencingSet> CovModelAllVariables::powerSet(vector<DNode> neighbors){
     return pSet;
 }
 /**
- * Computes the influence of a given set of incoming neigobors of a vertex v
+ * Computes the cost paid to activate a vertex v with a given set of incoming neigobors
  */
 double CovModelAllVariables::costInfluencingSet(GLCIPInstance &instance, DNode v, set<DNode> elements){
     int thr = instance.threshold[v];
@@ -31,14 +31,11 @@ double CovModelAllVariables::costInfluencingSet(GLCIPInstance &instance, DNode v
         //std::cout << instance.nodeName[u] + " ";
         exertedInfluence += instance.influence[a];
     }
-   // std::cout << ": excerts inflence of " + to_string(exertedInfluence);
 
     // assuming that the incentives are sorted in an increasing order
     // uses the first incentive that overcomes the threshold of v
     for (int i = 0; i < instance.incentives[v].size(); i++){
         if (exertedInfluence + instance.incentives[v][i] >= thr){
-            //std::cout << " with incentive of " + to_string(instance.incentives[v][i]);
-            //std::cout << " and threshold of " + to_string(thr) << std::endl;
             return instance.incentives[v][i];
         }
     }
@@ -81,8 +78,6 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
         for (int i = 0; i < infSet[v].size(); i++){
             // add variable if u belongs to the influencing set of v
             if (infSets[v][i].elements.count(u)){
-               //std::cout << instance.nodeName[u] + " is in the " + to_string(i) +
-               //             "th influencing set of " + instance.nodeName[v] << std::endl;
                 cons->addVar(infSet[v][i], 1);
             }
         }
@@ -136,13 +131,6 @@ bool CovModelAllVariables::run (GLCIPInstance &instance, GLCIPSolution &solution
             neighbors.push_back(graph.source(a));
         }
         infSets[v] = powerSet(neighbors);
-
-        /*for (int i = 0; i < infSets[v].size(); i++) {
-            for(DNode v : infSets[v][i].elements){
-                std::cout << instance.nodeName[v] + " ";
-            }           
-            std::cout << std::endl;
-        }*/
 
         for (int i = 0; i < infSets[v].size(); i++){
             double cost = costInfluencingSet(instance, v, infSets[v][i].elements);

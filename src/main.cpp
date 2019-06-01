@@ -34,6 +34,10 @@ int main(int argc, char *argv[]){
         CovModelAllVariables::run(instance, solution, params.timeLimit);
         GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
     }
+    if(params.alg.compare("covcg") == 0){
+        CovModel::run(instance, solution, params.timeLimit);
+        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with column generation");
+    }
 
     auto done = chrono::high_resolution_clock::now();
     int time = chrono::duration_cast<chrono::milliseconds>(done-started).count();

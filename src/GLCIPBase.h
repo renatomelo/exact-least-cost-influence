@@ -1,3 +1,6 @@
+//#ifndef __GLCIPBASE_H__
+//#define __GLCIPBASE_H__
+
 #include <float.h>
 #include <math.h>
 #include <set>
@@ -33,31 +36,31 @@ typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPVarsMap;
  */
 class GLCIPBase
 {
-    public:
-        
-        static void addLinkingConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+public:
+    
+    static void addLinkingConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
 
-        static void addCoverageConstraints (SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x);
+    static void addCoverageConstraints (SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x);
 
-        static void addCycleConstraints(SCIP *scip,
-                                        GLCIPInstance &instance, 
-                                        DNodeSCIPVarMap &x, 
-                                        ArcSCIPVarMap &z, 
-                                        DNodeIntMap &predMap, 
-                                        Arc &backArc);
+    static void addCycleConstraints(SCIP *scip,
+                                    GLCIPInstance &instance, 
+                                    DNodeSCIPVarMap &x, 
+                                    ArcSCIPVarMap &z, 
+                                    DNodeIntMap &predMap, 
+                                    Arc &backArc);
 
-        static void dfsSmallCycles(SCIP *scip, 
-                                   GLCIPInstance &instance, 
-                                   DNodeSCIPVarMap &x, 
-                                   ArcSCIPVarMap &z, 
-                                   DNodeIntMap &colors,
-                                   DNodeIntMap &predMap, 
-                                   DNode curr, 
-                                   int level, 
-                                   int rootId);
-                                   
-        static void addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
- //     static void addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+    static void dfsSmallCycles(SCIP *scip, 
+                                GLCIPInstance &instance, 
+                                DNodeSCIPVarMap &x, 
+                                ArcSCIPVarMap &z, 
+                                DNodeIntMap &colors,
+                                DNodeIntMap &predMap, 
+                                DNode curr, 
+                                int level, 
+                                int rootId);
+                                
+    static void addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+//     static void addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
 };
 
 /**
@@ -66,9 +69,9 @@ class GLCIPBase
  */
 class ArcModel: public GLCIPBase
 {
-    public:
-        //static SCIP_RETCODE addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
-        static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
+public:
+ //   static SCIP_RETCODE addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+    static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 
 // structure to storage the set of nodes belonging to a influencing set
@@ -101,3 +104,11 @@ public:
                                          DNodeInfSetsMap &infSets);
     static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
+
+class CovModel: public GLCIPBase
+{
+public:
+    static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
+};
+
+//#endif

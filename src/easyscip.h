@@ -41,9 +41,10 @@ namespace easyscip {
             }
     };
 
-    class ScipPriceBinVar: public ScipVar {
+    //class ScipPriceBinVar: public ScipVar {
+    class ScipPriceVar: public ScipVar {
         public:
-            ScipPriceBinVar(SCIP *scip, double objective) {
+            ScipPriceVar(SCIP *scip, double objective) {
                 SCIPcreateVar(scip, &var, NULL, 0.0, SCIPinfinity(scip), objective, SCIP_VARTYPE_CONTINUOUS,
                         TRUE, TRUE, NULL, NULL, NULL, NULL, NULL);
                 SCIPaddPricedVar(scip, var, 1.0);

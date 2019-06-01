@@ -102,7 +102,6 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     //include cycle removal cuts
     //SCIP_CALL( addCuttingPlanes(scip, instance, x, z) );
-    
     CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
