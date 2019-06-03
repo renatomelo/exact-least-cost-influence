@@ -21,7 +21,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // create empty problem
     SCIP_CALL( SCIPcreateProb(scip, "GLCIP_ColGeneration", 0, 0, 0, 0, 0, 0, 0) );
 
-    SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrestarts", 0));
+    /* SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrestarts", 0));
     SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrounds", 0));
     SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     SCIPsetHeuristics(scip, SCIP_PARAMSETTING_OFF, TRUE);
@@ -32,7 +32,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/feastol", 0.0001));
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/lpfeastol", 0.0001));
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/dualfeastol", 0.0001));
-    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001));
+    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001)); */
 
     DNodeSCIPVarMap x(graph); // active-vertex variables
     ArcSCIPVarMap z(graph); // arc-influence variables
@@ -87,13 +87,8 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // include pricer
     static const char* PRICER_NAME = "GLCIP_pricer";
     ObjPricerGLCIP* pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons);
-
     SCIP_CALL( SCIPincludeObjPricer(scip, pricer, TRUE) );
-
-    // activate pricer
     SCIP_CALL( SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)) );
-    std::cout << "\n ACTIVATE PRICER WAS CALLED DHFLKAHFLAKSDHÇFLHSAÇFLÇALSDFLÇASFÇLSAFÇSDFSF" << std::endl;
-
     //end of pricing
 
     // add cutting planes

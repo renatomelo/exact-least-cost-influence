@@ -78,7 +78,7 @@ public:
       const DNode&                      v,            /**< vertex to be influenced */
       const ArcValueMap&                dualValues,   /**< map of dual values associated to arc-constraints */
       const double                      dualVertValue,  /**< dual solution of vertex constraints */
-      const list<DNode>&                infSet        /**< list of influencing neighbors */
+      list<DNode>&                infSet        /**< list of influencing neighbors */
       ) const;
 
    double cheapestIncentive(const DNode& v, double exertedInfluence) const;
