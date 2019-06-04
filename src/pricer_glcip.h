@@ -81,6 +81,7 @@ public:
       list<DNode>&                infSet        /**< list of influencing neighbors */
       ) const;
 
+  // SCIP_RETCODE incentivesForAll(SCIP* scip) const;
    double cheapestIncentive(const DNode& v, double exertedInfluence) const;
    double costInfluencingSet(const DNode& v, const list<DNode>& nodes) const;
 };

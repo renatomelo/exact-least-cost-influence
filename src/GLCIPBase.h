@@ -95,8 +95,7 @@ public:
     static void addPropagationConstraints(SCIP *scip,
                                           GLCIPInstance &instance, 
                                           DNodeSCIPVarMap &x, 
-                                          DNodeSCIPVarsMap &infSet, 
-                                          DNodeInfSetsMap &infSets);
+                                          DNodeSCIPVarsMap &infSet);
     static void addChosenArcsConstraints(SCIP *scip, 
                                          GLCIPInstance &instance, 
                                          ArcSCIPVarMap &z, 

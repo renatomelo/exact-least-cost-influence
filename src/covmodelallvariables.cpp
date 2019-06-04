@@ -47,8 +47,7 @@ double CovModelAllVariables::costInfluencingSet(GLCIPInstance &instance, DNode v
 void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
                                                      GLCIPInstance &instance, 
                                                      DNodeSCIPVarMap &x, 
-                                                     DNodeSCIPVarsMap &infSet, 
-                                                     DNodeInfSetsMap &infSets) {
+                                                     DNodeSCIPVarsMap &infSet) {
     for (DNodeIt v(instance.g); v != INVALID; ++v){
         ScipCons* cons = new ScipCons(scip, 0, 0);
 
@@ -141,7 +140,7 @@ bool CovModelAllVariables::run (GLCIPInstance &instance, GLCIPSolution &solution
     }
 
     // Propagation constraints: 
-    addPropagationConstraints(scip, instance, x, infSet, infSets);
+    addPropagationConstraints(scip, instance, x, infSet);
 
     // add the chosen arcs constraints
     addChosenArcsConstraints(scip, instance, z, infSet, infSets);
