@@ -42,6 +42,7 @@ private:
    DNodeSCIPVarMap&              x;           /**< map of vertex variables */
    ArcConsMap&                   arcCons;     /**< map of arc constraints */
    DNodeConsMap&                 vertCons;    /**< map of partitioning constraints */
+   DNodeSCIPVarsMap&             infSetVar;
 
 public:
    /** Constructs the pricer object with the data needed */
@@ -52,7 +53,8 @@ public:
       ArcSCIPVarMap&                p_arc_var,    /**< map of arc variables */
       DNodeSCIPVarMap&              p_vert_var,   /**< map of arc variables */
       ArcConsMap&                   p_arc_con,    /**< map of arc constraints */
-      DNodeConsMap&                 p_vert_con    /**< map of vertex constraints */
+      DNodeConsMap&                 p_vert_con,    /**< map of vertex constraints */
+      DNodeSCIPVarsMap&             p_inf_set_var
       );
 
    /** Destructs the pricer object. */
@@ -81,7 +83,6 @@ public:
       list<DNode>&                infSet        /**< list of influencing neighbors */
       ) const;
 
-  // SCIP_RETCODE incentivesForAll(SCIP* scip) const;
    double cheapestIncentive(const DNode& v, double exertedInfluence) const;
    double costInfluencingSet(const DNode& v, const list<DNode>& nodes) const;
 };

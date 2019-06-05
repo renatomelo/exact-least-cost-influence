@@ -10,20 +10,6 @@ SCIP_RETCODE incentivesForAll(SCIP *scip, GLCIPInstance &instance, DNodeConsMap 
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        SCIP_VAR *var;
-        std::string name = "infSetVar" + instance.nodeName[v] + "empty";
-        SCIP_CALL(SCIPcreateVar(scip, &var,
-                                name.c_str(),            // var name
-                                0,                       // lower bound
-                                SCIPinfinity(scip),      // upper bound
-                                1,                       // coeficient in the objective function
-                                SCIP_VARTYPE_CONTINUOUS, // continuous variable
-                                TRUE,                    // initial variable
-                                TRUE,                    // removable variable
-                                NULL, NULL, NULL, NULL, NULL));
-        // add new variable to the list of variables to price into LP
-        SCIP_CALL(SCIPaddVar(scip, var));
-
         double cost = 0;
         // uses the first incentive that overcomes the threshold of v
         for (unsigned int i = 0; i < instance.incentives[v].size(); i++)
@@ -35,8 +21,22 @@ SCIP_RETCODE incentivesForAll(SCIP *scip, GLCIPInstance &instance, DNodeConsMap 
             }
         }
 
+        SCIP_VAR *var;
+        std::string name = "infSetVar" + instance.nodeName[v] + "_empty";
+        SCIP_CALL(SCIPcreateVar(scip, &var,
+                                name.c_str(),            // var name
+                                0,                       // lower bound
+                                SCIPinfinity(scip),      // upper bound
+                                cost,                       // coeficient in the objective function
+                                SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                TRUE,                    // initial variable
+                                TRUE,                    // removable variable
+                                NULL, NULL, NULL, NULL, NULL));
+        // add new variable to the list of variables to price into LP
+        SCIP_CALL(SCIPaddVar(scip, var));
+
         // add to each vertex constraint
-        SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, cost));
+        SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
 
        /*  std::cout << "Adding variable "
                   << "infSetVar" + instance.nodeName[v] + "empty" << std::endl; */
@@ -80,7 +80,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     DNodeSCIPVarMap x(graph);       // active-vertex variables
     ArcSCIPVarMap z(graph);         // arc-influence variables
-    DNodeSCIPVarsMap infSet(graph); // influencing-set variables
+    DNodeSCIPVarsMap infSetVar(graph); // influencing-set variables (used to show the solution)
 
     // create variables x
     for (DNodeIt v(graph); v != INVALID; ++v)
@@ -132,10 +132,12 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //Pricing to generate the propagation constraints the chosen arcs constraints
     //TODO decide if we start with a initial solution obtained heuristically
 
+    incentivesForAll(scip, instance, vertCons); // construct an initial solution
+    
     // include pricer
     static const char *PRICER_NAME = "GLCIP_pricer";
-    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons);
-    incentivesForAll(scip, instance, vertCons); // construct an initial solution
+    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSetVar);
+
     SCIP_CALL(SCIPincludeObjPricer(scip, pricer, TRUE));
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
@@ -164,9 +166,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         for (DNodeIt v(graph); v != INVALID; ++v)
         {
             // get the value of influencing-set variables
-            for (unsigned int i = 0; i < infSet[v].size(); i++)
+            for (unsigned int i = 0; i < infSetVar[v].size(); i++)
             {
-                double solVal = SCIPgetSolVal(scip, sol, infSet[v][i]);
+                double solVal = SCIPgetSolVal(scip, sol, infSetVar[v][i]);
 
                 // use it to find the amount of incentive paid
                 if (solVal > 0.1)
