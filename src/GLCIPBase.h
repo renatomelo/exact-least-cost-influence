@@ -1,5 +1,5 @@
-//#ifndef __GLCIPBASE_H__
-//#define __GLCIPBASE_H__
+#ifndef __GLCIPBASE_H__
+#define __GLCIPBASE_H__
 
 #include <float.h>
 #include <math.h>
@@ -75,11 +75,13 @@ public:
 };
 
 // structure to storage the set of nodes belonging to a influencing set
-struct influencingSet{
-    set<DNode> elements;
-};
+typedef struct influencing_set{
+    set<DNode> nodes;
+    SCIP_VAR* var;
+    double cost;
+}InfluencingSet;
 
-typedef Digraph::NodeMap< vector<influencingSet> > DNodeInfSetsMap;
+typedef Digraph::NodeMap< vector<InfluencingSet> > DNodeInfSetsMap;
 
 /**
  * Exact method based on COV model which add all influencing-set variables to the model and performs a branch-and-cut. 
@@ -90,24 +92,29 @@ class CovModelAllVariables: public GLCIPBase
 public:
     CovModelAllVariables();
     ~CovModelAllVariables();
-    static vector<influencingSet> powerSet(vector<DNode> neighbors);
-    static double costInfluencingSet(GLCIPInstance &instance, DNode v, set<DNode> elements);
+    static vector<InfluencingSet> powerSet(vector<DNode> neighbors);
+    static double costInfluencingSet(GLCIPInstance &instance, DNode v, set<DNode> nodes);
     static void addPropagationConstraints(SCIP *scip,
                                           GLCIPInstance &instance, 
                                           DNodeSCIPVarMap &x, 
-                                          DNodeSCIPVarsMap &infSet);
+                                          DNodeInfSetsMap &infSet);
     static void addChosenArcsConstraints(SCIP *scip, 
                                          GLCIPInstance &instance, 
                                          ArcSCIPVarMap &z, 
-                                         DNodeSCIPVarsMap &infSet, 
-                                         DNodeInfSetsMap &infSets);
+                                         DNodeInfSetsMap &infSet);
     static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 
 class CovModel: public GLCIPBase
 {
 public:
+    static bool isFeasible(GLCIPInstance &instance, GLCIPSolution &solution);
+    static void constructSoltion(SCIP *scip, 
+                                  GLCIPInstance &instance, 
+                                  GLCIPSolution &solution, 
+                                  ArcSCIPVarMap& z, 
+                                  DNodeInfSetsMap& infSet);
     static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 
-//#endif
+#endif

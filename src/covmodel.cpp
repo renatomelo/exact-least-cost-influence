@@ -6,7 +6,7 @@
  * Add to the model the influencing-set variables considering no incoming arcs, 
  * that is, paying the integral incentive for every vertex
  */
-SCIP_RETCODE incentivesForAll(SCIP *scip, GLCIPInstance &instance, DNodeConsMap &vertCons)
+SCIP_RETCODE incentivesForAll(SCIP *scip, GLCIPInstance &instance, DNodeConsMap &vertCons, DNodeInfSetsMap &infSet)
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
@@ -27,7 +27,7 @@ SCIP_RETCODE incentivesForAll(SCIP *scip, GLCIPInstance &instance, DNodeConsMap 
                                 name.c_str(),            // var name
                                 0,                       // lower bound
                                 SCIPinfinity(scip),      // upper bound
-                                cost,                       // coeficient in the objective function
+                                cost,                    // coeficient in the objective function
                                 SCIP_VARTYPE_CONTINUOUS, // continuous variable
                                 TRUE,                    // initial variable
                                 TRUE,                    // removable variable
@@ -38,12 +38,151 @@ SCIP_RETCODE incentivesForAll(SCIP *scip, GLCIPInstance &instance, DNodeConsMap 
         // add to each vertex constraint
         SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
 
-       /*  std::cout << "Adding variable "
+        // data structure to save the variables and associated costs
+        InfluencingSet in;
+        in.var = var;
+        in.cost = cost;
+        infSet[v].push_back(in);
+
+        /*  std::cout << "Adding variable "
                   << "infSetVar" + instance.nodeName[v] + "empty" << std::endl; */
         SCIP_CALL(SCIPreleaseVar(scip, &var));
     }
 
     return SCIP_OKAY;
+}
+
+/** 
+* greedy construction heuristic to obtain feasible solutions to warm-start column generatin 
+* with an initial set of influensing-set variables
+*/
+/* void greedyConstruction(SCIP *scip, GLCIPInstance &instance, ArcConsMap &arcCons, DNodeConsMap &vertCons)
+{
+   vector<DNode> activeNodes;
+   vector<DNode> seedNodes;
+   //double paidIncentives[] = new double[instance.n];
+
+   // initialize set with seed nodes - add every node which has no incoming arcs by paying its incentives
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      InDegMap<Digraph> inDeg(instance.g);
+      if (inDeg[v] == 0)
+      {
+         seedNodes.push_back(v);
+      }
+   }
+
+   while (seedNodes.size() > 0)
+   {
+      DNode u = seedNodes.back();
+   }
+} */
+
+/**
+ * Performs a propagation from a set of incentives to verify wheter the instance is feasible
+ */
+bool CovModel::isFeasible(GLCIPInstance &instance, GLCIPSolution &solution)
+{
+    // start wiht empty solution
+    Digraph::NodeMap<set<DNode>> influencers(instance.g);
+    set<DNode> actives;
+    list<DNode> seeds;
+
+    // initialize set with seed nodes
+    //std::cout << "Initial adopters:  ";
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        if (solution.incentives[v] >= instance.threshold[v])
+        {
+            seeds.push_back(v);
+            //std::cout << instance.nodeName[v] << " ";
+        }
+    }
+    //std::cout << std::endl;
+
+    // while the seed set is not empty try to activate non active vertices
+    while (seeds.size() > 0)
+    {
+        DNode u = seeds.front();
+        seeds.pop_front();
+        actives.insert(u);
+
+        for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+        {
+            DNode v = instance.g.target(a);
+            if (!actives.count(v))
+            {
+                //std::cout << instance.nodeName[v] << " is inactive " << std::endl;
+                if (solution.influence[a])
+                {
+                    //std::cout << "arc_" << instance.nodeName[u] << "_" << instance.nodeName[v] << " is active " << std::endl;
+                    influencers[v].insert(u);
+
+                    double exerterdInfluence = 0;
+                    for (DNode w : influencers[v])
+                    {
+                        Arc e = findArc(instance.g, w, v);
+                        assert(e != INVALID);
+
+                        exerterdInfluence += instance.influence[e];
+                    }
+                    //std::cout << " exerterd influence + incentive: " << (exerterdInfluence + solution.incentives[v]) << std::endl;
+                    if (exerterdInfluence + solution.incentives[v] >= instance.threshold[v])
+                    {
+                        //std::cout << instance.nodeName[v] << " is inserted in seed set " << std::endl;
+                        seeds.push_back(v);
+                    }
+                }
+            }
+        }
+    }
+
+    if (actives.size() >= instance.alpha * instance.n)
+        return true;
+
+    return false;
+}
+/**
+ * Constructs the solution of the GLCIP
+ */
+void CovModel::constructSoltion(SCIP *scip, GLCIPInstance &instance, GLCIPSolution &solution, ArcSCIPVarMap &z, DNodeInfSetsMap &infSet)
+{
+    SCIP_SOL *sol = SCIPgetBestSol(scip);
+
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        solution.incentives[v] = 0.0;
+        // get the value of influencing-set variables
+        for (unsigned int i = 0; i < infSet[v].size(); i++)
+        {
+            double solVal = SCIPgetSolVal(scip, sol, infSet[v][i].var);
+            // use it to find the amount of incentive paid
+            if (solVal > 0.1)
+            {
+                solution.incentives[v] = infSet[v][i].cost;
+                std::cout << "InfluencingSetVar[" + instance.nodeName[v] + "," << solution.incentives[v] << "]  \t= "
+                          << solVal << std::endl;
+            }
+        }
+    }
+    std::cout << std::endl;
+
+    for (ArcIt a(instance.g); a != INVALID; ++a)
+    {
+        double aux = SCIPgetSolVal(scip, sol, z[a]);
+
+        if (aux > 0.1)
+        {
+            DNode u = instance.g.source(a);
+            DNode v = instance.g.target(a);
+            std::cout << "z[" << instance.nodeName[u] << "," << instance.nodeName[v] << "] = " << aux << std::endl;
+            solution.influence[a] = true;
+        }
+        else
+        {
+            solution.influence[a] = false;
+        }
+    }
 }
 
 bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
@@ -78,9 +217,10 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/dualfeastol", 0.0001));
     SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001));
 
-    DNodeSCIPVarMap x(graph);       // active-vertex variables
-    ArcSCIPVarMap z(graph);         // arc-influence variables
-    DNodeSCIPVarsMap infSetVar(graph); // influencing-set variables (used to show the solution)
+    DNodeSCIPVarMap x(graph); // active-vertex variables
+    ArcSCIPVarMap z(graph);   // arc-influence variables
+    //DNodeSCIPVarsMap infSetVar(graph); // influencing-set variables (used to show the solution)
+    DNodeInfSetsMap infSet(graph);
 
     // create variables x
     for (DNodeIt v(graph); v != INVALID; ++v)
@@ -97,8 +237,6 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         ScipVar *var = new ScipBinVar(scip, "z_" + instance.nodeName[u] + "" + instance.nodeName[v], 0);
         z[a] = var->var;
     }
-
-    //TODO create influencing-set variables (dynamically)
 
     // add linking constraints
     addLinkingConstraints(scip, instance, x, z);
@@ -129,14 +267,14 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         cons->commit();
     }
 
-    //Pricing to generate the propagation constraints the chosen arcs constraints
+    //Pricing to generate the propagation constraints and the chosen arcs constraints
     //TODO decide if we start with a initial solution obtained heuristically
 
-    incentivesForAll(scip, instance, vertCons); // construct an initial solution
-    
+    incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
+
     // include pricer
     static const char *PRICER_NAME = "GLCIP_pricer";
-    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSetVar);
+    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSet);
 
     SCIP_CALL(SCIPincludeObjPricer(scip, pricer, TRUE));
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
@@ -159,52 +297,13 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         cout << "Reached time limit" << endl;
         return 0;
     }
+    // Construct solution
+    constructSoltion(scip, instance, solution, z, infSet);
+
+    if (isFeasible(instance, solution))
+        std::cout << "The solution is feasible" << std::endl;
     else
-    { // Construct solution
-        SCIP_SOL *sol = SCIPgetBestSol(scip);
-
-        for (DNodeIt v(graph); v != INVALID; ++v)
-        {
-            // get the value of influencing-set variables
-            for (unsigned int i = 0; i < infSetVar[v].size(); i++)
-            {
-                double solVal = SCIPgetSolVal(scip, sol, infSetVar[v][i]);
-
-                // use it to find the amount of incentive paid
-                if (solVal > 0.1)
-                {
-                    double cost = 0; //CovModelAllVariables::costInfluencingSet(instance, v, infSets[v][i].elements);
-
-                    std::cout << "lambda[" + instance.nodeName[v] + "," +
-                                     to_string(cost) + "] = "
-                              << solVal << std::endl;
-                    solution.incentives[v] = cost;
-                }
-                else
-                {
-                    solution.incentives[v] = 0;
-                }
-            }
-        }
-        std::cout << std::endl;
-
-        for (ArcIt a(graph); a != INVALID; ++a)
-        {
-            double aux = SCIPgetSolVal(scip, sol, z[a]);
-
-            if (aux > 0.1)
-            {
-                DNode u = graph.source(a);
-                DNode v = graph.target(a);
-                cout << "z[" << instance.nodeName[u] << "," << instance.nodeName[v] << "] = " << aux << endl;
-                solution.influence[a] = true;
-            }
-            else
-            {
-                solution.influence[a] = false;
-            }
-        }
-    }
+        std::cout << "The solution is NOT feasible" << std::endl;
 
     return SCIP_OKAY;
 }
