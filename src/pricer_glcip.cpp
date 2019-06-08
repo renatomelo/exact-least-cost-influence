@@ -110,7 +110,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
    {
       /* compute the minimum cost influencing set w.r.t. dual values */
       list<DNode> nodes;
-      SCIP_Real reduced_cost = findMinCostInfluencingSet(v, dualArcValues, dualVertValues[v], nodes);
+      SCIP_Real reduced_cost = findMinCostInfluencingSet(scip, v, dualArcValues, dualVertValues[v], nodes);
 
       //std::cout << "\nSize of infSet: " << infSet.size() << std::endl;
       //std::cout << "Pricing the vertex: " << instance.nodeName[v] << "  ";
@@ -206,7 +206,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
                            FALSE,                   // removable variable
                            NULL, NULL, NULL, NULL, NULL));
    // add new variable to the list of variables to price into LP
-   SCIP_CALL(SCIPaddPricedVar(scip, var, 1.0));
+   SCIP_CALL(SCIPaddPricedVar(scip, var, 2.0));
 
    SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
 
@@ -214,7 +214,8 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    InfluencingSet in;
    in.var = var;
    in.cost = cost;
-   //std::cout << "Adding variable for vertex: " << instance.nodeName[v] << " " << name << std::endl;
+   /* std::cout << "Adding variable for vertex: " << instance.nodeName[v] << " "
+             << name << ", cost = " << cost << std::endl; */
    if (nodes.size() != 0)
    {
       for (DNode u : nodes)
@@ -228,7 +229,6 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    }
 
    // save the variable
-   //infSetVar[v].push_back(var);
    infSet[v].push_back(in);
 
    SCIP_CALL(SCIPreleaseVar(scip, &var));
@@ -281,7 +281,8 @@ double ObjPricerGLCIP::costInfluencingSet(const DNode &v, const list<DNode> &nod
    return cost;
 }
 
-/** return negative reduced cost influencing set (uses minimum knapsack dynamic programming algorithm)
+/** return negative reduced cost influencing set (uses minimum knapsack dynamic 
+ *  programming algorithm)
  *  Algorithm:
  *    - Create a matrix min_cost[n+1][W+1], where n is the number of incoming neighbors
  *      with distinct weight of influence and W is the threshold of vertex
@@ -290,12 +291,14 @@ double ObjPricerGLCIP::costInfluencingSet(const DNode &v, const list<DNode> &nod
  *          min_cost[i][j] = min(min_cost[i-1][j], cost[i-1] + min_cost[i-1][j-weight[i-1]])
  */
 SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
+    SCIP *scip,
     const DNode &v,                  /**< vertex to be influenced */
     const ArcValueMap &dualArcValue, /**< dual solution of arc constraints */
     const double dualVertValue,      /**< dual solution of vertex constraints */
     list<DNode> &nodes               /**< list of incoming neighbors */
     ) const
 {
+   SCIP_Real redCost;
    nodes.clear();
    InDegMap<Digraph> inDegrees(instance.g);
    if (inDegrees[v] == 0)
@@ -338,9 +341,37 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
       {
          // get minimum cost by including or excluding the i-th node
          int col = max(j - wt[i - 1], 0.0); // to avoid negative index
-         minCost[i][j] = min(minCost[i - 1][j], minCost[i - 1][col] + costs[i - 1] + cheapestIncentive(v, j) - cheapestIncentive(v, col));
+         minCost[i][j] = min(minCost[i - 1][j],
+                             minCost[i - 1][col] + costs[i - 1] +
+                                 cheapestIncentive(v, j) - cheapestIncentive(v, col));
          /* std::cout << "Cheapest incentive of " << instance.nodeName[v] << " with j = " << j << ": " << cheapestIncentive(v, j)
                    << ", and col = " << col << ": " << cheapestIncentive(v, col) << std::endl; */
+         // stop whether the reduced cost is negative
+         if (SCIPisNegative(scip, minCost[i][j]))
+         {
+            //get the solution
+            int k = j;
+            for (int l = i; l > 0; l--)
+            {
+               if (minCost[l][k] != minCost[l - 1][k])
+               {
+                  nodes.push_back(neighbors[l - 1]);
+                  //j -= wt[i - 1];
+                  k = max(k - wt[l - 1], 0.0);
+               }
+            }
+
+            redCost = minCost[i][j];
+
+            delete[] wt;
+            delete[] costs;
+            //delete[] neighbors;
+            for (i = 0; i <= n; i++)
+               delete[] minCost[i];
+            delete[] minCost;
+
+            return redCost;
+         }
       }
       //std::cout << std::endl;
    }
@@ -355,19 +386,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
       std::cout << std::endl;
    } */
 
-   //get the solution
-   int j = W;
-   for (i = n; i > 0; i--)
-   {
-      if (minCost[i][j] != minCost[i - 1][j])
-      {
-         nodes.push_back(neighbors[i - 1]);
-         //j -= wt[i - 1];
-         j = max(j - wt[i - 1], 0.0);
-      }
-   }
-
-   SCIP_Real redCost = minCost[n][W];
+   redCost = minCost[n][W];
 
    delete[] wt;
    delete[] costs;

@@ -198,7 +198,6 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
         {
             double cost = costInfluencingSet(instance, v, infSet[v][i].nodes);
             ScipVar *var = new ScipContVar(scip, "infSet_" + instance.nodeName[v] + "" + to_string(i), 0, SCIPinfinity(scip), cost);
-            //infSet[v].push_back(var->var);
             infSet[v][i].var = var->var;
             infSet[v][i].cost = cost;
         }
