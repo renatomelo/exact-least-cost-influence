@@ -3,8 +3,8 @@
 bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     //set initial clock
-    double elapsed_time;
-    clock_t begin = clock();
+    //double elapsed_time;
+    //clock_t begin = clock();
 
     //---------------------------------------------------------------------------
     //SCIP variables and initialization
@@ -13,7 +13,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     //set some parameters
     SCIP_CALL(SCIPincludeDefaultPlugins(scip));
-    SCIP_CALL(SCIPsetIntParam(scip, "nodeselection/dfs/stdpriority", 1073741823));
+    /* SCIP_CALL(SCIPsetIntParam(scip, "nodeselection/dfs/stdpriority", 1073741823));
     //SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 5));
     //SCIP_CALL(SCIPsetBoolParam(scip, "display/lpinfo", TRUE));
     SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrestarts", 0));
@@ -32,7 +32,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/lpfeastol", 0.0001));
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/dualfeastol", 0.0001));
     SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001));
-    //SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "mytree.vbc"));
+    //SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "mytree.vbc")); */
 
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
@@ -48,9 +48,10 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         ScipVar* var  = new ScipBinVar(scip, "x_" + instance.nodeName[v], 0.0);
         x[v] = var->var;
 
-        for(int p = 0; p < instance.incentives[v].size(); p++){
+        for(unsigned int p = 0; p < instance.incentives[v].size(); p++){
             var  = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
             xip[v].push_back(var->var);
+            //std::cout << "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]) << endl;
         }
     }
 
@@ -66,7 +67,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         ScipCons *cons = new ScipCons(scip, 0.0, SCIPinfinity(scip));
 
         // \sum_{p \in P_i} (p - h_v) x_{v, p}
-        for (int p = 0; p < instance.incentives[v].size(); ++p){
+        for (unsigned int p = 0; p < instance.incentives[v].size(); p++){
             cons->addVar(xip[v][p], instance.incentives[v][p]);
         }
 
@@ -83,7 +84,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     for(DNodeIt v(instance.g); v != INVALID; ++v){
         ScipCons* cons = new ScipCons(scip, 0.0, 0.0);
 
-        for(int p = 0; p < instance.incentives[v].size(); ++p){
+        for(unsigned int p = 0; p < instance.incentives[v].size(); p++){
             cons->addVar(xip[v][p], 1.0);
         }
 
@@ -130,7 +131,8 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         SCIP_SOL* sol = SCIPgetBestSol(scip);
 
         for(DNodeIt v(instance.g); v != INVALID; ++v){
-            for(int p = 0; p < instance.incentives[v].size(); p++){
+            solution.incentives[v] = 0.0;
+            for(unsigned int p = 0; p < instance.incentives[v].size(); p++){
                 double aux = SCIPgetSolVal(scip, sol, xip[v][p]);
 
                 if(aux > 0.1){
@@ -138,9 +140,6 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                     instance.incentives[v][p] << "] = " << aux << endl;
                     solution.incentives[v] = instance.incentives[v][p];
                     //cout << "node incentive " << solution.incentives[v] << endl;
-                }
-                else{
-                    solution.incentives[v] = 0.0;
                 }
             }
         }
@@ -158,4 +157,6 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
             }
         }
     }
+
+    return SCIP_OKAY;
 }

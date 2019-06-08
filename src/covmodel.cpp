@@ -196,15 +196,14 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // explicitely enables the use of debug solution for this scip instance
     SCIPenableDebugSol(scip);
 
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 5));
-
     SCIP_CALL(SCIPincludeDefaultPlugins(scip));
     SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
 
     // create empty problem
-    SCIP_CALL(SCIPcreateProb(scip, "GLCIP_ColGeneration", 0, 0, 0, 0, 0, 0, 0));
+    SCIP_CALL(SCIPcreateProb(scip, "GLCIP_Column_Generation", 0, 0, 0, 0, 0, 0, 0));
 
-    SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrestarts", 0));
+    //SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 5));
+    /* SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrestarts", 0));
     SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrounds", 0));
     SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     SCIPsetHeuristics(scip, SCIP_PARAMSETTING_OFF, TRUE);
@@ -215,7 +214,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/feastol", 0.0001));
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/lpfeastol", 0.0001));
     SCIP_CALL(SCIPsetRealParam(scip, "numerics/dualfeastol", 0.0001));
-    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001));
+    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001)); */
 
     DNodeSCIPVarMap x(graph); // active-vertex variables
     ArcSCIPVarMap z(graph);   // arc-influence variables
@@ -243,9 +242,6 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     // add coverage constraints:
     addCoverageConstraints(scip, instance, x);
-
-    // add all cycles of size up to 4
-    addSmallCycleConstraints(scip, instance, x, z);
 
     // add vertex-coverage constraints
     DNodeConsMap vertCons(graph);
@@ -279,6 +275,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPincludeObjPricer(scip, pricer, TRUE));
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
+
+    // add all cycles of size up to 4
+    addSmallCycleConstraints(scip, instance, x, z);
 
     // add cutting planes
     CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);

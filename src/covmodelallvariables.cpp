@@ -160,7 +160,7 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
 
     // create empty problem
-    SCIP_CALL(SCIPcreateProb(scip, "GLCIP ColGeneration", 0, 0, 0, 0, 0, 0, 0));
+    SCIP_CALL(SCIPcreateProb(scip, "GLCIP_with_all_variables", 0, 0, 0, 0, 0, 0, 0));
 
     DNodeSCIPVarMap x(graph); // active-vertex variables
     ArcSCIPVarMap z(graph);   // arc-influence variables
