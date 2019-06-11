@@ -32,8 +32,8 @@ SCIP_RETCODE incentivesForAll(SCIP *scip,
                                 SCIPinfinity(scip),      // upper bound
                                 cost,                    // coeficient in the objective function
                                 SCIP_VARTYPE_CONTINUOUS, // continuous variable
-                                TRUE,                    // initial variable
-                                FALSE,                    // removable variable
+                                FALSE,                   // initial variable
+                                FALSE,                   // removable variable
                                 NULL, NULL, NULL, NULL, NULL));
         // add new variable to the list of variables to price into LP
         SCIP_CALL(SCIPaddVar(scip, var));
@@ -49,37 +49,108 @@ SCIP_RETCODE incentivesForAll(SCIP *scip,
 
         /*  std::cout << "Adding variable "
                   << "infSetVar" + instance.nodeName[v] + "empty" << std::endl; */
-        //SCIP_CALL(SCIPreleaseVar(scip, &var));
+        SCIP_CALL(SCIPreleaseVar(scip, &var));
     }
 
     return SCIP_OKAY;
 }
 
-/** 
-* greedy construction heuristic to obtain feasible solutions to warm-start column 
-* generation with an initial set of influensing-set variables
-*/
-/* void greedyConstruction(SCIP *scip, GLCIPInstance &instance, ArcConsMap &arcCons, DNodeConsMap &vertCons)
+/* double minIncentive(GLCIPInstance &instance)
 {
-   vector<DNode> activeNodes;
-   vector<DNode> seedNodes;
-   //double paidIncentives[] = new double[instance.n];
-
-   // initialize set with seed nodes - add every node which has no incoming arcs by paying its incentives
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      InDegMap<Digraph> inDeg(instance.g);
-      if (inDeg[v] == 0)
-      {
-         seedNodes.push_back(v);
-      }
-   }
-
-   while (seedNodes.size() > 0)
-   {
-      DNode u = seedNodes.back();
-   }
+    double min = 0;
+    double cost;
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        for (unsigned int i = 0; i < instance.incentives[v].size(); i++)
+        {
+           if (instance.incentives[v] >= instance.threshold[v])
+           {
+               cost = 0;
+           }
+        }
+        
+    }
+    return min;
 } */
+
+/** 
+* Greedy construction heuristic to obtain feasible solutions to warm-start column 
+* generation with an initial set of influensing-set variables:
+* 
+* At each iteration we activate a not yet active node by paying the minimum available 
+* incentive to reach its hurdle, taking into account the current influence coming 
+* from already active neighbors.
+*/
+void greedyConstruction(SCIP *scip,
+                        GLCIPInstance &instance,
+                        ArcConsMap &arcCons,
+                        DNodeConsMap &vertCons,
+                        DNodeInfSetsMap &infSet)
+{
+    // start wiht empty solution
+    Digraph::NodeMap<list<DNode>> influencers(instance.g);
+    set<DNode> actives;
+    list<DNode> seeds;
+    double min = SCIPinfinity(scip);
+
+    // initialize seed set with the node os smaller threshold
+    DNode tmp;
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        if (instance.threshold[v] < min)
+        {
+            min = instance.threshold[v];
+            tmp = v;
+        }
+    }
+    std::cout << "Node " + instance.nodeName[tmp] + " has the smallest thr: "
+              << instance.threshold[tmp] << std::endl;
+    seeds.push_back(tmp);
+    // pay the necessary incentive to u
+    InfluencingSet is;
+    is.cost = GLCIPBase::cheapestIncentive(instance, u, 0);
+    infSet[u].push_back(is);
+
+    OutDegreeMap outDeg(instance.g);
+
+    // while the seed set is not empty try to activate non active vertices
+    while (seeds.size() > 0)
+    {
+        DNode u = seeds.front();
+        seeds.pop_front();
+        actives.insert(u);
+
+        if (outDeg[u] != 0)
+        {
+            // chose the node with minimal incentive to activate it
+            for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+            {
+                DNode v = instance.g.target(a);
+                if (!actives.count(v))
+                {
+                    influencers[v].insert(u);
+
+                    double cost = GLCIPBase::costInfluencingSet(instance, v, influencers[v]);
+                    if (cost < min)
+                    {
+                        min = cost;
+                        tmp = v;
+                    }
+                }
+            }
+            
+            InfluencingSet is_tmp;
+            is_tmp.cost = min;
+            for (DNode w : influencers[v])
+            {
+                is_tmp.nodes.insert(w);
+            }
+            infSet[tmp].pop_back(is_tmp);    
+            
+            seeds.push_back(tmp);
+        }
+    }
+}
 
 /**
  * Performs a propagation from a set of incentives to verify wheter the instance is 
@@ -161,7 +232,7 @@ void CovModel::constructSoltion(SCIP *scip, GLCIPInstance &instance, GLCIPSoluti
             if (solVal > 0.1)
             {
                 solution.incentives[v] = infSet[v][i].cost;
-                std::cout << "InfluencingSetVar[" + instance.nodeName[v] + "," 
+                std::cout << "InfluencingSetVar[" + instance.nodeName[v] + ","
                           << solution.incentives[v] << "]  \t= " << solVal << std::endl;
             }
         }
@@ -196,29 +267,16 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     SCIP_CALL(SCIPincludeDefaultPlugins(scip));
     SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
-    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001));
+    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.1));
 
     // create empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP_Column_Generation", 0, 0, 0, 0, 0, 0, 0));
 
-    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
-    /* SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 5));
-    SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrestarts", 0));
-    SCIP_CALL(SCIPsetIntParam(scip, "presolving/maxrounds", 0));
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
-    SCIPsetHeuristics(scip, SCIP_PARAMSETTING_OFF, TRUE);
-    SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
-    SCIP_CALL(SCIPsetBoolParam(scip, "lp/cleanupcols", TRUE));
-    SCIP_CALL(SCIPsetBoolParam(scip, "lp/cleanupcolsroot", TRUE));
-    SCIP_CALL(SCIPsetRealParam(scip, "numerics/epsilon", 0.0001));
-    SCIP_CALL(SCIPsetRealParam(scip, "numerics/feastol", 0.0001));
-    SCIP_CALL(SCIPsetRealParam(scip, "numerics/lpfeastol", 0.0001));
-    SCIP_CALL(SCIPsetRealParam(scip, "numerics/dualfeastol", 0.0001));
-     */
-    
-    DNodeSCIPVarMap x(graph); // active-vertex variables
-    ArcSCIPVarMap z(graph);   // arc-influence variables
-    DNodeInfSetsMap infSet(graph);  // influencing-set variables (used to show the solution)
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
+
+    DNodeSCIPVarMap x(graph);      // active-vertex variables
+    ArcSCIPVarMap z(graph);        // arc-influence variables
+    DNodeInfSetsMap infSet(graph); // influencing-set variables (used to show the solution)
 
     // create variables x
     for (DNodeIt v(graph); v != INVALID; ++v)
@@ -258,10 +316,11 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     }
 
     //Pricing to generate the propagation constraints and the chosen arcs constraints
-   
-    // start with a initial solution obtained heuristically
-    incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
 
+    // start with a initial solution obtained heuristically
+    greedyConstruction(scip, instance, arcCons, vertCons);
+    //incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
+    exit(0);
     // include pricer
     static const char *PRICER_NAME = "GLCIP_pricer";
     ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSet);
@@ -270,7 +329,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
 
-     // add linking constraints
+    // add linking constraints
     addLinkingConstraints(scip, instance, x, z);
 
     // add coverage constraints:
@@ -296,13 +355,16 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         cout << "Reached time limit" << endl;
         return 0;
     }
-    // Construct solution
-    constructSoltion(scip, instance, solution, z, infSet);
 
-    if (isFeasible(instance, solution))
+    std::cout << SCIPgetSolvingTime(scip) << std::endl;
+
+    // Construct solution
+    //constructSoltion(scip, instance, solution, z, infSet);
+
+    /*  if (isFeasible(instance, solution))
         std::cout << "The solution is feasible" << std::endl;
     else
-        std::cout << "The solution is NOT feasible" << std::endl;
+        std::cout << "The solution is NOT feasible" << std::endl; */
 
     return SCIP_OKAY;
 }

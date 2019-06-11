@@ -58,8 +58,8 @@ public:
        list<DNode>&           nodes             /**< list of influencing neighbors */
        ) const;
 
-   double cheapestIncentive(const DNode &v, double exertedInfluence) const;
-   double costInfluencingSet(const DNode &v, const list<DNode> &nodes) const;
+/*    double cheapestIncentive(const DNode &v, double exertedInfluence) const;
+   double costInfluencingSet(const DNode &v, const list<DNode> &nodes) const; */
 };
 
 #endif

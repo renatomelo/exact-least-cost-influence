@@ -60,6 +60,9 @@ public:
                                 int rootId);
                                 
     static void addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+
+    static double cheapestIncentive(const GLCIPInstance &instance, const DNode &v, double exertedInfluence);
+    static double costInfluencingSet(const GLCIPInstance &instance, const DNode &v, const list<DNode> &nodes);
 //     static void addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
 };
 

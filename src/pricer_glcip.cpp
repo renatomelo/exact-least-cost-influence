@@ -194,7 +194,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    else
       name = "infSetVar" + instance.nodeName[v] + "_empty";
 
-   double cost = costInfluencingSet(v, nodes);
+   double cost = GLCIPBase::costInfluencingSet(instance, v, nodes);
    SCIP_VAR *var;
    SCIP_CALL(SCIPcreateVar(scip, &var,
                            name.c_str(),            // var name
@@ -238,7 +238,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
 /**
  * Computes the cost paid to activate a vertex v with a given weight of influence
  */
-double ObjPricerGLCIP::cheapestIncentive(const DNode &v, double exertedInfluence) const
+/* double ObjPricerGLCIP::cheapestIncentive(const DNode &v, double exertedInfluence) const
 {
    double cost = 0;
    // assuming that the incentives are sorted in an increasing order
@@ -252,12 +252,12 @@ double ObjPricerGLCIP::cheapestIncentive(const DNode &v, double exertedInfluence
       }
    }
    return cost;
-}
+} */
 
 /**
  * Computes the cost paid to activate a vertex v with a given set of incoming neigobors
  */
-double ObjPricerGLCIP::costInfluencingSet(const DNode &v, const list<DNode> &nodes) const
+/* double ObjPricerGLCIP::costInfluencingSet(const DNode &v, const list<DNode> &nodes) const
 {
    int thr = instance.threshold[v];
    double cost = 0;
@@ -279,7 +279,7 @@ double ObjPricerGLCIP::costInfluencingSet(const DNode &v, const list<DNode> &nod
       }
    }
    return cost;
-}
+} */
 
 /** return negative reduced cost influencing set (uses minimum knapsack dynamic 
  *  programming algorithm)
@@ -302,7 +302,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    nodes.clear();
    InDegMap<Digraph> inDegrees(instance.g);
    if (inDegrees[v] == 0)
-      return (cheapestIncentive(v, 0) - dualVertValue);
+      return (GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue);
 
    int n = inDegrees[v];               // number of itens to put into the knapsack
    int W = (int)instance.threshold[v]; // capacity to fill
@@ -326,9 +326,10 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    for (i = 0; i <= n; i++)
    {
       minCost[i] = new SCIP_Real[W + 1];
-      minCost[i][0] = cheapestIncentive(v, 0) - dualVertValue;
+      minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue;
    }
-   //std::cout << "\nIncentive cost with no influence from neighbors: " << cheapestIncentive(v, 0) << std::endl;
+   //std::cout << "\nIncentive cost with no influence from neighbors: " 
+               //<< cheapestIncentive(v, 0) << std::endl;
    // fill 0th row
    for (i = 1; i <= W; i++)
       minCost[0][i] = 1e+9;
@@ -343,7 +344,8 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
          int col = max(j - wt[i - 1], 0.0); // to avoid negative index
          minCost[i][j] = min(minCost[i - 1][j],
                              minCost[i - 1][col] + costs[i - 1] +
-                                 cheapestIncentive(v, j) - cheapestIncentive(v, col));
+                             GLCIPBase::cheapestIncentive(instance, v, j) - 
+                             GLCIPBase::cheapestIncentive(instance, v, col));
          /* std::cout << "Cheapest incentive of " << instance.nodeName[v] << " with j = " << j << ": " << cheapestIncentive(v, j)
                    << ", and col = " << col << ": " << cheapestIncentive(v, col) << std::endl; */
          // stop whether the reduced cost is negative

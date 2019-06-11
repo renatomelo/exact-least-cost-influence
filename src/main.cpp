@@ -28,15 +28,15 @@ int main(int argc, char *argv[]){
     */
     if(params.alg.compare("arc") == 0){
         ArcModel::run(instance, solution, params.timeLimit);
-        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Arc Model");
+        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Arc Model");
     }
     if(params.alg.compare("cov") == 0){
         CovModelAllVariables::run(instance, solution, params.timeLimit);
-        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
+        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
     }
     if(params.alg.compare("covcg") == 0){
         CovModel::run(instance, solution, params.timeLimit);
-        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with column generation");
+        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with column generation");
     }
 
     auto done = chrono::high_resolution_clock::now();
