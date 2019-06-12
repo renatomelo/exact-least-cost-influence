@@ -47,7 +47,7 @@ public:
    SCIP_RETCODE pricing(SCIP *scip, bool isFarkas) const;
 
    /** add influencing-set variable to problem */
-   SCIP_RETCODE addInfluencingSetVar(SCIP *scip, const DNode &v, const list<DNode> &nodes) const;
+   SCIP_RETCODE addInfluencingSetVar(SCIP *scip, const DNode &v, const set<DNode> &nodes) const;
 
    /** return negative reduced cost influencing set (uses minimum knapsack dynamic programming algorithm)*/
    double findMinCostInfluencingSet(
@@ -55,7 +55,7 @@ public:
        const DNode&           v,                /**< vertex to be influenced */
        const ArcValueMap&     dualValues,       /**< map of dual values associated to arc-constraints */
        const double           dualVertValue,    /**< dual solution of vertex constraints */
-       list<DNode>&           nodes             /**< list of influencing neighbors */
+       set<DNode>&           nodes             /**< list of influencing neighbors */
        ) const;
 
 /*    double cheapestIncentive(const DNode &v, double exertedInfluence) const;

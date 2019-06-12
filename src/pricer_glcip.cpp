@@ -109,7 +109,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       /* compute the minimum cost influencing set w.r.t. dual values */
-      list<DNode> nodes;
+      set<DNode> nodes;
       SCIP_Real reduced_cost = findMinCostInfluencingSet(scip, v, dualArcValues, dualVertValues[v], nodes);
 
       //std::cout << "\nSize of infSet: " << infSet.size() << std::endl;
@@ -181,7 +181,7 @@ SCIP_DECL_PRICERFARKAS(ObjPricerGLCIP::scip_farkas)
 }
 
 /** add influencing-set variable to problem */
-SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, const list<DNode> &nodes) const
+SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, const set<DNode> &nodes) const
 {
    std::string name;
    if (nodes.size() > 0)
@@ -295,7 +295,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
     const DNode &v,                  /**< vertex to be influenced */
     const ArcValueMap &dualArcValue, /**< dual solution of arc constraints */
     const double dualVertValue,      /**< dual solution of vertex constraints */
-    list<DNode> &nodes               /**< list of incoming neighbors */
+    set<DNode> &nodes               /**< list of incoming neighbors */
     ) const
 {
    SCIP_Real redCost;
@@ -357,7 +357,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
             {
                if (minCost[l][k] != minCost[l - 1][k])
                {
-                  nodes.push_back(neighbors[l - 1]);
+                  nodes.insert(neighbors[l - 1]);
                   //j -= wt[i - 1];
                   k = max(k - wt[l - 1], 0.0);
                }

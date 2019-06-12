@@ -177,7 +177,7 @@ double GLCIPBase::cheapestIncentive(const GLCIPInstance &instance,
  */
 double GLCIPBase::costInfluencingSet(const GLCIPInstance &instance, 
                                      const DNode &v, 
-                                     const list<DNode> &nodes)
+                                     const set<DNode> &nodes)
 {
     int thr = instance.threshold[v];
     double cost = 0;

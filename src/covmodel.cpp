@@ -88,7 +88,7 @@ void greedyConstruction(SCIP *scip,
                         DNodeInfSetsMap &infSet)
 {
     // start wiht empty solution
-    Digraph::NodeMap<list<DNode>> influencers(instance.g);
+    Digraph::NodeMap<set<DNode>> influencers(instance.g);
     set<DNode> actives;
     list<DNode> seeds;
     double min = SCIPinfinity(scip);
@@ -97,7 +97,7 @@ void greedyConstruction(SCIP *scip,
     DNode tmp;
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        if (instance.threshold[v] < min)
+        if (!actives.count(v) && instance.threshold[v] < min)
         {
             min = instance.threshold[v];
             tmp = v;
@@ -105,51 +105,162 @@ void greedyConstruction(SCIP *scip,
     }
     std::cout << "Node " + instance.nodeName[tmp] + " has the smallest thr: "
               << instance.threshold[tmp] << std::endl;
-    seeds.push_back(tmp);
-    // pay the necessary incentive to u
+    // pay the necessary incentive to tmp
     InfluencingSet is;
-    is.cost = GLCIPBase::cheapestIncentive(instance, u, 0);
-    infSet[u].push_back(is);
+    is.cost = GLCIPBase::cheapestIncentive(instance, tmp, 0);
+    infSet[tmp].push_back(is);
+    std::cout << instance.nodeName[tmp]
+              << " was activated " << std::endl;
+    actives.insert(tmp);
+    seeds.push_back(tmp);
 
-    OutDegreeMap outDeg(instance.g);
+    OutDegMap<Digraph> outDeg(instance.g);
 
     // while the seed set is not empty try to activate non active vertices
     while (seeds.size() > 0)
     {
         DNode u = seeds.front();
         seeds.pop_front();
-        actives.insert(u);
 
         if (outDeg[u] != 0)
         {
+            min = SCIPinfinity(scip);
             // chose the node with minimal incentive to activate it
             for (OutArcIt a(instance.g, u); a != INVALID; ++a)
             {
                 DNode v = instance.g.target(a);
+                std::cout << "arc_" << instance.nodeName[u] << "_" << instance.nodeName[v]
+                          << " is active now " << std::endl;
                 if (!actives.count(v))
                 {
                     influencers[v].insert(u);
-
+                    std::cout << instance.nodeName[v]
+                              << " is inactive " << std::endl;
                     double cost = GLCIPBase::costInfluencingSet(instance, v, influencers[v]);
                     if (cost < min)
                     {
+                        std::cout << "Cost of " + instance.nodeName[v]
+                                  << " is smaller than " << min << std::endl;
                         min = cost;
                         tmp = v;
                     }
                 }
             }
-            
-            InfluencingSet is_tmp;
-            is_tmp.cost = min;
-            for (DNode w : influencers[v])
+            // condition to avoid looping
+            if (!actives.count(tmp))
             {
-                is_tmp.nodes.insert(w);
+                InfluencingSet is_tmp;
+                is_tmp.cost = min;
+                for (DNode w : influencers[tmp])
+                {
+                    is_tmp.nodes.insert(w);
+                }
+                infSet[tmp].push_back(is_tmp);
+
+                std::cout << instance.nodeName[tmp]
+                          << " was activated " << std::endl;
+                actives.insert(tmp);
+                seeds.push_back(tmp);
+                std::cout << "Node " + instance.nodeName[tmp] + " has the minimum incentive: "
+                          << instance.threshold[tmp] << std::endl;
             }
-            infSet[tmp].pop_back(is_tmp);    
-            
-            seeds.push_back(tmp);
         }
     }
+
+    std::cout << "Active vertex and its influencing sets" << std::endl;
+    for (DNode v : actives)
+    {
+        std::cout << instance.nodeName[v] + ": ";
+        for (unsigned int i = 0; i < infSet[v].size(); i++)
+        {
+            for (DNode u : infSet[v][i].nodes)
+            {
+                std::cout << " " + instance.nodeName[u];
+            }
+            std::cout << "\t";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << " There are " << actives.size() << " active nodes" << std::endl;
+}
+
+DNode getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives)
+{
+    double minCost = 1e+20;
+    DNode choosed;
+    set<DNode> activeNeigbors;
+
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        activeNeigbors.clear();
+
+        if (!actives.count(v))
+        {
+            std::cout << instance.nodeName[v] << " is inactive " << std::endl;
+            for (InArcIt a(instance.g, v); a != INVALID; ++a)
+            {
+                DNode u = instance.g.source(a);
+                if (actives.count(u))
+                {
+                    activeNeigbors.insert(u);
+                }
+            }
+        }
+
+        double cost = GLCIPBase::costInfluencingSet(instance, v, activeNeigbors);
+        if (cost < minCost)
+        {
+            minCost = cost;
+            choosed = v;
+
+            // if the cost is zero it cannot be improved, then stop
+            if (cost == 0)
+                break;
+        }
+    }
+
+    return choosed;
+}
+
+void greedyConstruction2(SCIP *scip,
+                         GLCIPInstance &instance,
+                         DNodeInfSetsMap &infSet)
+{
+    set<DNode> actives; // start with a empty solution
+    while (actives.size() < instance.alpha * instance.n)
+    {
+        DNode v = getMinIncentiveNode(instance, actives);
+
+        // save v's influencing-set and activate it
+        InfluencingSet ifs;
+        for (InArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            DNode u = instance.g.source(a);
+            if (actives.count(u))
+            {
+                ifs.nodes.insert(u);
+            }
+        }
+        ifs.cost = GLCIPBase::costInfluencingSet(instance, v, ifs.nodes);
+        infSet[v].push_back(ifs);
+        actives.insert(v);
+    }
+
+    std::cout << "Active vertex and its influencing sets" << std::endl;
+    for (DNode v : actives)
+    {
+        std::cout << instance.nodeName[v] + ": ";
+        for (unsigned int i = 0; i < infSet[v].size(); i++)
+        {
+            for (DNode u : infSet[v][i].nodes)
+            {
+                std::cout << " " + instance.nodeName[u];
+            }
+            std::cout << "\t";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << " There are " << actives.size() << " active nodes" << std::endl;
 }
 
 /**
@@ -318,9 +429,10 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //Pricing to generate the propagation constraints and the chosen arcs constraints
 
     // start with a initial solution obtained heuristically
-    greedyConstruction(scip, instance, arcCons, vertCons);
-    //incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
-    exit(0);
+    //greedyConstruction(scip, instance, arcCons, vertCons, infSet);
+    //greedyConstruction2(scip, instance, infSet);
+    incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
+    //exit(0);
     // include pricer
     static const char *PRICER_NAME = "GLCIP_pricer";
     ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSet);
