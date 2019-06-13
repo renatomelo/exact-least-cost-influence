@@ -128,7 +128,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
          std::cout << "Non-negative reduced cost: " << reduced_cost << std::endl; */
    }
 
-   //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip.lp", "lp", FALSE));
+   //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
 
    /*  std::cout << "\n---------------------------- EXITING PRICING ----------------------------"
              << std::endl; */
@@ -206,7 +206,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
                            FALSE,                   // removable variable
                            NULL, NULL, NULL, NULL, NULL));
    // add new variable to the list of variables to price into LP
-   SCIP_CALL(SCIPaddPricedVar(scip, var, 2.0));
+   SCIP_CALL(SCIPaddPricedVar(scip, var, 1.0));
 
    SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
 
@@ -234,52 +234,6 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    SCIP_CALL(SCIPreleaseVar(scip, &var));
    return SCIP_OKAY;
 }
-
-/**
- * Computes the cost paid to activate a vertex v with a given weight of influence
- */
-/* double ObjPricerGLCIP::cheapestIncentive(const DNode &v, double exertedInfluence) const
-{
-   double cost = 0;
-   // assuming that the incentives are sorted in an increasing order
-   // uses the first incentive that overcomes the threshold of v
-   for (unsigned int i = 0; i < instance.incentives[v].size(); i++)
-   {
-      if (exertedInfluence + instance.incentives[v][i] >= instance.threshold[v])
-      {
-         cost = instance.incentives[v][i];
-         break;
-      }
-   }
-   return cost;
-} */
-
-/**
- * Computes the cost paid to activate a vertex v with a given set of incoming neigobors
- */
-/* double ObjPricerGLCIP::costInfluencingSet(const DNode &v, const list<DNode> &nodes) const
-{
-   int thr = instance.threshold[v];
-   double cost = 0;
-
-   // activation function
-   double exertedInfluence = 0;
-   for (DNode u : nodes)
-   {
-      Arc a = findArc(instance.g, u, v);
-      exertedInfluence += instance.influence[a];
-   }
-
-   for (unsigned int i = 0; i < instance.incentives[v].size(); i++)
-   {
-      if (exertedInfluence + instance.incentives[v][i] >= thr)
-      {
-         cost = instance.incentives[v][i];
-         break;
-      }
-   }
-   return cost;
-} */
 
 /** return negative reduced cost influencing set (uses minimum knapsack dynamic 
  *  programming algorithm)
