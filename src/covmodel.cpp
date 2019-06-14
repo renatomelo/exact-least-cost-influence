@@ -13,16 +13,7 @@ SCIP_RETCODE incentivesForAll(SCIP *scip,
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        double cost = 0;
-        // uses the first incentive that overcomes the threshold of v
-        for (unsigned int i = 0; i < instance.incentives[v].size(); i++)
-        {
-            if (instance.incentives[v][i] >= instance.threshold[v])
-            {
-                cost = instance.incentives[v][i];
-                break;
-            }
-        }
+        double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
 
         SCIP_VAR *var;
         std::string name = "infSetVar" + instance.nodeName[v] + "_empty";
@@ -77,10 +68,10 @@ void showActivatedNodes(GLCIPInstance &instance, set<DNode> actives, DNodeInfSet
 /**
  * The node with minimal incentive to activate it is chosen
  */
-DNode getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives)
+double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &node)
 {
     double minCost = 1e+20;
-    DNode choosed;
+    //DNode choosed;
     set<DNode> activeNeigbors;
 
     for (DNodeIt v(instance.g); v != INVALID; ++v)
@@ -112,7 +103,7 @@ DNode getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives)
                 //          << " is smaller than " << minCost << std::endl;
 
                 minCost = cost;
-                choosed = v;
+                node = v;
 
                 // if the cost is zero it cannot be improved, then stop
                 if (cost == 0)
@@ -124,7 +115,7 @@ DNode getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives)
     //std::cout << "Node " + instance.nodeName[choosed] + " has the minimum incentive: "
     //          << minCost << std::endl;
 
-    return choosed;
+    return minCost;
 }
 
 /** 
@@ -140,7 +131,8 @@ void greedyConstruction(GLCIPInstance &instance, DNodeInfSetsMap &infSet)
     set<DNode> actives; // start with a empty solution
     while (actives.size() < instance.alpha * instance.n)
     {
-        DNode v = getMinIncentiveNode(instance, actives);
+        DNode v;
+        double minCost = getMinIncentiveNode(instance, actives, v);
 
         // save v's influencing-set and activate it
         InfluencingSet ifs;
@@ -152,7 +144,7 @@ void greedyConstruction(GLCIPInstance &instance, DNodeInfSetsMap &infSet)
                 ifs.nodes.insert(u);
             }
         }
-        ifs.cost = GLCIPBase::costInfluencingSet(instance, v, ifs.nodes);
+        ifs.cost = minCost; //GLCIPBase::costInfluencingSet(instance, v, ifs.nodes);
         infSet[v].push_back(ifs);
         actives.insert(v);
 
@@ -166,10 +158,10 @@ void greedyConstruction(GLCIPInstance &instance, DNodeInfSetsMap &infSet)
  * the greedy heuristic construction method
  */
 SCIP_RETCODE addHeurInitialSol(SCIP *scip,
-                       GLCIPInstance &instance,
-                       ArcConsMap &arcCons,
-                       DNodeConsMap &vertCons,
-                       DNodeInfSetsMap &infSet)
+                               GLCIPInstance &instance,
+                               ArcConsMap &arcCons,
+                               DNodeConsMap &vertCons,
+                               DNodeInfSetsMap &infSet)
 {
     greedyConstruction(instance, infSet);
 
@@ -180,6 +172,61 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
         std::string name;
         if (infSet[v][0].nodes.size() > 0)
         {
+            // adding an empty influencing set var to keep the feasibility of the model
+            // after perfoms the branching on BCP algorithm
+            /* name = "infSetVar_" + instance.nodeName[v] + "_empty";
+            double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
+            
+            SCIP_VAR *extraVar;
+            SCIP_CALL(SCIPcreateVar(scip, &extraVar,
+                                    name.c_str(),            // var name
+                                    0,                       // lower bound
+                                    SCIPinfinity(scip),      // upper bound
+                                    cost,                    // coeficient in the objective function
+                                    SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                    FALSE,                   // initial variable
+                                    FALSE,                   // removable variable
+                                    NULL, NULL, NULL, NULL, NULL));
+            // add new variable to the list of variables to price into LP
+            SCIP_CALL(SCIPaddVar(scip, extraVar));
+
+            // add to each vertex constraint
+            SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], extraVar, 1));
+
+            InfluencingSet empty;
+            empty.cost = cost;
+            empty.var = extraVar;
+            infSet[v].push_back(empty); */
+
+            // adding an artificial influencing set var to keep the feasibility of the model
+            // after perfoms the branching on BCP algorithm
+            name = "infSetVar_" + instance.nodeName[v] + "_artificial";
+            double cost = 1e+6;
+
+            SCIP_VAR *extraVar;
+            SCIP_CALL(SCIPcreateVar(scip, &extraVar,
+                                    name.c_str(),            // var name
+                                    0,                       // lower bound
+                                    SCIPinfinity(scip),      // upper bound
+                                    cost,                    // coeficient in the objective function
+                                    SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                    FALSE,                   // initial variable
+                                    FALSE,                   // removable variable
+                                    NULL, NULL, NULL, NULL, NULL));
+            // add new variable to the list of variables to price into LP
+            SCIP_CALL(SCIPaddVar(scip, extraVar));
+
+            // add to each vertex constraint
+            SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], extraVar, 1));
+
+      /*       InfluencingSet empty;
+            empty.cost = cost;
+            empty.var = extraVar;
+            infSet[v].push_back(empty); */
+
+            SCIP_CALL(SCIPreleaseVar(scip, &extraVar));
+
+            // give a significative name for the variable
             std::stringstream stream;
             for (DNode u : infSet[v][0].nodes)
                 stream << instance.nodeName[u];
@@ -194,7 +241,7 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
                                 name.c_str(),            // var name
                                 0,                       // lower bound
                                 SCIPinfinity(scip),      // upper bound
-                                infSet[v][0].cost,                    // coeficient in the objective function
+                                infSet[v][0].cost,       // coeficient in the objective function
                                 SCIP_VARTYPE_CONTINUOUS, // continuous variable
                                 FALSE,                   // initial variable
                                 FALSE,                   // removable variable
@@ -215,8 +262,8 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
         }
 
-         infSet[v][0].var = var;
-       
+        infSet[v][0].var = var;
+
         //std::cout << "Adding variable " << name << std::endl;
         SCIP_CALL(SCIPreleaseVar(scip, &var));
     }
@@ -346,8 +393,8 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIPenableDebugSol(scip);
 
     SCIP_CALL(SCIPincludeDefaultPlugins(scip));
-    SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
-    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.1));
+    /*   SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
+    SCIP_CALL(SCIPsetRealParam(scip, "separating/minefficacy", 0.001)); */
 
     // create empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP_Column_Generation", 0, 0, 0, 0, 0, 0, 0));

@@ -17,7 +17,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 1));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
 
     // add variables to the model
     DNodeSCIPVarMap x(instance.g);
