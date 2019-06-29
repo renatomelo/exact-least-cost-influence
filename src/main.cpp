@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
     // solve it
     GLCIPSolution solution(g);
 
-    auto started = chrono::high_resolution_clock::now();
+    //auto started = chrono::high_resolution_clock::now();
     /*
     if(params.alg.compare("cov") == 0)
         GurobiBCP::run(instance, solution, measures, params.timeLimit);
@@ -32,15 +32,15 @@ int main(int argc, char *argv[]){
     }
     if(params.alg.compare("cov") == 0){
         CovModelAllVariables::run(instance, solution, params.timeLimit);
-        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
+        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
     }
     if(params.alg.compare("covcg") == 0){
         CovModel::run(instance, solution, params.timeLimit);
-        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with column generation");
+        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with column generation");
     }
 
-    auto done = chrono::high_resolution_clock::now();
-    int time = chrono::duration_cast<chrono::milliseconds>(done-started).count();
+    /* auto done = chrono::high_resolution_clock::now();
+    int time = chrono::duration_cast<chrono::milliseconds>(done-started).count(); */
 
     return 0;
 }

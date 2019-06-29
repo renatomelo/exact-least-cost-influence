@@ -9,7 +9,7 @@ typedef Digraph::NodeMap<SCIP_CONS *> DNodeConsMap;
 class ObjPricerGLCIP : public ObjPricer
 {
 private:
-   GLCIPInstance instance; /**< influence matrix */
+   GLCIPInstance instance; /**< problem data*/
 
    ArcSCIPVarMap &z;       /**< map of arc variables */
    DNodeSCIPVarMap &x;     /**< map of vertex variables */
