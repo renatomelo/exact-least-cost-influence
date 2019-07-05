@@ -423,16 +423,16 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //end of pricing
 
     //include branching rule
-    /* static const char* BRANCH_NAME = "GLCIP_branch";
-    ObjBranchruleGLCIP* branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, infSet);
+    static const char* BRANCH_NAME = "GLCIP_branch";
+    ObjBranchruleGLCIP* branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, x, z, infSet);
 
-    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE)); */
+    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE));
     //end of branching rule
 
     // include event handler pluging
-    static const char *EVENTHDLR_NAME = "GLCIP_eventhdlr";
+    /* static const char *EVENTHDLR_NAME = "GLCIP_eventhdlr";
     ObjEventhdlrGLCIP *event = new ObjEventhdlrGLCIP(scip, EVENTHDLR_NAME, instance);
-    SCIP_CALL(SCIPincludeObjEventhdlr(scip, event, TRUE));
+    SCIP_CALL(SCIPincludeObjEventhdlr(scip, event, TRUE)); */
 
     // add cutting planes
     CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);

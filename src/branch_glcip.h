@@ -7,6 +7,8 @@ class ObjBranchruleGLCIP : public ObjBranchrule
 {
 private:
     GLCIPInstance&          instance;
+    DNodeSCIPVarMap&        x;
+    ArcSCIPVarMap&          z;
     DNodeInfSetsMap&        infSet;
 
 public:
@@ -15,6 +17,8 @@ public:
         SCIP*               scip,
         const char*         p_name,         // name of branching rule
         GLCIPInstance&      p_instance,     // problem data
+        DNodeSCIPVarMap&    p_x,
+        ArcSCIPVarMap&      p_z,
         DNodeInfSetsMap&    p_inf_set       // influencing set data structure 
     );
 
