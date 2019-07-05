@@ -308,8 +308,7 @@ void CovModel::constructSoltion(SCIP *scip,
             if (solVal > 0.1)
             {
                 solution.incentives[v] = infSet[v][i].cost;
-                std::cout << "InfluencingSetVar[" + instance.nodeName[v] + ","
-                          << solution.incentives[v] << "]  \t= " << solVal << std::endl;
+                std::cout << SCIPvarGetName(infSet[v][i].var) << " \t\t= " << solVal << std::endl;
             }
         }
     }

@@ -25,28 +25,23 @@ SCIP_RETCODE getBranchCands(
     GLCIPInstance &instance,
     ArcSCIPVarMap &z,
     SCIP_VAR **branchCands,     //the address of branching candidates
-                                //    SCIP_Real *branchCandsSol,  //pointer to solution values of the candidates
     SCIP_Real *branchCandsFrac, //pointer to fractionalities of the candidates
     int *nCands                 //number of branching candidates
 )
 {
-    std::cout << "getBranchCands() FUNCIOTN \n";
-    //SCIP_Real *branchCandsSol;
+    std::cout << "getBranchCands() FUNCTION \n";
     // all arc variables that are in the LP, and have fractional values are viable candidates
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
-        SCIP_Bool isFeasibleIntegral = SCIPisFeasIntegral(scip, SCIPvarGetLPSol(z[a]));
+        //SCIP_Bool isFeasibleIntegral = SCIPisFeasIntegral(scip, SCIPvarGetLPSol(z[a]));
+        //std::cout << "var status = " << SCIPvarGetStatus(z[a]) <<std::endl;
 
-        std::cout << "var status = " << SCIPvarGetStatus(z[a]) <<std::endl;
-
-        if (SCIPvarGetStatus(z[a]) == SCIP_VARSTATUS_COLUMN && !isFeasibleIntegral)
+        //if (SCIPvarGetStatus(z[a]) == SCIP_VARSTATUS_COLUMN && !isFeasibleIntegral)
+        if (!SCIPisFeasIntegral(scip, SCIPvarGetLPSol(z[a])))
         {
-            std::cout << *nCands << " if condition  \n";
+            //std::cout << *nCands << " if condition  \n";
             (branchCands)[*nCands] = z[a];
-            std::cout << "fgdhjfdsafghdsa " << std::endl;
             (branchCandsFrac)[*nCands] = MAX(1 - SCIPvarGetLPSol(z[a]), SCIPvarGetLPSol(z[a]));
-            /* (branchCandsSol)[*nCands] = SCIPvarGetLPSol(z[a]);
-            (branchCandsFrac)[*nCands] = MAX(1 - (branchCandsSol)[*nCands], (branchCandsSol)[*nCands]); */
             (*nCands)++;
         }
     }
@@ -66,17 +61,10 @@ SCIP_RETCODE branchOnArcVar(
     SCIP_RESULT *result //pointer to store result of branching
 )
 {
-    /* SCIP_Bool branched;
-    SCIP_Real priority;
+    /* SCIP_Real priority;
     SCIP_Real estimate;
-    SCIP_Real tmp;
-    SCIP_Real minestzero;
-
     SCIP_NODE *leftChild;
     SCIP_NODE *rightChild;
-    int nCands = 0;
-
-    SCIP_CALL(SCIPallocClearBufferArray(scip, &branched, 2));
 
     // check all candidates
     for (int i = 0; i < nCands; i++)
@@ -99,7 +87,7 @@ SCIP_RETCODE branchOnArcVar(
         }
     } */
 
-    std::cout << "branchOnArcVar FUNCIOTN \n";
+    std::cout << "branchOnArcVar FUNCTION \n";
 
     // variables for finding the most fractional column
     double fractionality;
@@ -125,9 +113,9 @@ SCIP_RETCODE branchOnArcVar(
     assert(bestCand >= 0);
     assert(SCIPisFeasPositive(scip, bestFractionality));
 
-    /* SCIPinfoMessage(scip, " -> %d candidates, selected candidate %d: variable <%s> (frac=%g, obj=%g, factor=%g, score=%g)\n",
-                    nlpcands, bestcand, SCIPvarGetName(lpcands[bestcand]), lpcandsfrac[bestcand], bestobj,
-                    SCIPvarGetBranchFactor(lpcands[bestcand]), bestscore); */
+    SCIPinfoMessage(scip, NULL, " -> %d candidates, selected candidate %d: variable <%s> (frac=%g, factor=%g)\n",
+                    nCands, bestCand, SCIPvarGetName(candidates[bestCand]), branchCandsFrac[bestCand],
+                    SCIPvarGetBranchFactor(candidates[bestCand]));
 
     // perform the branching
     SCIP_CALL(SCIPbranchVar(scip, candidates[bestCand], NULL, NULL, NULL));
@@ -145,7 +133,7 @@ SCIP_RETCODE branchOnArcVar(
  */
 SCIP_DECL_BRANCHEXECLP(ObjBranchruleGLCIP::scip_execlp)
 {
-    std::cout << "---------- BRANCHING ----------\n\n";
+    std::cout << "---------- BRANCHING ----------\n";
     SCIP_VAR **candidates;        // candidates for branching
     double *fractionalitiesCands; // fractionalities of candidates
     int nCands = 0;               // length of array
