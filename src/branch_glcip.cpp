@@ -24,6 +24,7 @@ SCIP_RETCODE getBranchCands(
     SCIP *scip,
     GLCIPInstance &instance,
     ArcSCIPVarMap &z,
+    Arc **arcCands,
     SCIP_VAR **branchCands,     //the address of branching candidates
     SCIP_Real *branchCandsFrac, //pointer to fractionalities of the candidates
     int *nCands                 //number of branching candidates
@@ -124,6 +125,79 @@ SCIP_RETCODE branchOnArcVar(
     return SCIP_OKAY;
 }
 
+SCIP_RETCODE branchOnArcVar2(
+    SCIP *scip,
+    SCIP_VAR **candidates,
+    Arc **arcCands,
+    SCIP_Real *branchCandsFrac,
+    int nCands,
+    SCIP_RESULT *result //pointer to store result of branching
+)
+{
+    SCIP_NODE *leftChild;
+    SCIP_NODE *rightChild;
+    SCIP_CONS *consWith;
+    SCIP_CONS *consWithout;
+
+    Arc arc;
+
+    std::cout << "branchOnArcVar2 FUNCTION \n";
+
+    // variables for finding the most fractional column
+    double fractionality;
+    double bestFractionality;
+
+    int bestCand = -1;
+
+    // search the least fractional candidate
+    bestFractionality = 1;
+    for (int i = 0; i < nCands; i++)
+    {
+        assert(candidates[i] != NULL);
+        fractionality = branchCandsFrac[i];
+        //fractionality = min(fractionality, 1 - fractionality);
+
+        if (fractionality < bestFractionality)
+        {
+            bestFractionality = fractionality;
+            bestCand = i;
+        }
+    }
+
+    assert(bestCand >= 0);
+    assert(SCIPisFeasPositive(scip, bestFractionality));
+
+   /*  SCIPinfoMessage(scip, NULL, " -> %d candidates, 
+                selected candidate %d: variable <%s> (frac=%g, factor=%g)\n",
+                nCands, bestCand, SCIPvarGetName(candidates[bestCand]),
+                branchCandsFrac[bestCand], SCIPvarGetBranchFactor(candidates[bestCand])); */
+
+    // perform the branching
+    //SCIP_CALL(SCIPbranchVar(scip, candidates[bestCand], NULL, NULL, NULL));
+    // create the branch-and-bound tree child nodes of the current node
+    SCIP_CALL( SCIPcreateChild(scip, &leftChild, 0, SCIPgetLocalTransEstimate(scip)) );
+    SCIP_CALL( SCIPcreateChild(scip, &rightChild, 0, SCIPgetLocalTransEstimate(scip)) );
+
+    // create corresponding constraints (createConsArcMarker())
+    
+    SCIP_CALL( ConshdlrArcMarker::createConsArcMarker(scip, &consWithout, "without",
+                arcCands[bestCand],  WITHOUT,  leftChild, TRUE) );
+    SCIP_CALL( ConshdlrArcMarker::createConsArcMarker(scip, &consWith, "with",
+                arc[bestCand],  WITH, rightChild, TRUE) );
+
+    // add constraints to nodes
+    SCIP_CALL( SCIPaddConsNode(scip, leftChild, consWithout, NULL) );
+    SCIP_CALL( SCIPaddConsNode(scip, rightChild, consWith, NULL) );    
+
+    // release constraints
+    SCIP_CALL(SCIPreleaseCons(scip, &consWithout));
+    SCIP_CALL(SCIPreleaseCons(scip, &consWith));
+
+    *result = SCIP_BRANCHED;
+
+    return SCIP_OKAY;
+}
+
 /* SCIP_DECL_BRANCHINIT(ObjBranchruleGLCIP::scip_init)
 {
     return SCIP_OKAY;
@@ -133,28 +207,23 @@ SCIP_RETCODE branchOnArcVar(
  */
 SCIP_DECL_BRANCHEXECLP(ObjBranchruleGLCIP::scip_execlp)
 {
-    std::cout << "---------- BRANCHING ----------\n";
+    //std::cout << "---------- BRANCHING ----------\n";
+    SCIPinfoMessage(scip, NULL, "Start branching at node %" SCIP_LONGINT_FORMAT ", depth %d\n", SCIPgetNNodes(scip), SCIPgetDepth(scip));
     SCIP_VAR **candidates;        // candidates for branching
+    Arc **arcCands;
     double *fractionalitiesCands; // fractionalities of candidates
     int nCands = 0;               // length of array
 
+    SCIP_CALL(SCIPallocClearBufferArray(scip, &arcCands, instance.m));
     SCIP_CALL(SCIPallocClearBufferArray(scip, &candidates, instance.m));
     SCIP_CALL(SCIPallocClearBufferArray(scip, &fractionalitiesCands, instance.m));
     // get branching candidates
-    SCIP_CALL(getBranchCands(scip, instance, z, candidates, fractionalitiesCands, &nCands));
+    SCIP_CALL(getBranchCands(scip, instance, z, arcCands, candidates, fractionalitiesCands, &nCands));
     assert(nCands > 0);
     *result = SCIP_DIDNOTRUN;
 
-    // SCIP_CALL(SCIPgetLPBranchCands(scip,
-    //                                &candidates,           /* array of LP branching candidates, or NULL */
-    //                                NULL,                  /* array of LP candidate solution values, or NULL */
-    //                                &fractionalitiesCands, /* array of LP candidate fractionalities, or NULL */
-    //                                NULL,                  /* number of LP branching candidates, or NULL */
-    //                                &numLPCands,           /* number of candidates with maximal priority, or NULL */
-    //                                NULL));
-
     // perform the branching
-    SCIP_CALL(branchOnArcVar(scip, candidates, fractionalitiesCands, nCands, result));
+    SCIP_CALL(branchOnArcVar2(scip, candidates, fractionalitiesCands, nCands, result));
 
     // free memory
     SCIPfreeBufferArray(scip, &candidates);

@@ -13,14 +13,16 @@ ObjPricerGLCIP::ObjPricerGLCIP(
     ArcConsMap &p_arc_con,       /**< matrix of arc constraints */
     DNodeConsMap &p_vert_con,    /**< array of partitioning constraints */
     //DNodeSCIPVarsMap &p_inf_set
-    DNodeInfSetsMap &p_inf_set) : ObjPricer(scip, p_name, "Finds influencing set with negative reduced cost.", 0, TRUE),
-                                  instance(p_instance),
-                                  z(p_arc_var),
-                                  x(p_vert_var),
-                                  arcCons(p_arc_con),
-                                  vertCons(p_vert_con),
-                                  infSet(p_inf_set)
+    DNodeInfSetsMap &p_inf_set)
+    : ObjPricer(scip, p_name, "Finds influencing set with negative reduced cost.", 0, TRUE),
+      instance(p_instance),
+      z(p_arc_var),
+      x(p_vert_var),
+      arcCons(p_arc_con),
+      vertCons(p_vert_con),
+      infSet(p_inf_set)
 {
+   // arcMarker isOnSolution(instance.g);
 }
 
 ObjPricerGLCIP::~ObjPricerGLCIP() {}

@@ -18,6 +18,8 @@ private:
    //DNodeSCIPVarsMap&             infSetVar;
    DNodeInfSetsMap &infSet;
 
+   //ArcBoolMap arcMarker;   // map to signals the decision about the arcs in the branching rule
+
 public:
    /** Constructs the pricer object with the data needed */
    ObjPricerGLCIP(
@@ -55,10 +57,10 @@ public:
        const DNode&           v,                /**< vertex to be influenced */
        const ArcValueMap&     dualValues,       /**< map of dual values associated to arc-constraints */
        const double           dualVertValue,    /**< dual solution of vertex constraints */
-       set<DNode>&           nodes             /**< list of influencing neighbors */
+       set<DNode>&            nodes             /**< list of influencing neighbors */
        ) const;
 
-/*    double cheapestIncentive(const DNode &v, double exertedInfluence) const;
+/* double cheapestIncentive(const DNode &v, double exertedInfluence) const;
    double costInfluencingSet(const DNode &v, const list<DNode> &nodes) const; */
 };
 

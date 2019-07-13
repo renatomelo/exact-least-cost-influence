@@ -2,6 +2,7 @@
 #define __SCIP_BRANCH_GLCIP_H__
 
 #include "GLCIPBase.h"
+#include "consarcmarker.h"
 
 class ObjBranchruleGLCIP : public ObjBranchrule
 {

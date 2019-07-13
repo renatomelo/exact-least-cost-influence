@@ -18,7 +18,7 @@ void GraphViewer::ViewGLCIPSolution(GLCIPInstance &instance, GLCIPSolution &solu
     // set graph attributes for the visualizer
     DigraphAttributes GA(instance.g, nodeNames, instance.posx, instance.posy);
 
-    GA.SetDefaultDNodeAttrib("color = Gray shape = ellipse style = bold fontsize = 20");
+    GA.SetDefaultDNodeAttrib("color = Gray shape = circle style = bold fontsize = 18");
 
     // color nodes according to the solution
     for(DNodeIt v(instance.g); v != INVALID; ++v){
@@ -31,7 +31,8 @@ void GraphViewer::ViewGLCIPSolution(GLCIPInstance &instance, GLCIPSolution &solu
     // remove arcs that are not in the solution
     for(ArcIt a(instance.g); a != INVALID; ++a){
         if(!solution.influence[a]){
-            GA.SetColor(a, "Invis");
+            //GA.SetColor(a, "Invis");
+            GA.SetColor(a, "gray");
         }
     }
 
