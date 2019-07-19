@@ -79,20 +79,20 @@ SCIP_DECL_EVENTEXEC(ObjEventhdlrGLCIP::scip_exec)
     SCIP_Real val = SCIPgetSolOrigObj(scip, sol);
     SCIPinfoMessage(scip, NULL, "found new best solution with solution value <%g>\n", val); */
 
-    SCIP_VAR *var;
-    ObjPricerGLCIP *pricer;
-    SCIP_PRICERDATA *pricerData;
+    //SCIP_VAR *var;
+    //ObjPricerGLCIP *pricer;
+    //SCIP_PRICERDATA *pricerData;
     SCIP_VAR **origninalVars;
 
-    pricer = static_cast<ObjPricerGLCIP *>(SCIPfindObjPricer(scip, "GLCIP_pricer"));
-    assert(pricer != NULL);
+    /* pricer = static_cast<ObjPricerGLCIP *>(SCIPfindObjPricer(scip, "GLCIP_pricer"));
+    assert(pricer != NULL); */
 
     //TODO maybe define the pricer data structure
     //pricerData = pricer->getPricerData();
 
-    assert(SCIPeventGetType(event) == SCIP_EVENTTYPE_VARDELETED);
+    /* assert(SCIPeventGetType(event) == SCIP_EVENTTYPE_VARDELETED);
     var = SCIPeventGetVar(event);
-    assert(var != NULL);
+    assert(var != NULL); */
 
     /* SCIP_EVENTTYPE_VARFIXED
     SCIP_EVENTTYPE_OBJCHANGED

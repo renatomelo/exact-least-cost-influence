@@ -1,9 +1,12 @@
 #include "consarcmarker.h"
 
+using namespace arcmarker;
+
 struct SCIP_ConsData
 {
     Digraph *graph;
-    Arc arc;
+    //Arc& arc;
+    SCIP_VAR *arcVar;
     int nPropagatedVars;         /* number of variables that existed, the last time,
                                   *  the related node was propagated, used to determine
                                   *  whether the constraint should be repropagated */
@@ -13,8 +16,47 @@ struct SCIP_ConsData
     SCIP_NODE *node;             // the node in the B&B-tree at which the cons is sticking
 };
 
+SCIP_RETCODE createConsData(
+    SCIP *scip,
+    SCIP_CONSDATA **consdata, //pointer to store the constraint data
+    //Arc& arc,
+    SCIP_VAR *arcVar,
+    CONSTYPE type,   //stores whether the arc have to be in the solution or not
+    SCIP_NODE *node) //the node in the B&B-tree at which the cons is sticking
+{
+    assert(scip != NULL);
+    assert(consdata != NULL);
+    //assert(arc != NULL);
+    assert(type == WITH || type == WITHOUT);
+
+    SCIP_CALL(SCIPallocBlockMemory(scip, consdata));
+    
+    (*consdata)->arcVar = arcVar;
+    (*consdata)->type = type;
+    (*consdata)->nPropagatedVars = 0;
+    (*consdata)->nPropagations = 0;
+    (*consdata)->propagated = FALSE;
+    (*consdata)->node = node;
+
+    return SCIP_OKAY;
+}
+
+void printConsData(SCIP_CONSDATA *consdata)
+{
+    /* DNode u = instance.g.source(consdata->arc);
+    DNode v = instance.g.target(consdata->arc);
+    std::cout << "arc (" << instance.nodeName[u] << "," << instance.nodeName[v]
+              << ") at node " << SCIPnodeGetNumber(consdata->node) << "is "
+              << (consdata->type == WITH ? " " : "NOT") << " on the solution" << std::endl; */
+
+    std::cout << "arc variable  (" << SCIPvarGetName(consdata->arcVar) << ") at node " 
+              << SCIPnodeGetNumber(consdata->node) << " is "
+              << (consdata->type == WITH ? "" : "NOT") << " on the solution" << std::endl;
+}
+
 /**
  * fixes variables
+ * TODO: probably in this function I need to create a copy of the graph and remove edges
  */
 SCIP_RETCODE checkVariable(
     SCIP *scip,
@@ -24,8 +66,7 @@ SCIP_RETCODE checkVariable(
     SCIP_Bool *cuttoff       // pointer to store if a cutoff was detected
 )
 {
-    SCIP_VARDATA *vardata;
-    CONSTYPE type;
+    std::cout << "checkVariable() function\n";
     SCIP_Bool fixed;
     SCIP_Bool infeasible;
 
@@ -39,13 +80,18 @@ SCIP_RETCODE checkVariable(
         return SCIP_OKAY;
 
     //check if the arc which corresponds to the varialbe is feasible for this constraint
-    vardata = SCIPvarGetData(var);
-
-    if (type == WITHOUT)
+    //vardata = SCIPvarGetData(var);
+    std::cout << "after upper bound test\n";
+    if (consdata->type == WITHOUT)
     {
+        std::cout << "lower bound before fixing = " << SCIPvarGetLbLocal(var) << "\n";
         SCIP_CALL(SCIPfixVar(scip, var, 0.0, &infeasible, &fixed));
+        std::cout << "lower bound after fixing = " << SCIPvarGetLbLocal(var) << "\n";
+        std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 0\n";
+        
         if (infeasible)
         {
+            std::cout << "IS INFEASIBLE\n";
             assert(SCIPvarGetLbLocal(var) > 0.5);
             SCIPinfoMessage(scip, NULL, "-> cutoff\n");
             (*cuttoff) = TRUE;
@@ -59,10 +105,15 @@ SCIP_RETCODE checkVariable(
     // otherwise the variable is in the solution
     else
     {
+        std::cout << "lower bound before fixing = " << SCIPvarGetLbLocal(var) << "\n";
         SCIP_CALL(SCIPfixVar(scip, var, 1.0, &infeasible, &fixed));
+        std::cout << "lower bound after fixing = " << SCIPvarGetLbLocal(var) << "\n";
+        std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 1\n";
+        
         if (infeasible)
         {
-            assert(SCIPvarGetUbLocal(var) < 0.5);
+            std::cout << "IS INFEASIBLE\n";
+            assert(SCIPvarGetLbLocal(var) < 0.5);
             SCIPinfoMessage(scip, NULL, "-> cutoff\n");
             (*cuttoff) = TRUE;
         }
@@ -83,23 +134,22 @@ SCIP_RETCODE checkVariable(
 SCIP_RETCODE fixVariables(
     SCIP *scip,
     SCIP_CONSDATA *consdata,
-    ArcSCIPVarMap &z,
+    SCIP_VAR *arc_var,
+    int nVars,
     SCIP_RESULT *result)
 {
     int nFixedVars = 0;
     SCIP_Bool cutoff = FALSE;
 
-    SCIPinfoMessage(scip, NULL, "check variables %d to %d\n", consdata->nPropagatedVars, nVars);
+    SCIPinfoMessage(scip, NULL, "check variables %d of %d\n", consdata->nPropagatedVars, nVars);
 
-    for (int i = consdata->nPropagatedVars; i < nVars; i++)
-    {
-        SCIP_CALL( checkVariable(scip, consdata, vars[i], &nFixedVars, &cutoff) );
-    }
+    SCIP_CALL(checkVariable(scip, consdata, arc_var, &nFixedVars, &cutoff));
+
     SCIPinfoMessage(scip, NULL, "fixed %d variables locally\n", nFixedVars);
 
-    if (cutoff)  
+    if (cutoff)
         *result = SCIP_CUTOFF;
-    else if (nFixedVars > 0)  
+    else if (nFixedVars > 0)
         *result = SCIP_REDUCEDDOM;
 
     return SCIP_OKAY;
@@ -117,6 +167,26 @@ SCIP_DECL_CONSDELETE(ConshdlrArcMarker::scip_delete)
     return SCIP_OKAY;
 }
 
+SCIP_DECL_CONSENFOLP(ConshdlrArcMarker::scip_enfolp)
+{
+    return SCIP_OKAY;
+}
+
+SCIP_DECL_CONSENFOPS(ConshdlrArcMarker::scip_enfops)
+{
+    return SCIP_OKAY;
+}
+
+SCIP_DECL_CONSLOCK(ConshdlrArcMarker::scip_lock)
+{
+    return SCIP_OKAY;
+}
+
+SCIP_DECL_CONSCHECK(ConshdlrArcMarker::scip_check)
+{
+    return SCIP_OKAY;
+}
+
 /**
  * transforms constraint data into data belonging to the trasformed problem
  */
@@ -130,18 +200,16 @@ SCIP_DECL_CONSTRANS(ConshdlrArcMarker::scip_trans)
 
     //create constraint data for the target constraint
     SCIP_CALL(
-        createConsData(scip, &targetdata, sourcedata->arc, sourcedata->type, sourcedata->node)
-    );
+        createConsData(scip, &targetdata, sourcedata->arcVar, sourcedata->type, sourcedata->node));
 
     //create target constraint
     SCIP_CALL(
         SCIPcreateCons(scip, targetcons, SCIPconsGetName(sourcecons), conshdlr,
-                         targetdata, SCIPconsIsInitial(sourcecons), SCIPconsIsSeparated(sourcecons),
-                         SCIPconsIsEnforced(sourcecons), SCIPconsIsChecked(sourcecons),
-                         SCIPconsIsPropagated(sourcecons), SCIPconsIsLocal(sourcecons),
-                         SCIPconsIsModifiable(sourcecons), SCIPconsIsDynamic(sourcecons),
-                         SCIPconsIsRemovable(sourcecons), SCIPconsIsStickingAtNode(sourcecons))
-    );
+                       targetdata, SCIPconsIsInitial(sourcecons), SCIPconsIsSeparated(sourcecons),
+                       SCIPconsIsEnforced(sourcecons), SCIPconsIsChecked(sourcecons),
+                       SCIPconsIsPropagated(sourcecons), SCIPconsIsLocal(sourcecons),
+                       SCIPconsIsModifiable(sourcecons), SCIPconsIsDynamic(sourcecons),
+                       SCIPconsIsRemovable(sourcecons), SCIPconsIsStickingAtNode(sourcecons)));
     return SCIP_OKAY;
 }
 
@@ -151,14 +219,14 @@ SCIP_DECL_CONSTRANS(ConshdlrArcMarker::scip_trans)
 SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
 {
     SCIP_CONSDATA *consdata;
-    SCIP_VAR **vars;
-    int nVars;
+    //SCIP_VAR **vars;
+    int nVars = instance.m;
 
     assert(scip != NULL);
     assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
     assert(result != NULL);
 
-    SCIPinfoMessage(scip, NULL, "propagation constraints of constraint handler <" CONSHDLR_NAME ">\n");
+    SCIPinfoMessage(scip, NULL, "propagation of constraint handler <" CONSHDLR_NAME ">\n");
 
     // get vars and nvars if needed
 
@@ -175,9 +243,9 @@ SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
         if (!consdata->propagated)
         {
             SCIPinfoMessage(scip, NULL, "propagate constraint <%s> ", SCIPconsGetName(conss[i]));
-            printConsData(instance, consdata);
+            printConsData(consdata);
 
-            SCIP_CALL(fixVariables(scip, consdata, z, result));
+            SCIP_CALL(fixVariables(scip, consdata, consdata->arcVar, nVars, result));
             consdata->nPropagations++;
 
             if (*result != SCIP_CUTOFF)
@@ -258,7 +326,7 @@ SCIP_DECL_CONSDELVARS(ConshdlrArcMarker::scip_delvars)
     return SCIP_OKAY;
 }
 
-SCIP_DECL_CONSPRINT(ConshdlrArcMarker::scip_print)
+/* SCIP_DECL_CONSPRINT(ConshdlrArcMarker::scip_print)
 {
     SCIP_CONSDATA *consdata;
     Arc a;
@@ -271,57 +339,22 @@ SCIP_DECL_CONSPRINT(ConshdlrArcMarker::scip_print)
     DNode v = consdata->graph->target(a);
 
     SCIPinfoMessage(scip, NULL, "branching on the arc (%s,%s)", instance.nodeName[u], instance.nodeName[v]);
-}
-
-SCIP_RETCODE createConsData(
-    SCIP *scip,
-    SCIP_CONSDATA **consdata, //pointer to store the constraint data
-    Arc arc,
-    CONSTYPE type,   //stores whether the arc have to be in the solution or not
-    SCIP_NODE *node) //the node in the B&B-tree at which the cons is sticking
-{
-    assert(scip != NULL);
-    assert(consdata != NULL);
-    assert(arc != NULL);
-    assert(type == WITH || type == WITHOUT);
-
-    SCIP_CALL(SCIPallocBlockMemory(scip, consdata));
-
-    (*consdata)->arc = arc;
-    (*consdata)->type = type;
-    (*consdata)->nPropagatedVars = 0;
-    (*consdata)->nPropagations = 0;
-    (*consdata)->propagated = FALSE;
-    (*consdata)->node = node;
-
-    return SCIP_OKAY;
-}
-
-void printConsData(GLCIPInstance &instance, SCIP_CONSDATA *consdata)
-{
-    DNode u = instance.g.source(consdata->arc);
-    DNode v = instance.g.target(consdata->arc);
-    std::cout << "arc (" << instance.nodeName[u] << "," << instance.nodeName[v]
-              << ") at node " << SCIPnodeGetNumber(consdata->node) << "is "
-              << consdata->type ==
-            WITH
-        ? ""
-        : "NOT"
-              << " on the solution" << std::endl;
-}
+} */
 
 /**
  * creates and captures the arc marker constraint
  */
-SCIP_RETCODE ConshdlrArcMarker::createConsArcMarker(
+SCIP_RETCODE arcmarker::createConsArcMarker(
     SCIP *scip,
     SCIP_CONS **cons,
     const char *name,
-    Arc arc,
+    SCIP_VAR* arcVar,
+   // Arc& arc,
     CONSTYPE type,
     SCIP_NODE *node,
     SCIP_Bool local)
 {
+    //std::cout << "Entenring in createConsArcMarker()\n";
     SCIP_CONSHDLR *conshdlr;
     SCIP_CONSDATA *consdata;
 
@@ -334,15 +367,15 @@ SCIP_RETCODE ConshdlrArcMarker::createConsArcMarker(
     }
 
     // create constraint data
-    SCIP_CALL(createConsData(scip, &consdata, arc, type, node));
-
+    SCIP_CALL(createConsData(scip, &consdata, arcVar, type, node));
+    
     //create constraint
     SCIP_CALL(
         SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, FALSE, FALSE, FALSE,
                        TRUE, local, FALSE, FALSE, FALSE, TRUE));
 
-    SCIPinfoMessage(scip, NULL, "created constraint: ");
-    printConsData(instance, consdata);
+    std::cout <<"created constraint: ";
+    printConsData(consdata);
 
     return SCIP_OKAY;
 }

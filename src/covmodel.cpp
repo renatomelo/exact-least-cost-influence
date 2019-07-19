@@ -3,6 +3,9 @@
 #include "pricer_glcip.h"
 #include "branch_glcip.h"
 #include "event_glcip.h"
+#include "consarcmarker.h"
+
+using namespace arcmarker;
 
 /**
  * Add to the model the influencing-set variables considering no incoming
