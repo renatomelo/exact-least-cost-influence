@@ -28,7 +28,6 @@ public:
 
     //virtual SCIP_DECL_BRANCHINIT(scip_init);
     virtual SCIP_DECL_BRANCHEXECLP(scip_execlp);
-
 };
 
 #endif

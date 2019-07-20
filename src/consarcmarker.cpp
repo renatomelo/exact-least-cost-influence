@@ -1,11 +1,12 @@
 #include "consarcmarker.h"
+#include "pricer_glcip.h"
 
 using namespace arcmarker;
 
 struct SCIP_ConsData
 {
     Digraph *graph;
-    //Arc& arc;
+    ArcIt arc;
     SCIP_VAR *arcVar;
     int nPropagatedVars;         /* number of variables that existed, the last time,
                                   *  the related node was propagated, used to determine
@@ -19,7 +20,7 @@ struct SCIP_ConsData
 SCIP_RETCODE createConsData(
     SCIP *scip,
     SCIP_CONSDATA **consdata, //pointer to store the constraint data
-    //Arc& arc,
+    ArcIt& arc,
     SCIP_VAR *arcVar,
     CONSTYPE type,   //stores whether the arc have to be in the solution or not
     SCIP_NODE *node) //the node in the B&B-tree at which the cons is sticking
@@ -30,7 +31,8 @@ SCIP_RETCODE createConsData(
     assert(type == WITH || type == WITHOUT);
 
     SCIP_CALL(SCIPallocBlockMemory(scip, consdata));
-    
+
+    (*consdata)->arc = arc;
     (*consdata)->arcVar = arcVar;
     (*consdata)->type = type;
     (*consdata)->nPropagatedVars = 0;
@@ -49,7 +51,7 @@ void printConsData(SCIP_CONSDATA *consdata)
               << ") at node " << SCIPnodeGetNumber(consdata->node) << "is "
               << (consdata->type == WITH ? " " : "NOT") << " on the solution" << std::endl; */
 
-    std::cout << "arc variable  (" << SCIPvarGetName(consdata->arcVar) << ") at node " 
+    std::cout << "arc variable  (" << SCIPvarGetName(consdata->arcVar) << ") at node "
               << SCIPnodeGetNumber(consdata->node) << " is "
               << (consdata->type == WITH ? "" : "NOT") << " on the solution" << std::endl;
 }
@@ -80,15 +82,17 @@ SCIP_RETCODE checkVariable(
         return SCIP_OKAY;
 
     //check if the arc which corresponds to the varialbe is feasible for this constraint
-    //vardata = SCIPvarGetData(var);
-    std::cout << "after upper bound test\n";
     if (consdata->type == WITHOUT)
     {
-        std::cout << "lower bound before fixing = " << SCIPvarGetLbLocal(var) << "\n";
         SCIP_CALL(SCIPfixVar(scip, var, 0.0, &infeasible, &fixed));
-        std::cout << "lower bound after fixing = " << SCIPvarGetLbLocal(var) << "\n";
-        std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 0\n";
-        
+        //std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 0\n";
+
+        //SCIP_PRICER* pricer = SCIPfindPricer(scip, "GLCIP_pricer");
+        ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
+        pricer_glcip->isOnSolution[consdata->arc] = FALSE;
+        //SCIP_PRICERDATA* pricerdata =  SCIPpricerGetData(scip, pricer);
+        //SCIPpricerSetData()
+
         if (infeasible)
         {
             std::cout << "IS INFEASIBLE\n";
@@ -105,11 +109,9 @@ SCIP_RETCODE checkVariable(
     // otherwise the variable is in the solution
     else
     {
-        std::cout << "lower bound before fixing = " << SCIPvarGetLbLocal(var) << "\n";
         SCIP_CALL(SCIPfixVar(scip, var, 1.0, &infeasible, &fixed));
-        std::cout << "lower bound after fixing = " << SCIPvarGetLbLocal(var) << "\n";
-        std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 1\n";
-        
+        //std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 1\n";
+
         if (infeasible)
         {
             std::cout << "IS INFEASIBLE\n";
@@ -135,17 +137,14 @@ SCIP_RETCODE fixVariables(
     SCIP *scip,
     SCIP_CONSDATA *consdata,
     SCIP_VAR *arc_var,
-    int nVars,
     SCIP_RESULT *result)
 {
     int nFixedVars = 0;
     SCIP_Bool cutoff = FALSE;
 
-    SCIPinfoMessage(scip, NULL, "check variables %d of %d\n", consdata->nPropagatedVars, nVars);
-
     SCIP_CALL(checkVariable(scip, consdata, arc_var, &nFixedVars, &cutoff));
 
-    SCIPinfoMessage(scip, NULL, "fixed %d variables locally\n", nFixedVars);
+    SCIPinfoMessage(scip, NULL, "variable locally fixed\n");
 
     if (cutoff)
         *result = SCIP_CUTOFF;
@@ -156,7 +155,7 @@ SCIP_RETCODE fixVariables(
 }
 
 /**
- * frees constraint data
+ * Frees all data of a constraint
  */
 SCIP_DECL_CONSDELETE(ConshdlrArcMarker::scip_delete)
 {
@@ -200,7 +199,7 @@ SCIP_DECL_CONSTRANS(ConshdlrArcMarker::scip_trans)
 
     //create constraint data for the target constraint
     SCIP_CALL(
-        createConsData(scip, &targetdata, sourcedata->arcVar, sourcedata->type, sourcedata->node));
+        createConsData(scip, &targetdata, sourcedata->arc, sourcedata->arcVar, sourcedata->type, sourcedata->node));
 
     //create target constraint
     SCIP_CALL(
@@ -214,13 +213,14 @@ SCIP_DECL_CONSTRANS(ConshdlrArcMarker::scip_trans)
 }
 
 /**
- * domain propagation method of constraint handler
+ * Propagation callback of the constraint handler, needed to fix variables
+ * for enforcing the branching decision.
+ * TODO read about the SCIPrepropagateNode() method
  */
 SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
 {
     SCIP_CONSDATA *consdata;
-    //SCIP_VAR **vars;
-    int nVars = instance.m;
+    //int nVars = instance.m;
 
     assert(scip != NULL);
     assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
@@ -228,13 +228,13 @@ SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
 
     SCIPinfoMessage(scip, NULL, "propagation of constraint handler <" CONSHDLR_NAME ">\n");
 
-    // get vars and nvars if needed
-
     *result = SCIP_DIDNOTFIND;
 
     for (int i = 0; i < nconss; i++)
     {
         consdata = SCIPconsGetData(conss[i]);
+        /* std::cout << "number of propagated variables: " << consdata->nPropagatedVars
+                  << std::endl; */
 
         // chech if all previously generated variables are valid for this constraint
         //assert(checkConsData(instance, consdata, TRUE));
@@ -242,16 +242,18 @@ SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
         // remember of verify about the NDEBUG flag of SCIP
         if (!consdata->propagated)
         {
-            SCIPinfoMessage(scip, NULL, "propagate constraint <%s> ", SCIPconsGetName(conss[i]));
+            std::cout << "propagate constraint <" << SCIPconsGetName(conss[i]) << ">:";
             printConsData(consdata);
 
-            SCIP_CALL(fixVariables(scip, consdata, consdata->arcVar, nVars, result));
+            SCIP_CALL(fixVariables(scip, consdata, consdata->arcVar, result));
             consdata->nPropagations++;
+
+            //std::cout << "value of nVars: " << nVars << std::endl;
 
             if (*result != SCIP_CUTOFF)
             {
                 consdata->propagated = TRUE;
-                consdata->nPropagatedVars = nVars;
+                //consdata->nPropagatedVars = nVars;
             }
             else
                 break;
@@ -265,7 +267,9 @@ SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
 }
 
 /**
- * constraint activation notification method of constraint handler
+ * Constraint activation notification method of constraint handler.
+ * This method is always called when a node is entered on which the constraint
+ * has been added. Here, we apply the changes to the pricing data structures. 
  */
 SCIP_DECL_CONSACTIVE(ConshdlrArcMarker::scip_active)
 {
@@ -277,24 +281,29 @@ SCIP_DECL_CONSACTIVE(ConshdlrArcMarker::scip_active)
 
     consdata = SCIPconsGetData(cons);
     assert(consdata != NULL);
-    assert(consdata->nPropagatedVars <= instance.m);
+    //assert(consdata->nPropagatedVars <= instance.m);
 
-    SCIPinfoMessage(scip, NULL,
-                    "activate constraint <%s> at node <%" SCIP_LONGINT_FORMAT "> in depth <%d>: ",
-                    SCIPconsGetName(cons), SCIPnodeGetNumber(consdata->node),
-                    SCIPnodeGetDepth(consdata->node));
-    //SCIPinfoMessage(consdataPrint(scip, consdata, NULL));
+    std::cout << "activate constraint <" << SCIPconsGetName(cons) << "> at node <"
+              << SCIPnodeGetNumber(consdata->node) << "> in depth <"
+              << SCIPnodeGetDepth(consdata->node) << ">: ";
+    printConsData(consdata);
 
-    if (consdata->nPropagatedVars != instance.m)
-    {
-        SCIPinfoMessage(scip, NULL, "-> mark constraint to be repropagated\n");
-        consdata->propagated = FALSE;
-        SCIP_CALL(SCIPrepropagateNode(scip, consdata->node));
-    }
+    //std::cout << "number of propagated variables: " << consdata->nPropagatedVars << std::endl;
+    /*  if (consdata->nPropagatedVars != instance.m)
+    { */
+   /*  SCIPinfoMessage(scip, NULL, "-> mark constraint to be repropagated\n");
+    consdata->propagated = FALSE;
+    SCIP_CALL(SCIPrepropagateNode(scip, consdata->node)); */
+    //}
 
     return SCIP_OKAY;
 }
 
+/**
+ * The CONSDEACTIVE method will be called if the node is left again. Since the 
+ * CONSACTIVE and CONSDEACTIVE methods of different constraints are always called in a
+ * stack-like fashion, this should be exactly what you need.
+ */
 SCIP_DECL_CONSDEACTIVE(ConshdlrArcMarker::scip_deactive)
 {
     SCIP_CONSDATA *consdata;
@@ -307,13 +316,13 @@ SCIP_DECL_CONSDEACTIVE(ConshdlrArcMarker::scip_deactive)
     assert(consdata != NULL);
     assert(consdata->propagated || SCIPgetNChildren(scip) == 0);
 
-    SCIPinfoMessage(scip, NULL,
-                    "deactivate constraint <%s> at node <%" SCIP_LONGINT_FORMAT "> in depth <%d>: ",
-                    SCIPconsGetName(cons), SCIPnodeGetNumber(consdata->node),
-                    SCIPnodeGetDepth(consdata->node));
+    std::cout << "deactivate constraint <" << SCIPconsGetName(cons) << "> at node <"
+              << SCIPnodeGetNumber(consdata->node) << "> in depth <"
+              << SCIPnodeGetDepth(consdata->node) << ">: ";
+    printConsData(consdata);
 
-    // set the number of propagated varables to current number of ARC variables in SCIP
-    consdata->nPropagatedVars = instance.m;
+    ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
+    pricer_glcip->isOnSolution[consdata->arc] = TRUE;
 
     return SCIP_OKAY;
 }
@@ -348,12 +357,12 @@ SCIP_RETCODE arcmarker::createConsArcMarker(
     SCIP *scip,
     SCIP_CONS **cons,
     const char *name,
-    SCIP_VAR* arcVar,
-   // Arc& arc,
+    SCIP_VAR *arcVar,
+    ArcIt& arc,
     CONSTYPE type,
-    SCIP_NODE *node,
-    SCIP_Bool local)
+    SCIP_NODE *node)
 {
+
     //std::cout << "Entenring in createConsArcMarker()\n";
     SCIP_CONSHDLR *conshdlr;
     SCIP_CONSDATA *consdata;
@@ -367,14 +376,14 @@ SCIP_RETCODE arcmarker::createConsArcMarker(
     }
 
     // create constraint data
-    SCIP_CALL(createConsData(scip, &consdata, arcVar, type, node));
-    
+    SCIP_CALL(createConsData(scip, &consdata, arc, arcVar, type, node));
+
     //create constraint
     SCIP_CALL(
         SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, FALSE, FALSE, FALSE,
-                       TRUE, local, FALSE, FALSE, FALSE, TRUE));
+                       TRUE, TRUE, FALSE, FALSE, FALSE, TRUE));
 
-    std::cout <<"created constraint: ";
+    std::cout << "created constraint: ";
     printConsData(consdata);
 
     return SCIP_OKAY;

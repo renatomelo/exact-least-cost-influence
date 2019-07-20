@@ -15,12 +15,12 @@ private:
    DNodeSCIPVarMap &x;     /**< map of vertex variables */
    ArcConsMap &arcCons;    /**< map of arc constraints */
    DNodeConsMap &vertCons; /**< map of partitioning constraints */
-   //DNodeSCIPVarsMap&             infSetVar;
    DNodeInfSetsMap &infSet;
 
    //ArcBoolMap arcMarker;   // map to signals the decision about the arcs in the branching rule
 
 public:
+   ArcBoolMap &isOnSolution;
    /** Constructs the pricer object with the data needed */
    ObjPricerGLCIP(
        SCIP *scip,                  /**< SCIP pointer */
@@ -30,8 +30,8 @@ public:
        DNodeSCIPVarMap &p_vert_var, /**< map of arc variables */
        ArcConsMap &p_arc_con,       /**< map of arc constraints */
        DNodeConsMap &p_vert_con,    /**< map of vertex constraints */
-       //DNodeSCIPVarsMap&             p_inf_set_var
-       DNodeInfSetsMap &p_inf_set);
+       DNodeInfSetsMap &p_inf_set,
+       ArcBoolMap&      p_isOnSolution);
 
    /** Destructs the pricer object. */
    virtual ~ObjPricerGLCIP();

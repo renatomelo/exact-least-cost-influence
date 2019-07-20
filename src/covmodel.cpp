@@ -417,8 +417,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
     // include pricer
+    ArcBoolMap isOnSolution(graph);
     static const char *PRICER_NAME = "GLCIP_pricer";
-    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSet);
+    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSet, isOnSolution);
 
     SCIP_CALL(SCIPincludeObjPricer(scip, pricer, TRUE));
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));

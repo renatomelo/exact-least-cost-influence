@@ -13,16 +13,19 @@ ObjPricerGLCIP::ObjPricerGLCIP(
     ArcConsMap &p_arc_con,       /**< matrix of arc constraints */
     DNodeConsMap &p_vert_con,    /**< array of partitioning constraints */
     //DNodeSCIPVarsMap &p_inf_set
-    DNodeInfSetsMap &p_inf_set)
+    DNodeInfSetsMap &p_inf_set,
+    ArcBoolMap &p_isOnSolution)
     : ObjPricer(scip, p_name, "Finds influencing set with negative reduced cost.", 0, TRUE),
       instance(p_instance),
       z(p_arc_var),
       x(p_vert_var),
       arcCons(p_arc_con),
       vertCons(p_vert_con),
-      infSet(p_inf_set)
+      infSet(p_inf_set),
+      isOnSolution(p_isOnSolution)
 {
-   // arcMarker isOnSolution(instance.g);
+   for (ArcIt a(instance.g); a != INVALID; ++a)
+      this->isOnSolution[a] = TRUE;
 }
 
 ObjPricerGLCIP::~ObjPricerGLCIP() {}
@@ -269,9 +272,18 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    vector<DNode> neighbors(n);
    for (InArcIt a(instance.g, v); a != INVALID; ++a)
    {
-      neighbors[i] = instance.g.source(a);
-      costs[i] = dualArcValue[a];
-      wt[i++] = instance.influence[a];
+      if (isOnSolution[a])
+      {
+         neighbors[i] = instance.g.source(a);
+         costs[i] = dualArcValue[a];
+         wt[i++] = instance.influence[a];
+      }
+      else
+      {
+         std::cout << "the arc is NOT in solution\n";
+         //reduces the size of the knapsack
+         n--;
+      }
    }
 
    // fill 0th column

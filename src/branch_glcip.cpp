@@ -27,7 +27,7 @@ SCIP_RETCODE getBranchCands(
     SCIP *scip,
     GLCIPInstance &instance,
     ArcSCIPVarMap &z,
- //   Arc *arcCands,
+    ArcIt *arcCands,
     SCIP_VAR **branchCands,     //the address of branching candidates
     SCIP_Real *branchCandsFrac, //pointer to fractionalities of the candidates
     int *nCands                 //number of branching candidates
@@ -41,6 +41,7 @@ SCIP_RETCODE getBranchCands(
         if (!SCIPisFeasIntegral(scip, SCIPvarGetLPSol(z[a])))
         {
             (branchCands)[*nCands] = z[a];
+            (arcCands)[*nCands] = a;
             (branchCandsFrac)[*nCands] = MAX(1 - SCIPvarGetLPSol(z[a]), SCIPvarGetLPSol(z[a]));
             (*nCands)++;
         }
@@ -126,7 +127,7 @@ SCIP_RETCODE branchOnArcVar(
 SCIP_RETCODE branchOnArcVar2(
     SCIP *scip,
     SCIP_VAR **candidates,
-    //Arc* arcCands,
+    ArcIt *arcCands,
     SCIP_Real *branchCandsFrac,
     int nCands,
     SCIP_RESULT *result //pointer to store result of branching
@@ -162,27 +163,27 @@ SCIP_RETCODE branchOnArcVar2(
     assert(bestCand >= 0);
     assert(SCIPisFeasPositive(scip, bestFractionality));
 
-    //Arc& arc = arcCands[bestCand];
+    ArcIt arc = arcCands[bestCand];
 
     SCIPinfoMessage(scip, NULL, "-> %d candidates, selected candidate: variable <%s> (frac=%g, factor=%g)\n",
-                nCands, SCIPvarGetName(candidates[bestCand]),
-                branchCandsFrac[bestCand], SCIPvarGetBranchFactor(candidates[bestCand]));
+                    nCands, SCIPvarGetName(candidates[bestCand]),
+                    branchCandsFrac[bestCand], SCIPvarGetBranchFactor(candidates[bestCand]));
 
     // perform the branching
     // create the branch-and-bound tree child nodes of the current node
-    SCIP_CALL( SCIPcreateChild(scip, &leftChild, 0, SCIPgetLocalTransEstimate(scip)) );
-    SCIP_CALL( SCIPcreateChild(scip, &rightChild, 0, SCIPgetLocalTransEstimate(scip)) );
+    SCIP_CALL(SCIPcreateChild(scip, &leftChild, 0, SCIPgetLocalTransEstimate(scip)));
+    SCIP_CALL(SCIPcreateChild(scip, &rightChild, 0, SCIPgetLocalTransEstimate(scip)));
 
     //std::cout << "creating the constraint handlers \n";
-    // create corresponding constraints 
-    SCIP_CALL( createConsArcMarker(scip, &consWithout, "without", candidates[bestCand],
-                WITHOUT,  leftChild, TRUE) );
-    SCIP_CALL( createConsArcMarker(scip, &consWith, "with", candidates[bestCand],
-                WITH, rightChild, TRUE) );
+    // create corresponding constraints
+    SCIP_CALL(createConsArcMarker(scip, &consWithout, "without", candidates[bestCand],
+                                  arc, WITHOUT, leftChild));
+    SCIP_CALL(createConsArcMarker(scip, &consWith, "with", candidates[bestCand],
+                                  arc, WITH, rightChild));
 
     // add constraints to nodes
-    SCIP_CALL( SCIPaddConsNode(scip, leftChild, consWithout, NULL) );
-    SCIP_CALL( SCIPaddConsNode(scip, rightChild, consWith, NULL) );    
+    SCIP_CALL(SCIPaddConsNode(scip, leftChild, consWithout, NULL));
+    SCIP_CALL(SCIPaddConsNode(scip, rightChild, consWith, NULL));
 
     // release constraints
     SCIP_CALL(SCIPreleaseCons(scip, &consWithout));
@@ -207,18 +208,28 @@ SCIP_DECL_BRANCHEXECLP(ObjBranchruleGLCIP::scip_execlp)
     SCIP_VAR **candidates;        // candidates for branching
     double *fractionalitiesCands; // fractionalities of candidates
     int nCands = 0;               // length of array
+    ArcIt *arcCands;
 
+    SCIP_CALL(SCIPallocClearBufferArray(scip, &arcCands, instance.m));
     SCIP_CALL(SCIPallocClearBufferArray(scip, &candidates, instance.m));
     SCIP_CALL(SCIPallocClearBufferArray(scip, &fractionalitiesCands, instance.m));
     // get branching candidates
-    SCIP_CALL(getBranchCands(scip, instance, z, candidates, fractionalitiesCands, &nCands));
+    SCIP_CALL(getBranchCands(scip, instance, z, arcCands, candidates, fractionalitiesCands, &nCands));
     assert(nCands > 0);
     *result = SCIP_DIDNOTRUN;
 
+    /* for (int i = 0; i < nCands; i++)
+    {
+        ArcIt a = arcCands[i];
+        DNode u = instance.g.source(a);
+        cout << "source of the arc " << instance.nodeName[u] << "\n";
+    } */
+
     // perform the branching
-    SCIP_CALL(branchOnArcVar2(scip, candidates, fractionalitiesCands, nCands, result));
+    SCIP_CALL(branchOnArcVar2(scip, candidates, arcCands, fractionalitiesCands, nCands, result));
 
     // free memory
+    SCIPfreeBufferArray(scip, &arcCands);
     SCIPfreeBufferArray(scip, &candidates);
     SCIPfreeBufferArray(scip, &fractionalitiesCands);
 

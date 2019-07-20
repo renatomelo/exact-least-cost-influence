@@ -73,10 +73,9 @@ SCIP_RETCODE createConsArcMarker(
     SCIP_CONS **cons,
     const char *name,
     SCIP_VAR* arcVar,
-    //Arc& arc,
+    ArcIt& arc,
     CONSTYPE type,
-    SCIP_NODE *node,
-    SCIP_Bool local);
+    SCIP_NODE *node);
 
 } // namespace arcmarker
 #endif
