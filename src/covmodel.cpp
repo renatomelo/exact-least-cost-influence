@@ -417,7 +417,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
     // include pricer
-    ArcBoolMap isOnSolution(graph);
+    ArcIntMap isOnSolution(graph);
     static const char *PRICER_NAME = "GLCIP_pricer";
     ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSet, isOnSolution);
 
@@ -425,14 +425,14 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
 
-    ConshdlrArcMarker *arcMarker = new ConshdlrArcMarker(scip, instance, z);
+   /*  ConshdlrArcMarker *arcMarker = new ConshdlrArcMarker(scip, instance, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, arcMarker, TRUE));
 
     //include branching rule
     static const char* BRANCH_NAME = "GLCIP_branch";
     ObjBranchruleGLCIP* branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, x, z, infSet);
 
-    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE));
+    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE)); */
     //end of branching rule
 
     // include event handler pluging

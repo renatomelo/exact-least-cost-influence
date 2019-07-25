@@ -176,14 +176,15 @@ SCIP_RETCODE branchOnArcVar2(
 
     //std::cout << "creating the constraint handlers \n";
     // create corresponding constraints
-    SCIP_CALL(createConsArcMarker(scip, &consWithout, "without", candidates[bestCand],
-                                  arc, WITHOUT, leftChild));
     SCIP_CALL(createConsArcMarker(scip, &consWith, "with", candidates[bestCand],
                                   arc, WITH, rightChild));
+    SCIP_CALL(createConsArcMarker(scip, &consWithout, "without", candidates[bestCand],
+                                  arc, WITHOUT, leftChild));
 
     // add constraints to nodes
-    SCIP_CALL(SCIPaddConsNode(scip, leftChild, consWithout, NULL));
+    
     SCIP_CALL(SCIPaddConsNode(scip, rightChild, consWith, NULL));
+    SCIP_CALL(SCIPaddConsNode(scip, leftChild, consWithout, NULL));
 
     // release constraints
     SCIP_CALL(SCIPreleaseCons(scip, &consWithout));

@@ -89,7 +89,7 @@ SCIP_RETCODE checkVariable(
 
         //SCIP_PRICER* pricer = SCIPfindPricer(scip, "GLCIP_pricer");
         ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
-        pricer_glcip->isOnSolution[consdata->arc] = FALSE;
+        pricer_glcip->isOnSolution[consdata->arc] = -1;
         //SCIP_PRICERDATA* pricerdata =  SCIPpricerGetData(scip, pricer);
         //SCIPpricerSetData()
 
@@ -111,6 +111,9 @@ SCIP_RETCODE checkVariable(
     {
         SCIP_CALL(SCIPfixVar(scip, var, 1.0, &infeasible, &fixed));
         //std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 1\n";
+
+        ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
+        pricer_glcip->isOnSolution[consdata->arc] = 1;
 
         if (infeasible)
         {
@@ -168,11 +171,13 @@ SCIP_DECL_CONSDELETE(ConshdlrArcMarker::scip_delete)
 
 SCIP_DECL_CONSENFOLP(ConshdlrArcMarker::scip_enfolp)
 {
+    *result = SCIP_FEASIBLE;
     return SCIP_OKAY;
 }
 
 SCIP_DECL_CONSENFOPS(ConshdlrArcMarker::scip_enfops)
 {
+    *result = SCIP_FEASIBLE;
     return SCIP_OKAY;
 }
 
@@ -183,6 +188,7 @@ SCIP_DECL_CONSLOCK(ConshdlrArcMarker::scip_lock)
 
 SCIP_DECL_CONSCHECK(ConshdlrArcMarker::scip_check)
 {
+    *result = SCIP_FEASIBLE;
     return SCIP_OKAY;
 }
 
@@ -248,13 +254,8 @@ SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
             SCIP_CALL(fixVariables(scip, consdata, consdata->arcVar, result));
             consdata->nPropagations++;
 
-            //std::cout << "value of nVars: " << nVars << std::endl;
-
             if (*result != SCIP_CUTOFF)
-            {
                 consdata->propagated = TRUE;
-                //consdata->nPropagatedVars = nVars;
-            }
             else
                 break;
         }
@@ -322,7 +323,7 @@ SCIP_DECL_CONSDEACTIVE(ConshdlrArcMarker::scip_deactive)
     printConsData(consdata);
 
     ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
-    pricer_glcip->isOnSolution[consdata->arc] = TRUE;
+    pricer_glcip->isOnSolution[consdata->arc] = 0;
 
     return SCIP_OKAY;
 }

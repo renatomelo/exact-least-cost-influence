@@ -20,7 +20,10 @@ private:
    //ArcBoolMap arcMarker;   // map to signals the decision about the arcs in the branching rule
 
 public:
-   ArcBoolMap &isOnSolution;
+   // indicates whether a arc variable is fixed to be in soluton (+1), 
+   // to not be in solution (-1) or free (0). To be used by the branching rule
+   ArcIntMap &isOnSolution;
+
    /** Constructs the pricer object with the data needed */
    ObjPricerGLCIP(
        SCIP *scip,                  /**< SCIP pointer */
@@ -31,7 +34,7 @@ public:
        ArcConsMap &p_arc_con,       /**< map of arc constraints */
        DNodeConsMap &p_vert_con,    /**< map of vertex constraints */
        DNodeInfSetsMap &p_inf_set,
-       ArcBoolMap&      p_isOnSolution);
+       ArcIntMap&      p_isOnSolution);
 
    /** Destructs the pricer object. */
    virtual ~ObjPricerGLCIP();

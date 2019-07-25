@@ -14,7 +14,7 @@ ObjPricerGLCIP::ObjPricerGLCIP(
     DNodeConsMap &p_vert_con,    /**< array of partitioning constraints */
     //DNodeSCIPVarsMap &p_inf_set
     DNodeInfSetsMap &p_inf_set,
-    ArcBoolMap &p_isOnSolution)
+    ArcIntMap &p_isOnSolution)
     : ObjPricer(scip, p_name, "Finds influencing set with negative reduced cost.", 0, TRUE),
       instance(p_instance),
       z(p_arc_var),
@@ -25,7 +25,7 @@ ObjPricerGLCIP::ObjPricerGLCIP(
       isOnSolution(p_isOnSolution)
 {
    for (ArcIt a(instance.g); a != INVALID; ++a)
-      this->isOnSolution[a] = TRUE;
+      this->isOnSolution[a] = 0;
 }
 
 ObjPricerGLCIP::~ObjPricerGLCIP() {}
@@ -68,7 +68,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
 
    if (isFarkas)
    {
-      std::cout << "Dual farkas arc solution: " << endl;
+      std::cout << "Dual farkas arc solution at node: " << SCIPgetFocusDepth(scip) << endl;
       /* compute the dual farkas of the variable associated wiht each arc coverage constraints */
       for (ArcIt a(instance.g); a != INVALID; ++a)
       {
@@ -121,7 +121,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
       /* add influencing set variable */
       if (SCIPisNegative(scip, reduced_cost))
       {
-         //std::cout << "Negative reduced cost: " << reduced_cost << std::endl;
+         std::cout << "Negative reduced cost: " << reduced_cost << std::endl;
          //return addInfluencingSetVar(scip, v, nodes);
          retcode = addInfluencingSetVar(scip, v, nodes);
          if (retcode != SCIP_OKAY)
@@ -171,13 +171,15 @@ SCIP_DECL_PRICERREDCOST(ObjPricerGLCIP::scip_redcost)
  */
 SCIP_DECL_PRICERFARKAS(ObjPricerGLCIP::scip_farkas)
 {
-   SCIPdebugMsg(scip, "call scip_farkas ...\n");
-
    std::cout << "\n---------------------------- CALL SCIP FARKAS ----------------------------"
              << std::endl;
 
+   //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
    /* call pricing routine */
-   SCIP_CALL(pricing(scip, TRUE));
+   //SCIP_CALL(pricing(scip, TRUE));
+
+   //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed2.lp", "lp", FALSE));
+   //exit(0);
 
    return SCIP_OKAY;
 }
@@ -267,22 +269,45 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    double *wt = new double[n];
    double *costs = new double[n];
 
+   std::cout << "looking the influencing-set of node " << instance.nodeName[v]
+             << " at BnB node " << SCIPgetFocusDepth(scip) << "\n";
+
    //initialize weight of influence vector and costs vector
+   double extInf = 0;
    int i = 0;
    vector<DNode> neighbors(n);
    for (InArcIt a(instance.g, v); a != INVALID; ++a)
    {
-      if (isOnSolution[a])
+      if (isOnSolution[a] == 0)
       {
+         /*  std::cout << "arc " << SCIPvarGetName(z[a]) << " explored at node " 
+                   << SCIPgetFocusDepth(scip) << "\n"; */
          neighbors[i] = instance.g.source(a);
          costs[i] = dualArcValue[a];
          wt[i++] = instance.influence[a];
       }
+      else if (isOnSolution[a] == -1)
+      {
+         std::cout << "arc " << SCIPvarGetName(z[a]) << " marked to NOT be in solution at node "
+                   << SCIPgetFocusDepth(scip) << "\n";
+         n--; //reduces the size of the knapsack
+         if (n == 0)
+            return (GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue);
+      }
       else
       {
-         std::cout << "the arc is NOT in solution\n";
-         //reduces the size of the knapsack
+         std::cout << "arc marked to be in solution: ";
+         // add the source of the arc to the influencing set of v
+         nodes.insert(instance.g.source(a));
          n--;
+         W = W - instance.influence[a]; // decreases the knapsack capacity
+         std::cout << "knapsack's capacity changed to " << W << "\n";
+         //assert(W >= 0);
+
+         extInf += instance.influence[a];
+
+         if (W <= 0)
+            return (GLCIPBase::cheapestIncentive(instance, v, extInf) - dualVertValue + dualArcValue[a]);
       }
    }
 
