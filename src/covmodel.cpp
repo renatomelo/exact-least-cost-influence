@@ -4,6 +4,7 @@
 #include "branch_glcip.h"
 #include "event_glcip.h"
 #include "consarcmarker.h"
+#include "generalizedpropagationcons.h"
 
 using namespace arcmarker;
 
@@ -21,7 +22,7 @@ SCIP_RETCODE incentivesForAll(SCIP *scip,
         double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
 
         SCIP_VAR *var;
-        std::string name = "infSetVar" + instance.nodeName[v] + "_empty";
+        std::string name = "infSetVar_" + instance.nodeName[v] + "_empty";
         SCIP_CALL(SCIPcreateVar(scip, &var,
                                 name.c_str(),            // var name
                                 0,                       // lower bound
@@ -43,8 +44,8 @@ SCIP_RETCODE incentivesForAll(SCIP *scip,
         initial.cost = cost;
         infSet[v].push_back(initial);
 
-        /*  std::cout << "Adding variable "
-                  << "infSetVar" + instance.nodeName[v] + "empty" << std::endl; */
+        /*  std::cout << "Adding variable (trivial)"
+                  << "infSetVar_" + instance.nodeName[v] + "empty" << std::endl; */
         SCIP_CALL(SCIPreleaseVar(scip, &var));
     }
 
@@ -118,7 +119,7 @@ double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &n
     }
 
     //std::cout << "Node " + instance.nodeName[node] + " has the minimum incentive: "
-            //  << minCost << std::endl;
+    //  << minCost << std::endl;
 
     return minCost;
 }
@@ -158,6 +159,7 @@ set<DNode> greedyConstruction(GLCIPInstance &instance, DNodeInfSetsMap &infSet)
     //showActivatedNodes(instance, actives, infSet);
     return actives;
 }
+
 /**
  * Add to the model the decision variables for an initial solution obtained from 
  * the greedy heuristic construction method
@@ -166,19 +168,47 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
                                GLCIPInstance &instance,
                                ArcConsMap &arcCons,
                                DNodeConsMap &vertCons,
-                               DNodeInfSetsMap &infSet)
+                               DNodeInfSetsMap &infSet,
+                               ArcBoolMap &isAble)
 {
     set<DNode> activated = greedyConstruction(instance, infSet);
 
     //create a var for each vertex v and add it to the associated vertex constraint
-    //for (DNodeIt v(instance.g); v != INVALID; ++v)
-    for (DNode v: activated)
+    for (DNode v : activated)
     {
-        // give a representative name to the variable
         std::string name;
         if (infSet[v][0].nodes.size() > 0)
         {
             // give a significative name for the variable
+            name = "infSetVar_" + instance.nodeName[v] + "_empty";
+
+            //add a empty influencing-set var for each vertex
+            double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
+            SCIP_VAR *var;
+            SCIP_CALL(SCIPcreateVar(scip, &var,
+                                    name.c_str(),            // var name
+                                    0,                       // lower bound
+                                    SCIPinfinity(scip),      // upper bound
+                                    cost,                    // coeficient in the objective function
+                                    SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                    FALSE,                   // initial variable
+                                    FALSE,                   // removable variable
+                                    NULL, NULL, NULL, NULL, NULL));
+            // add new variable to the list of variables to price into LP
+            SCIP_CALL(SCIPaddVar(scip, var));
+
+            // add to each vertex constraint
+            SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
+
+            // data structure to save the variables and associated costs
+            InfluencingSet initial;
+            initial.var = var;
+            initial.cost = cost;
+            infSet[v].push_back(initial);
+
+            SCIP_CALL(SCIPreleaseVar(scip, &var));
+
+            // give a representative name to the variable
             std::stringstream stream;
             for (DNode u : infSet[v][0].nodes)
                 stream << instance.nodeName[u];
@@ -187,7 +217,6 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
         else
             name = "infSetVar_" + instance.nodeName[v] + "_empty";
 
-        //double cost = GLCIPBase::costInfluencingSet(instance, v, infSet[v][0].nodes);
         SCIP_VAR *var;
         SCIP_CALL(SCIPcreateVar(scip, &var,
                                 name.c_str(),            // var name
@@ -204,7 +233,7 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
         // add to each vertex constraint
         SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
 
-        // until this momem each vertex has exactly one assossiated influencing-set
+        // until this moment, each vertex has exactly one assossiated influencing-set
         // add the vars associated with each arc constraint
         for (DNode u : infSet[v][0].nodes)
         {
@@ -212,12 +241,168 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             Arc a = findArc(instance.g, u, v);
             assert(a != INVALID);
             SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+            isAble[a] = TRUE;
+            //cout << " arc is able flag changed to " << isAble[a] << endl;
         }
 
         infSet[v][0].var = var;
 
-        //std::cout << "Adding variable " << name << std::endl;
+        //std::cout << "Adding variable (heur) " << name << std::endl;
         SCIP_CALL(SCIPreleaseVar(scip, &var));
+    }
+
+    //add influencing-set var for the non-active vertices to guarantee the feasibility
+    for(DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        if(!activated.count(v))
+        {
+            std::string name;
+            name = "infSetVar_" + instance.nodeName[v] + "_empty";
+
+            double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
+
+            SCIP_VAR *var;
+            SCIP_CALL(SCIPcreateVar(scip, &var,
+                                    name.c_str(),            // var name
+                                    0,                       // lower bound
+                                    SCIPinfinity(scip),      // upper bound
+                                    cost,                    // coeficient in the objective function
+                                    SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                    FALSE,                   // initial variable
+                                    FALSE,                   // removable variable
+                                    NULL, NULL, NULL, NULL, NULL));
+            // add new variable to the list of variables to price into LP
+            SCIP_CALL(SCIPaddVar(scip, var));
+
+            // add to each vertex constraint
+            SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
+
+            // data structure to save the variables and associated costs
+            InfluencingSet initial;
+            initial.var = var;
+            initial.cost = cost;
+            infSet[v].push_back(initial);
+
+            SCIP_CALL(SCIPreleaseVar(scip, &var));
+        }
+    }
+
+    //TEST
+    // add artificial variables on arc constraints to avoid ifeasibility
+    /*  for (ArcIt a(instance.g); a != INVALID; ++a)
+    {
+        DNode u = instance.g.source(a);
+        DNode v = instance.g.target(a);
+        std::string name = "artificialarcvar_" + instance.nodeName[u] + "" + instance.nodeName[v];
+
+        SCIP_VAR *var;
+        SCIP_CALL(SCIPcreateVar(scip, &var,
+                                name.c_str(),            // var name
+                                0,                       // lower bound
+                                SCIPinfinity(scip),      // upper bound
+                                10000,                   // coeficient in the objective function
+                                SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                FALSE,                   // initial variable
+                                FALSE,                   // removable variable
+                                NULL, NULL, NULL, NULL, NULL));
+        // add new variable to the list of variables to price into LP
+        SCIP_CALL(SCIPaddVar(scip, var));
+        SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+        //std::cout << "Adding artificial variable" << name << std::endl;
+        SCIP_CALL(SCIPreleaseVar(scip, &var));
+    } */
+    //END OF TEST
+
+    // add trivial infSet for every arc not selected in the initial sol
+/*     for (ArcIt a(instance.g); a != INVALID; ++a)
+    {
+        cout << isAble[a] << endl;
+        if (!isAble[a])
+        {
+            DNode u = instance.g.source(a);
+            DNode v = instance.g.target(a);
+            std::string name = "infSet_" + instance.nodeName[u] + "," + instance.nodeName[v];
+
+            // data structure to save the variables and associated costs
+            InfluencingSet initial;
+            initial.nodes.insert(u);
+            initial.cost = GLCIPBase::costInfluencingSet(instance, v, initial.nodes);
+            ;
+            SCIP_VAR *var;
+            SCIP_CALL(SCIPcreateVar(scip, &var,
+                                    name.c_str(),            // var name
+                                    0,                       // lower bound
+                                    SCIPinfinity(scip),      // upper bound
+                                    initial.cost,            // coeficient in the objective function
+                                    SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                    FALSE,                   // initial variable
+                                    FALSE,                   // removable variable
+                                    NULL, NULL, NULL, NULL, NULL));
+            // add new variable to the list of variables to price into LP
+            SCIP_CALL(SCIPaddVar(scip, var));
+            SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+
+            initial.var = var;
+            infSet[v].push_back(initial);
+            std::cout << "Adding trivial influencing set variable" << name << std::endl;
+            SCIP_CALL(SCIPreleaseVar(scip, &var));
+        }
+        else
+        {
+            std::cout << "arc not able" << std::endl;
+        }
+    }
+ */
+    //std::cout << "Cost of this solution: " << totalCost << std::endl;
+    return SCIP_OKAY;
+}
+
+/**
+ * Add to the model the decision variables for an initial feasible solution obtained from 
+ * the greedy heuristic construction method 
+ */
+SCIP_RETCODE addInitialFeasibleSol(SCIP *scip,
+                                   GLCIPInstance &instance,
+                                   ArcConsMap &arcCons,
+                                   DNodeConsMap &vertCons,
+                                   DNodeInfSetsMap &infSet,
+                                   ArcBoolMap &isAble)
+{
+    SCIP_CALL(addHeurInitialSol(scip, instance, arcCons,vertCons, infSet, isAble));
+
+    // add trivial influencing-set variable for every arc not selected in the initial sol
+    for (ArcIt a(instance.g); a != INVALID; ++a)
+    {
+        if (!isAble[a])
+        {
+            DNode u = instance.g.source(a);
+            DNode v = instance.g.target(a);
+            std::string name = "infSet_" + instance.nodeName[u] + "," + instance.nodeName[v];
+
+            // data structure to save the variables and associated costs
+            InfluencingSet initial;
+            initial.nodes.insert(u);
+            initial.cost = GLCIPBase::costInfluencingSet(instance, v, initial.nodes);
+            
+            SCIP_VAR *var;
+            SCIP_CALL(SCIPcreateVar(scip, &var,
+                                    name.c_str(),            // var name
+                                    0,                       // lower bound
+                                    SCIPinfinity(scip),      // upper bound
+                                    initial.cost,            // coeficient in the objective function
+                                    SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                                    FALSE,                   // initial variable
+                                    FALSE,                   // removable variable
+                                    NULL, NULL, NULL, NULL, NULL));
+            // add new variable to the list of variables to price into LP
+            SCIP_CALL(SCIPaddVar(scip, var));
+            SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+
+            initial.var = var;
+            infSet[v].push_back(initial);
+            //std::cout << "Adding trivial influencing set variable" << name << std::endl;
+            SCIP_CALL(SCIPreleaseVar(scip, &var));
+        }
     }
 
     //std::cout << "Cost of this solution: " << totalCost << std::endl;
@@ -357,6 +542,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetBoolParam(scip, "visual/dispsols", TRUE));
     SCIP_CALL(SCIPsetBoolParam(scip, "visual/realtime", FALSE));
 
+    //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
+    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+
     DNodeSCIPVarMap x(graph);      // active-vertex variables
     ArcSCIPVarMap z(graph);        // arc-influence variables
     DNodeInfSetsMap infSet(graph); // influencing-set variables (used to show the solution)
@@ -393,6 +581,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     for (ArcIt a(graph); a != INVALID; ++a)
     {
         ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip));
+
         cons->addVar(z[a], 1);
         arcCons[a] = cons->cons;
         cons->commit();
@@ -401,9 +590,17 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     // start with a initial solution obtained heuristically
     //incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
+
+    //indicates whether an arc is able to be branched, that is, if source(arc)
+    //is in some non-empty influencing-set
+    ArcBoolMap isAble(graph);
+    for (ArcIt a(graph); a != INVALID; ++a)
+    {
+        isAble[a] = FALSE;
+    }
     //add initial heuristic solution
-    SCIP_CALL(addHeurInitialSol(scip, instance, arcCons, vertCons, infSet));
-    //exit(0);
+    //SCIP_CALL(addHeurInitialSol(scip, instance, arcCons, vertCons, infSet, isAble));
+    SCIP_CALL(addInitialFeasibleSol(scip, instance, arcCons, vertCons, infSet, isAble));
 
     // add linking constraints
     addLinkingConstraints(scip, instance, x, z);
@@ -419,18 +616,27 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // include pricer
     ArcIntMap isOnSolution(graph);
     static const char *PRICER_NAME = "GLCIP_pricer";
-    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip, PRICER_NAME, instance, z, x, arcCons, vertCons, infSet, isOnSolution);
+    ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip,
+                                                PRICER_NAME,
+                                                instance,
+                                                z,
+                                                x,
+                                                arcCons,
+                                                vertCons,
+                                                infSet,
+                                                isAble,
+                                                isOnSolution);
 
     SCIP_CALL(SCIPincludeObjPricer(scip, pricer, TRUE));
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
 
-   /*  ConshdlrArcMarker *arcMarker = new ConshdlrArcMarker(scip, instance, z);
+    /* ConshdlrArcMarker *arcMarker = new ConshdlrArcMarker(scip, instance, z, x);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, arcMarker, TRUE));
 
     //include branching rule
-    static const char* BRANCH_NAME = "GLCIP_branch";
-    ObjBranchruleGLCIP* branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, x, z, infSet);
+    static const char *BRANCH_NAME = "GLCIP_branch";
+    ObjBranchruleGLCIP *branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, x, z, infSet, isAble);
 
     SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE)); */
     //end of branching rule
@@ -449,6 +655,16 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                                    FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
+
+    // add generalized propagation constraints
+    /* GeneralizedPropagation gpc = new GeneralizedPropagation(scip, instance, z, x, infSet);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, &gpc, TRUE));
+
+    SCIP_CONS *cons;
+    SCIP_CALL(gpc.createGenPropagationCons(scip, &cons, "GPC"));
+    SCIP_CALL(SCIPaddCons(scip, cons));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
+    // end of GPC
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));

@@ -16,6 +16,7 @@ private:
    ArcConsMap &arcCons;    /**< map of arc constraints */
    DNodeConsMap &vertCons; /**< map of partitioning constraints */
    DNodeInfSetsMap &infSet;
+   ArcBoolMap &isAble;
 
    //ArcBoolMap arcMarker;   // map to signals the decision about the arcs in the branching rule
 
@@ -34,6 +35,7 @@ public:
        ArcConsMap &p_arc_con,       /**< map of arc constraints */
        DNodeConsMap &p_vert_con,    /**< map of vertex constraints */
        DNodeInfSetsMap &p_inf_set,
+       ArcBoolMap&      p_isAble,
        ArcIntMap&      p_isOnSolution);
 
    /** Destructs the pricer object. */

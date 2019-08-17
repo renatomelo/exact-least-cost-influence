@@ -20,13 +20,15 @@ class ConshdlrArcMarker : public ObjConshdlr
 private:
     GLCIPInstance &instance;
     ArcSCIPVarMap &z; /**< map of arc variables */
+    DNodeSCIPVarMap &x;
 
 public:
     // default constructor
     ConshdlrArcMarker(
         SCIP *scip,
         GLCIPInstance &p_instance,
-        ArcSCIPVarMap &p_z /**< map of arc variables */
+        ArcSCIPVarMap &p_z, /**< map of arc variables */
+        DNodeSCIPVarMap &p_x
         ) : ObjConshdlr(scip,
                         CONSHDLR_NAME,                         //name
                         "stores the local branching decision", //description
@@ -43,7 +45,8 @@ public:
                         SCIP_PROPTIMING_BEFORELP,              //propagation timing
                         SCIP_PRESOLTIMING_FAST),               //presolving timing
             instance(p_instance),
-            z(p_z)
+            z(p_z),
+            x(p_x)
     {
     }
 

@@ -11,6 +11,7 @@ private:
     DNodeSCIPVarMap&        x;
     ArcSCIPVarMap&          z;
     DNodeInfSetsMap&        infSet;
+    ArcBoolMap&             isAble;
 
 public:
     /** Constructs the branching rule object with the data needed */
@@ -20,7 +21,8 @@ public:
         GLCIPInstance&      p_instance,     // problem data
         DNodeSCIPVarMap&    p_x,
         ArcSCIPVarMap&      p_z,
-        DNodeInfSetsMap&    p_inf_set       // influencing set data structure 
+        DNodeInfSetsMap&    p_inf_set,       // influencing set data structure 
+        ArcBoolMap&         p_isAble
     );
 
     // Destructs the branching rule object
