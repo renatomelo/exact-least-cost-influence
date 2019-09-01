@@ -287,72 +287,6 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
         }
     }
 
-    //TEST
-    // add artificial variables on arc constraints to avoid ifeasibility
-    /*  for (ArcIt a(instance.g); a != INVALID; ++a)
-    {
-        DNode u = instance.g.source(a);
-        DNode v = instance.g.target(a);
-        std::string name = "artificialarcvar_" + instance.nodeName[u] + "" + instance.nodeName[v];
-
-        SCIP_VAR *var;
-        SCIP_CALL(SCIPcreateVar(scip, &var,
-                                name.c_str(),            // var name
-                                0,                       // lower bound
-                                SCIPinfinity(scip),      // upper bound
-                                10000,                   // coeficient in the objective function
-                                SCIP_VARTYPE_CONTINUOUS, // continuous variable
-                                FALSE,                   // initial variable
-                                FALSE,                   // removable variable
-                                NULL, NULL, NULL, NULL, NULL));
-        // add new variable to the list of variables to price into LP
-        SCIP_CALL(SCIPaddVar(scip, var));
-        SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
-        //std::cout << "Adding artificial variable" << name << std::endl;
-        SCIP_CALL(SCIPreleaseVar(scip, &var));
-    } */
-    //END OF TEST
-
-    // add trivial infSet for every arc not selected in the initial sol
-/*     for (ArcIt a(instance.g); a != INVALID; ++a)
-    {
-        cout << isAble[a] << endl;
-        if (!isAble[a])
-        {
-            DNode u = instance.g.source(a);
-            DNode v = instance.g.target(a);
-            std::string name = "infSet_" + instance.nodeName[u] + "," + instance.nodeName[v];
-
-            // data structure to save the variables and associated costs
-            InfluencingSet initial;
-            initial.nodes.insert(u);
-            initial.cost = GLCIPBase::costInfluencingSet(instance, v, initial.nodes);
-            ;
-            SCIP_VAR *var;
-            SCIP_CALL(SCIPcreateVar(scip, &var,
-                                    name.c_str(),            // var name
-                                    0,                       // lower bound
-                                    SCIPinfinity(scip),      // upper bound
-                                    initial.cost,            // coeficient in the objective function
-                                    SCIP_VARTYPE_CONTINUOUS, // continuous variable
-                                    FALSE,                   // initial variable
-                                    FALSE,                   // removable variable
-                                    NULL, NULL, NULL, NULL, NULL));
-            // add new variable to the list of variables to price into LP
-            SCIP_CALL(SCIPaddVar(scip, var));
-            SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
-
-            initial.var = var;
-            infSet[v].push_back(initial);
-            std::cout << "Adding trivial influencing set variable" << name << std::endl;
-            SCIP_CALL(SCIPreleaseVar(scip, &var));
-        }
-        else
-        {
-            std::cout << "arc not able" << std::endl;
-        }
-    }
- */
     //std::cout << "Cost of this solution: " << totalCost << std::endl;
     return SCIP_OKAY;
 }
@@ -543,7 +477,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetBoolParam(scip, "visual/realtime", FALSE));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
 
     DNodeSCIPVarMap x(graph);      // active-vertex variables
     ArcSCIPVarMap z(graph);        // arc-influence variables
@@ -647,23 +581,23 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPincludeObjEventhdlr(scip, event, TRUE)); */
 
     // add cutting planes
-    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
     SCIP_CONS *cons;
     SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts",
                                    FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
 
     // add generalized propagation constraints
-    /* GeneralizedPropagation gpc = new GeneralizedPropagation(scip, instance, z, x, infSet);
-    SCIP_CALL(SCIPincludeObjConshdlr(scip, &gpc, TRUE));
+    GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
 
     SCIP_CONS *cons;
-    SCIP_CALL(gpc.createGenPropagationCons(scip, &cons, "GPC"));
+    SCIP_CALL(gpc->createGenPropagationCons(scip, &cons, "GPC"));
     SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
+    SCIP_CALL(SCIPreleaseCons(scip, &cons));
     // end of GPC
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

@@ -69,3 +69,21 @@ void GraphViewer::ViewGLCIPFracSolution(GLCIPInstance &instance, ArcValueMap &we
     GA.SetLabel(title);
     GA.View();
 }
+
+void GraphViewer::ViewGLCIPSupportGraph(GLCIPInstance &instance, Digraph &g, string title){
+    // assign names to the nodes
+    DNodeStringMap nodeNames(g);
+    for(DNodeIt v(g); v != INVALID; ++v){
+        nodeNames[v] = "\"" + instance.nodeName[v] + "\"";
+    }
+
+    // set graph attributes for the visualizer
+    DigraphAttributes GA(g, nodeNames, instance.posx, instance.posy);
+
+    GA.SetDefaultDNodeAttrib("color = Gray shape = ellipse style = bold fontsize = 20");
+
+    // set arcs label according to weights
+
+    GA.SetLabel(title);
+    GA.View();
+}

@@ -3,15 +3,138 @@
  */
 #include "generalizedpropagationcons.h"
 
+typedef lemon::Dijkstra<Digraph, ArcValueMap> SptSolver;
+
 struct SCIP_ConsData
 {
    Digraph *graph;
 };
 
+//TODO create the suport graph and test if it is a DAG
+//peforms a DFS to verify if there is cycle in the graph suport of the feasible solution
+SCIP_Bool findTour(
+    SCIP *scip,
+    SCIP_SOL *sol,
+    GLCIPInstance &instance,
+    DNodeSCIPVarMap &x,
+    ArcSCIPVarMap &z)
+{
+   DNodeIntMap color(instance.g); //0=white, 1=gray, 2=black
+
+   //initialization
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+      color[v] = 0;
+
+   vector<DNode> stack;
+   for (DNodeIt u(instance.g); u != INVALID; ++u)
+   {
+      double value = SCIPgetVarSol(scip, x[u]);
+      //if (SCIPisIntegral(scip, value) && SCIPisEQ(scip, value, 1))
+      if ((color[u] == 0) && SCIPisEQ(scip, value, 1))
+      {
+         stack.push_back(u);
+         color[u] = 1;
+
+         while (stack.size() > 0)
+         {
+            DNode v = stack.back();
+            stack.pop_back();
+
+            for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+            {
+               if (!SCIPisEQ(scip, SCIPgetVarSol(scip, z[a]), 1))
+                  continue;
+
+               DNode w = instance.g.target(a);
+               if (SCIPisEQ(scip, SCIPgetVarSol(scip, x[w]), 1) && (color[w] == 0))
+               {
+                  stack.push_back(w);
+                  color[w] = 1;
+               }
+               else if (color[w] == 1)
+               {
+                  cout << "tour founded!" << endl;
+                  return true;
+               }
+            }
+
+            color[v] = 2;
+         }
+      }
+   }
+
+   return false;
+}
+
+/**
+ * Searches for cycles in the solution.
+ * To cut off infeasible integer solutions, we search for cycles in the support graph
+ * defined by x and z with breadth-first search.
+ */
+/* SCIP_Bool findTour(
+    SCIP *scip,
+    SCIP_SOL *sol,
+    GLCIPInstance &instance,
+    DNodeSCIPVarMap &x,
+    ArcSCIPVarMap &z)
+{
+   // create the suporte graph
+   Digraph suportGraph;
+
+   //show the original graph
+
+   ArcValueMap weight(instance.g);
+
+   for (ArcIt a(instance.g); a != INVALID; ++a)
+   {
+      weight[a] = SCIPgetSolVal(scip, sol, x[instance.g.source(a)]) - SCIPgetSolVal(scip, sol, z[a]);
+      // double value = SCIPgetVarSol(scip, z[a]);
+      // if(SCIPisEQ(scip, value, 1.0))
+      // {
+      //    weight[a] = value;
+      // }
+      // else
+      // {
+      //    weight[a] = 0;
+      // }
+      
+   }
+   // CHANGE
+   // for each node u in the graph, we will run dijkstra to get the shortest path from u to its neighbors
+   for (DNodeIt u(instance.g); u != INVALID; ++u)
+   {
+      if (!SCIPisNegative(scip, SCIPgetSolVal(scip, sol, x[u]) - 1))
+      {
+         // run dijkstra starting from u
+         SptSolver spt(instance.g, weight);
+         spt.run(u);
+
+         // for each neighbor of u, we check if it violates the cycle inequality
+         for (InArcIt a(instance.g, u); a != INVALID; ++a)
+         {
+            DNode v = instance.g.source(a);
+
+            // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
+            //if (spt.reached(v) && spt.dist(v) + weight[a] < SCIPgetSolVal(scip, sol, x[u]))
+            if (spt.reached(v))
+            {
+               cout << instance.nodeName[v] << " reached by " << instance.nodeName[u] << endl;;
+               GraphViewer::ViewGLCIPFracSolution(instance, weight, "Suport Graph");
+               exit(0);
+               cout << "tour founded!" << endl;
+               return true;
+            }
+         }
+      }
+   }
+
+   return false;
+} */
+
 /** 
  * separates generalized propagation constraints
  */
-SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
+/* SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
     SCIP *scip,
     SCIP_CONSHDLR *conshdlr,  //the constraint handler itself
     SCIP_CONS **conss,        //array of constraint to process
@@ -20,40 +143,119 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
     SCIP_SOL *sol,            //primal solution that should be separated
     SCIP_RESULT *result,      //pointer to store the result of the separation call
     set<DNode> generalizedSet // set of vertices to be separated
-)
+) */
+SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
+    SCIP *scip,
+    SCIP_CONSHDLR *conshdlr, //the constraint handler itself
+    SCIP_SOL *sol,
+    SCIP_RESULT *result,
+    set<DNode> generalizedSet)
 {
-   *result = SCIP_DIDNOTFIND;
-
+   cout << "ADDING CONSTRAINT" << endl;
    // add a constraint for each vertex k in the generilized set (k \in X)
    for (DNode k : generalizedSet)
    {
       SCIP_ROW *row;
 
-      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0, SCIPinfinity, FALSE, FALSE, TRUE));
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
       SCIP_CALL(SCIPcacheRowExtensions(scip, row));
+
       SCIPaddVarToRow(scip, row, x[k], -1.0);
       for (DNode v : generalizedSet)
       {
-         for (int i = 0; i < infSet[v].size(); i++)
+         for (unsigned int i = 0; i < infSet[v].size(); i++)
          {
             set<DNode> intersection;
             set_intersection(generalizedSet.begin(), generalizedSet.end(),
                              infSet[v][i].nodes.begin(), infSet[v][i].nodes.end(),
                              std::inserter(intersection, intersection.begin()));
 
+            /* cout << "set_intersection: ";
+            for(DNode l : intersection)
+            {
+               cout << instance.nodeName[l] << " ";
+            }
+            cout << endl; */
             if (intersection.size() == 0)
                SCIPaddVarToRow(scip, row, infSet[v][i].var, 1.0);
          }
       }
       SCIP_CALL(SCIPflushRowExtensions(scip, row));
-      SCIP_Bool infeasible;
-      SCIP_CALL(SCIPaddCut(scip, sol, row, TRUE, &infeasible));
+
+      // add cut
+      if (SCIPisCutEfficacious(scip, sol, row))
+      {
+         SCIP_Bool infeasible;
+         SCIP_CALL(SCIPaddRow(scip, row, FALSE, &infeasible));
+         if (infeasible)
+            *result = SCIP_CUTOFF;
+      }
+      SCIP_CALL(SCIPreleaseRow(scip, &row));
    }
 
-   if (infeasible)
-      *result = SCIP_CUTOFF;
-   else
-      *result = SCIP_SEPARATED;
+   return SCIP_OKAY;
+}
+
+SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
+    SCIP *scip,
+    SCIP_CONSHDLR *conshdlr, //the constraint handler itself
+                             //    SCIP_CONS **conss,        //array of constraint to process
+                             //    int nConss,               //number of constraints to process
+                             //    int nUsefulConss,         //number of useful (non-obsolete) constraints to process
+    SCIP_SOL *sol,           //primal solution that should be separated
+    SCIP_RESULT *result      //pointer to store the result of the separation call
+                             //    set<DNode> generalizedSet // set of vertices to be separated
+)
+{
+   cout << "SEPARATION()" << endl;
+
+   assert(result != NULL);
+   *result = SCIP_DIDNOTFIND;
+
+   ArcValueMap weight(instance.g);
+
+   // construct edges weights according to w[(i, j)] = x_i - z_{i,j}
+   for (ArcIt a(instance.g); a != INVALID; ++a)
+   {
+      weight[a] = SCIPgetSolVal(scip, sol, x[instance.g.source(a)]) - SCIPgetSolVal(scip, sol, z[a]);
+   }
+
+   for (DNodeIt u(instance.g); u != INVALID; ++u)
+   {
+      if (!SCIPisNegative(scip, SCIPgetSolVal(scip, sol, x[u]) - 1))
+      {
+         cout << "ENTERED IN FIRST IF CONDITION" << endl;
+         SptSolver spt(instance.g, weight);
+         spt.run(u);
+
+         for (InArcIt a(instance.g, u); a != INVALID; ++a)
+         {
+            DNode v = instance.g.source(a);
+
+            //TO VERIFY THIS CONDITION
+            // in order to violate cycle inequalities we need that L_{u, v} + w_{v, u} < x_u
+            if (spt.reached(v) && (spt.dist(v) + weight[a] < SCIPgetSolVal(scip, sol, x[u])))
+            {
+               cout << "ENTERED IN SECOND IF CONDITION" << endl;
+               *result = SCIP_SEPARATED;
+
+               set<DNode> tour;
+               for (DNode w = v; w != u; w = spt.predNode(w))
+               {
+                  tour.insert(w);
+                  cout << instance.nodeName[w] << ", ";
+               }
+               tour.insert(u);
+               cout << instance.nodeName[u] << endl;
+
+               addGeneralizedPropCons(scip, conshdlr, sol, result, tour);
+
+               if (*result == SCIP_CUTOFF)
+                  return SCIP_OKAY;
+            }
+         }
+      }
+   }
 
    return SCIP_OKAY;
 }
@@ -73,16 +275,16 @@ SCIP_DECL_CONSDELETE(GeneralizedPropagation::scip_delete)
 /** transforms constraint data into data belonging to the transformed problem */
 SCIP_DECL_CONSTRANS(GeneralizedPropagation::scip_trans)
 {
-   SCIP_CONSDATA *sourcedata;
+   //SCIP_CONSDATA *sourcedata;
    SCIP_CONSDATA *targetdata;
 
-   sourcedata = SCIPconsGetData(sourcecons);
-   assert(sourcedata != NULL);
+   /* sourcedata = SCIPconsGetData(sourcecons);
+   assert(sourcedata != NULL); */
    targetdata = NULL;
 
    SCIP_CALL(SCIPallocBlockMemory(scip, &targetdata));
-   targetdata->graph = sourcedata->graph;
-   capture_graph(targetdata->graph);
+   /* targetdata->graph = sourcedata->graph;
+   capture_graph(targetdata->graph); */
 
    /* create target constraint */
    SCIP_CALL(SCIPcreateCons(scip, targetcons, SCIPconsGetName(sourcecons), conshdlr, targetdata,
@@ -116,8 +318,10 @@ SCIP_DECL_CONSTRANS(GeneralizedPropagation::scip_trans)
  */
 SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
 {
+   cout << "CONSSEPALP()" << endl;
    //implement the fischetti's model for separation
-   SCIP_CALL(exactSeparation(scip, conshdlr, conss, nconss, nusefulconss, NULL, result));
+   //SCIP_CALL(exactSeparation(scip, conshdlr, conss, nconss, nusefulconss, NULL, result));
+   SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
 
    return SCIP_OKAY;
 }
@@ -132,8 +336,11 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
  */
 SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 {
+   
+   cout << "CONSSEPASOL()" << endl;
    // put here some separation method for an primal solution
-   SCIP_CALL(heuristicSeparation(scip, conshdlr, conss, nconss, nusefulconss, sol, result));
+   //SCIP_CALL(heuristicSeparation(scip, conshdlr, conss, nconss, nusefulconss, sol, result));
+   SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
 
    return SCIP_OKAY;
 }
@@ -171,23 +378,33 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
 {
    *result = SCIP_FEASIBLE;
+   cout << "CONSELFOLP" << endl;
 
-   for (int i = 0; i < nconss; ++i)
+   //cout << "Construct the suport graph" << endl;
+   Digraph new_graph;
+
+   Digraph::NodeMap<DNode> nodeReference(instance.g);
+   Digraph::ArcMap<Arc> arcReference(new_graph);
+   digraphCopy(instance.g, new_graph).nodeRef(nodeReference).arcCrossRef(arcReference).run();
+
+   for (ArcIt a(new_graph); a != INVALID; ++a)
    {
-      SCIP_CONSDATA *consdata;
-      Digraph *graph;
-      SCIP_Bool found;
-      consdata = SCIPconsGetData(conss[i]);
-      assert(consdata != NULL);
-      graph = consdata->graph;
-      assert(graph != NULL);
+      if (SCIPgetVarSol(scip, z[a]) < 0.5)
+      {
+         new_graph.erase(a);
+      }
+   }
 
-      //implemente some funtion here in this sense
-      found = findTour(scip, graph, NULL);
+   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph");
 
-      // if a tour was found, we generate a cut constraint saying that there must be at least two outgoing edges
-      if (found)
-         *result = SCIP_INFEASIBLE;
+   //implemente some funtion here in this sense
+   //found = findTour(scip, NULL, instance, x, z);
+
+   // if a tour was found, we generate a cut constraint saying that there must be at least two outgoing edges
+   if (!dag(new_graph))
+   {
+      *result = SCIP_INFEASIBLE;
+      //cout << "isn't acyclic\n";
    }
 
    return SCIP_OKAY;
@@ -225,24 +442,43 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
  */
 SCIP_DECL_CONSENFOPS(GeneralizedPropagation::scip_enfops)
 {
+   cout << "CONSELFOPS" << endl;
    *result = SCIP_FEASIBLE;
+
+   //cout << "Construct the suport graph" << endl;
+   Digraph new_graph;
+
+   Digraph::NodeMap<DNode> nodeReference(instance.g);
+   Digraph::ArcMap<Arc> arcReference(new_graph);
+   digraphCopy(instance.g, new_graph).nodeRef(nodeReference).arcCrossRef(arcReference).run();
+
+   for (ArcIt a(new_graph); a != INVALID; ++a)
+   {
+      if (SCIPgetVarSol(scip, z[a]) < 0.5)
+      {
+         new_graph.erase(a);
+      }
+   }
+
+   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph");
 
    for (int i = 0; i < nconss; ++i)
    {
-      SCIP_CONSDATA *consdata;
+      /* SCIP_CONSDATA *consdata;
       Digraph *graph;
       SCIP_Bool found;
 
       consdata = SCIPconsGetData(conss[i]);
       assert(consdata != NULL);
       graph = consdata->graph;
-      assert(graph != NULL);
+      assert(graph != NULL); */
 
       // if a tour is found, the solution must be infeasible
-      found = findTour(scip, graph, NULL);
-      if (found)
+      //found = findTour(scip, NULL);
+      if (!dag(new_graph))
          *result = SCIP_INFEASIBLE;
    }
+
 
    return SCIP_OKAY;
 }
@@ -272,7 +508,24 @@ SCIP_DECL_CONSCHECK(GeneralizedPropagation::scip_check)
 {
    *result = SCIP_FEASIBLE;
 
-   for (int i = 0; i < nconss; ++i)
+   cout << "CONSCHECK()\n";
+   //cout << "Construct the suport graph" << endl;
+   Digraph new_graph;
+
+   Digraph::NodeMap<DNode> nodeReference(instance.g);
+   Digraph::ArcMap<Arc> arcReference(new_graph);
+   digraphCopy(instance.g, new_graph).nodeRef(nodeReference).arcCrossRef(arcReference).run();
+
+   for (ArcIt a(new_graph); a != INVALID; ++a)
+   {
+      if (SCIPgetSolVal(scip, sol, z[a]) < 0.5)
+      {
+         new_graph.erase(a);
+      }
+   }
+
+   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph");
+   /* for (int i = 0; i < nconss; ++i)
    {
       SCIP_CONSDATA *consdata;
       Digraph *graph;
@@ -294,7 +547,9 @@ SCIP_DECL_CONSCHECK(GeneralizedPropagation::scip_check)
             SCIPinfoMessage(scip, NULL, "violation: graph has a subtour\n");
          }
       }
-   }
+   } */
+   if (!dag(new_graph))
+      *result = SCIP_INFEASIBLE;
 
    return SCIP_OKAY;
 }
@@ -348,48 +603,48 @@ SCIP_DECL_CONSDELVARS(GeneralizedPropagation::scip_delvars)
 }
 
 /** clone method which will be used to copy a objective plugin */
-SCIP_DECL_CONSHDLRCLONE(ObjProbCloneable *GeneralizedPropagation::clone)
+/* SCIP_DECL_CONSHDLRCLONE(ObjProbCloneable *GeneralizedPropagation::clone)
 {
    *valid = true;
-   return new GeneralizedPropagation(scip);
-}
+   return new GeneralizedPropagation(scip, );
+} */
 
 /** constraint copying method of constraint handler
  *
  *  The constraint handler can provide a copy method, which copies a constraint from one SCIP data structure into a other
  *  SCIP data structure.
  */
-SCIP_DECL_CONSCOPY(GeneralizedPropagation::scip_copy)
-{
-   SCIP_CONSHDLR *conshdlr;
-   SCIP_CONSDATA *consdata;
+// SCIP_DECL_CONSCOPY(GeneralizedPropagation::scip_copy)
+// {
+//    SCIP_CONSHDLR *conshdlr;
+//    SCIP_CONSDATA *consdata;
 
-   /* find the subtour constraint handler */
-   conshdlr = SCIPfindConshdlr(scip, "GPC");
-   if (conshdlr == NULL)
-   {
-      SCIPerrorMessage("CPC constraint handler not found\n");
-      return SCIP_PLUGINNOTFOUND;
-   }
+//    // find the subtour constraint handler */
+//    conshdlr = SCIPfindConshdlr(scip, "GPC");
+//    if (conshdlr == NULL)
+//    {
+//       SCIPerrorMessage("CPC constraint handler not found\n");
+//       return SCIP_PLUGINNOTFOUND;
+//    }
 
-   /* create constraint data */
-   consdata = NULL;
-   SCIP_CALL(SCIPallocBlockMemory(scip, &consdata));
+//    /* create constraint data */
+//    consdata = NULL;
+//    SCIP_CALL(SCIPallocBlockMemory(scip, &consdata));
 
-   Digraph *graph = instance.g;
-   consdata->graph = graph;
-   capture_graph(consdata->graph);
+//    /* Digraph *graph = instance.g;
+//    consdata->graph = graph;
+//    capture_graph(consdata->graph); */
 
-   /* create constraint */
-   SCIP_CALL(SCIPcreateCons(scip, cons, (name == NULL) ? SCIPconsGetName(sourcecons) : name,
-                            conshdlr, consdata, initial, separate, enforce, check,
-                            propagate, local, modifiable, dynamic, removable, FALSE));
+//    /* create constraint */
+//    SCIP_CALL(SCIPcreateCons(scip, cons, (name == NULL) ? SCIPconsGetName(sourcecons) : name,
+//                             conshdlr, consdata, initial, separate, enforce, check,
+//                             propagate, local, modifiable, dynamic, removable, FALSE));
 
-   *valid = true;
-   return SCIP_OKAY;
-}
+//    *valid = true;
+//    return SCIP_OKAY;
+// }
 
-SCIP_RETCODE createGenPropagationCons(
+SCIP_RETCODE GeneralizedPropagation::createGenPropagationCons(
     SCIP *scip,
     SCIP_CONS **cons,
     const char *name)
