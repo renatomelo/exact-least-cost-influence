@@ -157,6 +157,11 @@ SCIP_DECL_PRICERREDCOST(ObjPricerGLCIP::scip_redcost)
    /* set result pointer, see above */
    *result = SCIP_SUCCESS;
 
+   /* if (SCIPgetDepth(scip) != 0)
+   {
+      return SCIP_OKAY;
+   } */
+
    /* call pricing routine */
    SCIP_CALL(pricing(scip, FALSE));
 
@@ -238,7 +243,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
 
    //std::cout << "Adding var: " << SCIPvarGetName(var) << std::endl;
 
-   SCIP_CALL(SCIPreleaseVar(scip, &var));   
+   SCIP_CALL(SCIPreleaseVar(scip, &var));
    return SCIP_OKAY;
 }
 

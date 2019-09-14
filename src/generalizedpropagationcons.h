@@ -56,7 +56,7 @@ public:
     virtual SCIP_DECL_CONSDELVARS(scip_delvars);
     //virtual SCIP_DECL_CONSPRINT(scip_print);
 
-   /*  virtual SCIP_DECL_CONSHDLRISCLONEABLE(iscloneable)
+    /*  virtual SCIP_DECL_CONSHDLRISCLONEABLE(iscloneable)
     {
         return true;
     } */
@@ -67,12 +67,15 @@ public:
     SCIP_RETCODE sepaGeneralizedPropCons(
         SCIP *scip,
         SCIP_CONSHDLR *conshdlr, //the constraint handler itself
-        //SCIP_CONS **conss,        //array of constraint to process
-        //int nConss,               //number of constraints to process
-        //int nUsefulConss,         //number of useful (non-obsolete) constraints to process
-        SCIP_SOL *sol,            //primal solution that should be separated
+        SCIP_SOL *sol,      //primal solution that should be separated
+        SCIP_RESULT *result //pointer to store the result of the separation call
+                            //        set<DNode> generalizedSet // set of vertices to be separated
+    );
+    SCIP_RETCODE exactSeparation(
+        SCIP *scip,
+        SCIP_CONSHDLR *conshdlr, //the constraint handler itself
+        SCIP_SOL *sol,           //primal solution that should be separated
         SCIP_RESULT *result      //pointer to store the result of the separation call
-//        set<DNode> generalizedSet // set of vertices to be separated
     );
 
     SCIP_RETCODE createGenPropagationCons(

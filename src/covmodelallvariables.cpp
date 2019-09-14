@@ -1,4 +1,5 @@
 #include "GLCIPBase.h"
+#include "generalizedpropagationcons.h"
 
 /**
  * Constructs the solution of the GLCIP
@@ -225,13 +226,23 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
     // add cutting planes
     //ArcModel::addCuttingPlanes(scip, instance, x, z);
-    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
     SCIP_CONS *cons;
     SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
+
+    // add generalized propagation constraints
+    GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
+
+    SCIP_CONS *cons;
+    SCIP_CALL(gpc->createGenPropagationCons(scip, &cons, "GPC"));
+    SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
+    // end of GPC
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));
