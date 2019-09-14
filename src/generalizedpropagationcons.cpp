@@ -252,7 +252,6 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                   return SCIP_OKAY;
             }
          }
-
          //remove the vertex to avoid add repeated cycles
          //g.erase(u);
       }
@@ -352,13 +351,13 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    //create constraint to force a minimum size of two for set X
    //or size (1 - alpha) * n if the lifting is applied.
    //double lb = 2 + (floor((1 - instance.alpha) * instance.n) - 2) * liftingRHS;
-   ScipCons *cons= new ScipCons(new_scip, 2.0, SCIPinfinity(new_scip));
+   ScipCons *cons1= new ScipCons(new_scip, 2.0, SCIPinfinity(new_scip));
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
-      cons->addVar(belongsToX[v], 1.0);
+      cons1->addVar(belongsToX[v], 1.0);
    }
-   cons->addVar(liftingRHS, floor((1 - instance.alpha) * instance.n) - 2);
-   cons->commit();
+   cons1->addVar(liftingRHS, floor((1 - instance.alpha) * instance.n) - 2);
+   cons1->commit();
 
    //constraint to decide for the node or the lifting on the right-hand side
    ScipCons *cons2 = new ScipCons(new_scip, 1.0, 1.0);
@@ -381,11 +380,19 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    //minimal influencing sets are set to one
    for(DNodeIt v(instance.g); v != INVALID; ++v)
    {
-   //go through all the influencing-sets of v
+      ScipCons *cons = new ScipCons(new_scip, 0.0, SCIPinfinity(new_scip));
+      
+      cons->addVar(belongsToX[v], -1.0);
+      //go through all the influencing-sets of v
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
-
+         for(DNode u : validInfSet[v][i].nodes)
+         {
+            cons->addVar(belongsToX[u], 1.0);
+         }
+         cons->addVar(validInfSet[v][i].var, 1.0);
       }
+      cons->commit();
    }
 
    return SCIP_OKAY;
