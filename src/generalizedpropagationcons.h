@@ -88,7 +88,9 @@ public:
         SCIP_CONSHDLR *conshdlr, //the constraint handler itself
         SCIP_SOL *sol,
         SCIP_RESULT *result,
-        set<DNode> generalizedSet);
+        set<DNode> generalizedSet,
+        DNode k,
+        SCIP_Bool lifting);
 };
 
 #endif

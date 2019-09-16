@@ -125,36 +125,24 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
     SCIP_CONSHDLR *conshdlr, //the constraint handler itself
     SCIP_SOL *sol,
     SCIP_RESULT *result,
-    set<DNode> generalizedSet)
+    set<DNode> generalizedSet,
+    DNode k,
+    SCIP_Bool lifting)
 {
    cout << "ADDING CONSTRAINT" << endl;
-
-   //choose the maximum x[k]
-   double max_k = -1;
-   int idOfNodek = -1;
-   for (DNode v : generalizedSet)
-   {
-      //cout << "value of x_v: " << SCIPgetSolVal(scip, sol, x[v]) << endl;
-      if (SCIPgetSolVal(scip, sol, x[v]) > max_k)
-      {
-         idOfNodek = instance.g.id(v);
-         max_k = SCIPgetSolVal(scip, sol, x[v]);
-         if (SCIPisEQ(scip, max_k, 1))
-         {
-            break;
-         }
-      }
-   }
-   assert(idOfNodek != -1);
-   DNode k = instance.g.nodeFromId(idOfNodek);
 
    // add a constraint for each vertex k in the generilized set (k \in X)
    SCIP_ROW *row;
 
-   SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+   if (lifting)
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", -1.0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+   else
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+
    SCIP_CALL(SCIPcacheRowExtensions(scip, row));
 
-   SCIPaddVarToRow(scip, row, x[k], -1.0);
+   if (!lifting)
+      SCIPaddVarToRow(scip, row, x[k], -1.0);
    for (DNode v : generalizedSet)
    {
       for (unsigned int i = 0; i < infSet[v].size(); i++)
@@ -246,7 +234,26 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                //tour.insert(instance.g.nodeFromId(g.id(u)));
                cout << instance.nodeName[u] << endl;
 
-               addGeneralizedPropCons(scip, conshdlr, sol, result, tour);
+               //choose the maximum x[k]
+               double max_k = -1;
+               int idOfNodek = -1;
+               for (DNode i : tour)
+               {
+                  //cout << "value of x_v: " << SCIPgetSolVal(scip, sol, x[v]) << endl;
+                  if (SCIPgetSolVal(scip, sol, x[i]) > max_k)
+                  {
+                     idOfNodek = instance.g.id(i);
+                     max_k = SCIPgetSolVal(scip, sol, x[i]);
+                     if (SCIPisEQ(scip, max_k, 1))
+                     {
+                        break;
+                     }
+                  }
+               }
+               assert(idOfNodek != -1);
+               DNode k = instance.g.nodeFromId(idOfNodek);
+
+               addGeneralizedPropCons(scip, conshdlr, sol, result, tour, k, FALSE);
 
                if (*result == SCIP_CUTOFF)
                   return SCIP_OKAY;
@@ -287,7 +294,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    DNodeInfSetsMap validInfSet(instance.g); //equal to one iff node i \in X and U has no
                                             // intersection with X
    //decides whether the lifting to one on the right-hand side is applied or not
-   ScipVar *var_lifting = new ScipBinVar(scip, "lifting_rhs", -1);
+   ScipVar *var_lifting = new ScipBinVar(new_scip, "lifting_rhs", -1);
    SCIP_VAR *liftingRHS = var_lifting->var;
 
    //create "belong to X" variables
@@ -297,7 +304,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       belongsToX[v] = var->var;
 
       //fix the variable in zero in order to consider only variables which x[v] > 0
-      if (SCIPisEQ(new_scip, SCIPgetSolVal(new_scip, sol, x[v]), 0.0))
+      if (SCIPisEQ(new_scip, SCIPgetSolVal(scip, sol, x[v]), 0.0))
       {
          SCIPfixVar(new_scip, belongsToX[v], 0.0, NULL, NULL);
       }
@@ -324,7 +331,9 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
          //give a significative name
          std::stringstream stream;
          for (DNode u : infSet[v][i].nodes)
+         {
             stream << instance.nodeName[u];
+         }
          string name;
          if (infSet[v][i].nodes.empty())
             name = "u_" + instance.nodeName[v] + "_empty";
@@ -335,14 +344,18 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
          InfluencingSet ini;
          ini.cost = value;
-         ini.nodes = infSet[v][i].nodes;
+         //ini.nodes = infSet[v][i].nodes;
+         for (DNode u : infSet[v][i].nodes)
+         {
+            ini.nodes.insert(u);
+         }
          ini.var = var->var;
 
          //fix the variable in zero if the value of infSet is zero
-         if (SCIPisEQ(new_scip, value, 0.0))
+         /* if (SCIPisEQ(new_scip, value, 0.0))
          {
             SCIPfixVar(new_scip, ini.var, 0.0, NULL, NULL);
-         }
+         } */
 
          validInfSet[v].push_back(ini);
       }
@@ -351,7 +364,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    //create constraint to force a minimum size of two for set X
    //or size (1 - alpha) * n if the lifting is applied.
    //double lb = 2 + (floor((1 - instance.alpha) * instance.n) - 2) * liftingRHS;
-   ScipCons *cons1= new ScipCons(new_scip, 2.0, SCIPinfinity(new_scip));
+   ScipCons *cons1 = new ScipCons(new_scip, 2.0, SCIPinfinity(new_scip));
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       cons1->addVar(belongsToX[v], 1.0);
@@ -368,7 +381,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    cons2->addVar(liftingRHS, 1.0);
    cons2->commit();
 
-   for(DNodeIt v(instance.g); v != INVALID; ++v)
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       ScipCons *cons = new ScipCons(new_scip, -SCIPinfinity(new_scip), 0.0);
       cons->addVar(isOnRHS[v], 1.0);
@@ -376,17 +389,17 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       cons->commit();
    }
 
-   //constraint to ensure that all variables corresponding to relevant 
+   //constraint to ensure that all variables corresponding to relevant
    //minimal influencing sets are set to one
-   for(DNodeIt v(instance.g); v != INVALID; ++v)
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       ScipCons *cons = new ScipCons(new_scip, 0.0, SCIPinfinity(new_scip));
-      
+
       cons->addVar(belongsToX[v], -1.0);
       //go through all the influencing-sets of v
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
-         for(DNode u : validInfSet[v][i].nodes)
+         for (DNode u : validInfSet[v][i].nodes)
          {
             cons->addVar(belongsToX[u], 1.0);
          }
@@ -394,6 +407,55 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       }
       cons->commit();
    }
+
+   SCIP_CALL(SCIPsolve(new_scip));
+
+   //get the vertices that belgong to X
+   SCIP_SOL *localSol = SCIPgetBestSol(new_scip);
+
+   set<DNode> generalizedSet;
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      double value = SCIPgetSolVal(new_scip, localSol, belongsToX[v]);
+      if (value > 0.5)
+      {
+         //std::cout << SCIPvarGetName(belongsToX[v]) << " = " << value << std::endl;
+         generalizedSet.insert(v);
+      }
+   }
+
+   cout << "lifting the RHS = " << SCIPgetSolVal(new_scip, localSol, liftingRHS) << "\n";
+
+   //get the value of the valid influensing-set variables
+   /* for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      for (unsigned int i = 0; i < validInfSet[v].size(); i++)
+      {
+         double value = SCIPgetSolVal(new_scip, localSol, validInfSet[v][i].var);
+         cout << SCIPvarGetName(validInfSet[v][i].var) << " = " << value << endl;
+      }
+   } */
+
+   *result = SCIP_SEPARATED;
+   // in case the lifting isn't done find the vertex to be in the RHS
+   if (SCIPgetSolVal(new_scip, localSol, liftingRHS) < 0.5)
+   {
+      for (DNodeIt v(instance.g); v != INVALID; ++v)
+      {
+         if (SCIPgetSolVal(new_scip, localSol, isOnRHS[v]) > .5)
+         {
+            cout << instance.nodeName[v] << " is on the RHS\n";
+            addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, v, FALSE);
+         }
+      }
+   }
+   else
+   {
+      addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, instance.g.nodeFromId(0), TRUE);
+   }
+
+   //cout << "ILP for separation solved\n";
+   //exit(0);
 
    return SCIP_OKAY;
 }
@@ -458,8 +520,8 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
 {
    cout << "CONSSEPALP()" << endl;
    //implement the fischetti's model for separation
-   //SCIP_CALL(exactSeparation(scip, conshdlr, conss, nconss, nusefulconss, NULL, result));
-   SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
+   SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+   //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
 
    return SCIP_OKAY;
 }
@@ -477,7 +539,8 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 
    cout << "CONSSEPASOL()" << endl;
    // heuristic separation method for an primal solution
-   SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
+   //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
+   SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
 
    return SCIP_OKAY;
 }

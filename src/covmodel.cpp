@@ -408,6 +408,7 @@ bool CovModel::isFeasible(GLCIPInstance &instance, GLCIPSolution &solution)
 
     return false;
 }
+
 /**
  * Constructs the solution of the GLCIP
  */
