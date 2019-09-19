@@ -107,7 +107,6 @@ double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &n
             {
                 //std::cout << "Cost of " + instance.nodeName[v]
                 //          << " is smaller than " << minCost << std::endl;
-
                 minCost = cost;
                 node = v;
 

@@ -13,9 +13,10 @@ private:
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
     DNodeInfSetsMap &infSet;
+    int nGeneratedCons = 0;
 
 public:
-    GeneralizedPropagation(
+    /* GeneralizedPropagation(
         SCIP *scip,
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
@@ -38,6 +39,20 @@ public:
                                      instance(p_instance),
                                      x(p_x),
                                      z(p_z),
+                                     infSet(p_infSet) */
+    GeneralizedPropagation(
+        SCIP *scip,
+        GLCIPInstance &p_instance,
+        DNodeSCIPVarMap &p_x,
+        ArcSCIPVarMap &p_z,
+        DNodeInfSetsMap &p_infSet) : ObjConshdlr(scip,
+                                                 "GPC",
+                                                 "GLCIP generalized propagation constraints",
+                                                 -1, -1, -1, 1, -1, 1, 0,
+                                                 FALSE, FALSE, TRUE, SCIP_PROPTIMING_BEFORELP, SCIP_PRESOLTIMING_FAST),
+                                     instance(p_instance),
+                                     x(p_x),
+                                     z(p_z),
                                      infSet(p_infSet)
     {
     }
@@ -54,7 +69,7 @@ public:
     virtual SCIP_DECL_CONSPROP(scip_prop);
     virtual SCIP_DECL_CONSLOCK(scip_lock);
     virtual SCIP_DECL_CONSDELVARS(scip_delvars);
-    //virtual SCIP_DECL_CONSPRINT(scip_print);
+    virtual SCIP_DECL_CONSPRINT(scip_print);
 
     /*  virtual SCIP_DECL_CONSHDLRISCLONEABLE(iscloneable)
     {
@@ -67,9 +82,9 @@ public:
     SCIP_RETCODE sepaGeneralizedPropCons(
         SCIP *scip,
         SCIP_CONSHDLR *conshdlr, //the constraint handler itself
-        SCIP_SOL *sol,      //primal solution that should be separated
-        SCIP_RESULT *result //pointer to store the result of the separation call
-                            //        set<DNode> generalizedSet // set of vertices to be separated
+        SCIP_SOL *sol,           //primal solution that should be separated
+        SCIP_RESULT *result      //pointer to store the result of the separation call
+                                 //        set<DNode> generalizedSet // set of vertices to be separated
     );
     SCIP_RETCODE exactSeparation(
         SCIP *scip,

@@ -105,7 +105,7 @@ void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        ScipCons *cons = new ScipCons(scip, 0, 0);
+        ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
 
         // summation of all influencing-set varialbes related to a vertex v
         for (unsigned int i = 0; i < infSet[v].size(); i++)
@@ -127,7 +127,7 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
 {
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
-        ScipCons *cons = new ScipCons(scip, 0, 0);
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0);
         DNode u = instance.g.source(a);
         DNode v = instance.g.target(a);
 
@@ -159,11 +159,12 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
     SCIP_CALL(SCIPincludeDefaultPlugins(scip));
     SCIP_CALL(SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE));
+    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
 
     // create empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP_with_all_variables", 0, 0, 0, 0, 0, 0, 0));
     SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
-   
+
     // to show the branch and bound tree
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
     SCIP_CALL(SCIPsetBoolParam(scip, "visual/dispsols", TRUE));
@@ -203,7 +204,19 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
             double cost = costInfluencingSet(instance, v, infSet[v][i].nodes);
-            ScipVar *var = new ScipContVar(scip, "infSet_" + instance.nodeName[v] + "" + to_string(i), 0, SCIPinfinity(scip), cost);
+
+            string name;
+            if (infSet[v][i].nodes.empty())
+                name = "infSetVar_" + instance.nodeName[v] + "_empty";
+            else
+            {
+                std::stringstream stream;
+                for (DNode u : infSet[v][i].nodes)
+                    stream << instance.nodeName[u];
+                name = "infSetVar_" + instance.nodeName[v] + "_" + stream.str();
+            }
+
+            ScipVar *var = new ScipContVar(scip, name, 0, SCIPinfinity(scip), cost);
             infSet[v][i].var = var->var;
             infSet[v][i].cost = cost;
         }

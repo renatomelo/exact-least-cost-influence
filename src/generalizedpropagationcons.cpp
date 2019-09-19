@@ -8,6 +8,7 @@ typedef lemon::Dijkstra<Digraph, ArcValueMap> SptSolver;
 struct SCIP_ConsData
 {
    Digraph *graph;
+   SCIP_ROW *row;
 };
 
 //TODO create the suport graph and test if it is a DAG
@@ -135,7 +136,7 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    SCIP_ROW *row;
 
    if (lifting)
-      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", -1.0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 1.0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
    else
       SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
 
@@ -143,6 +144,18 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
 
    if (!lifting)
       SCIPaddVarToRow(scip, row, x[k], -1.0);
+
+   /* cout << "elements in X\n";
+   for (DNode v : generalizedSet)
+   {
+      cout << instance.nodeName[v] << " ";
+   }
+   cout << endl; */
+
+   SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
+
+   //cout << "the row before add the elements\n";
+   //SCIPprintRow(scip, row, NULL);
    for (DNode v : generalizedSet)
    {
       for (unsigned int i = 0; i < infSet[v].size(); i++)
@@ -152,21 +165,32 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
                           infSet[v][i].nodes.begin(), infSet[v][i].nodes.end(),
                           std::inserter(intersection, intersection.begin()));
 
-         if (intersection.size() == 0)
+         if (intersection.empty())
+         {
+            cout << "adding var: " << SCIPvarGetName(infSet[v][i].var) << endl;
             SCIPaddVarToRow(scip, row, infSet[v][i].var, 1.0);
+         }
       }
    }
+
    SCIP_CALL(SCIPflushRowExtensions(scip, row));
 
    // add cut
-   if (SCIPisCutEfficacious(scip, sol, row))
+   //if (SCIPisCutEfficacious(scip, sol, row))
    {
       SCIP_Bool infeasible;
       SCIP_CALL(SCIPaddRow(scip, row, FALSE, &infeasible));
+      nGeneratedCons++;
+      cout << "number of generated constraints: " << nGeneratedCons << endl;
+      /* SCIP_CONSDATA* consdata;
+      consdata = SCIPconsGetData(cons); */
+
+      SCIPprintRow(scip, row, NULL);
+
       if (infeasible)
          *result = SCIP_CUTOFF;
    }
-   SCIP_CALL(SCIPreleaseRow(scip, &row));
+   //SCIP_CALL(SCIPreleaseRow(scip, &row));
 
    return SCIP_OKAY;
 }
@@ -519,8 +543,16 @@ SCIP_DECL_CONSTRANS(GeneralizedPropagation::scip_trans)
 SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
 {
    cout << "CONSSEPALP()" << endl;
-   //implement the fischetti's model for separation
-   SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+
+   for (int i = 0; i < nconss; i++)
+   {
+      //implement the fischetti's model for separation
+      SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+
+      SCIPprintCons(scip, conss[i], NULL);
+      cout << "--------END OF SEPARATION---------\n";
+   }
+
    //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
 
    return SCIP_OKAY;
@@ -536,7 +568,6 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
  */
 SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 {
-
    cout << "CONSSEPASOL()" << endl;
    // heuristic separation method for an primal solution
    //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
@@ -600,7 +631,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
    if (!dag(new_graph))
    {
       *result = SCIP_INFEASIBLE;
-      //cout << "isn't acyclic\n";
+      cout << "isn't acyclic\n";
    }
 
    return SCIP_OKAY;
@@ -763,6 +794,17 @@ SCIP_DECL_CONSDELVARS(GeneralizedPropagation::scip_delvars)
    return SCIP_OKAY;
 }
 
+SCIP_DECL_CONSPRINT(GeneralizedPropagation::scip_print)
+{
+   /* SCIP_CONSDATA* consdata;
+   consdata = SCIPconsGetData(cons); */
+   //SCIPprintCons(scip, cons, file);
+
+   cout << "TODO\n";
+   //exit(0);
+   return SCIP_OKAY;
+}
+
 /** clone method which will be used to copy a objective plugin */
 /* SCIP_DECL_CONSHDLRCLONE(ObjProbCloneable *GeneralizedPropagation::clone)
 {
@@ -781,7 +823,7 @@ SCIP_RETCODE GeneralizedPropagation::createGenPropagationCons(
     const char *name)
 {
    SCIP_CONSHDLR *conshdlr;
-   SCIP_CONSDATA *consdata;
+   SCIP_CONSDATA *consdata = NULL;
 
    // find the generalized propagation constraint handler
    conshdlr = SCIPfindConshdlr(scip, "GPC");
