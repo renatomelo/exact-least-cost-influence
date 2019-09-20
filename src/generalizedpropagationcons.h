@@ -13,7 +13,7 @@ private:
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
     DNodeInfSetsMap &infSet;
-    int nGeneratedCons = 0;
+    unsigned long int nGeneratedCons = 0;
 
 public:
     /* GeneralizedPropagation(

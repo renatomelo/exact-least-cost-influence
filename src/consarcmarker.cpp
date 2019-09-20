@@ -281,14 +281,14 @@ SCIP_DECL_CONSPROP(ConshdlrArcMarker::scip_prop)
  */
 SCIP_DECL_CONSACTIVE(ConshdlrArcMarker::scip_active)
 {
-    SCIP_CONSDATA *consdata;
+   /*  SCIP_CONSDATA *consdata;
 
     assert(scip != NULL);
     assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
     assert(cons != NULL);
 
     consdata = SCIPconsGetData(cons);
-    assert(consdata != NULL);
+    assert(consdata != NULL); */
     //assert(consdata->nPropagatedVars <= instance.m);
 
     /* std::cout << "activate constraint <" << SCIPconsGetName(cons) << "> at node <"

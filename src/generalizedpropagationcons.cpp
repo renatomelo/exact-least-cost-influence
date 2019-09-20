@@ -136,9 +136,9 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    SCIP_ROW *row;
 
    if (lifting)
-      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 1.0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 1.0, SCIPinfinity(scip), FALSE, FALSE, FALSE));
    else
-      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0, SCIPinfinity(scip), FALSE, FALSE, FALSE));
 
    SCIP_CALL(SCIPcacheRowExtensions(scip, row));
 
@@ -152,7 +152,7 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    }
    cout << endl; */
 
-   SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
+   //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
 
    //cout << "the row before add the elements\n";
    //SCIPprintRow(scip, row, NULL);
@@ -167,7 +167,7 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
 
          if (intersection.empty())
          {
-            cout << "adding var: " << SCIPvarGetName(infSet[v][i].var) << endl;
+            //cout << "adding var: " << SCIPvarGetName(infSet[v][i].var) << endl;
             SCIPaddVarToRow(scip, row, infSet[v][i].var, 1.0);
          }
       }
@@ -176,16 +176,16 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    SCIP_CALL(SCIPflushRowExtensions(scip, row));
 
    // add cut
-   //if (SCIPisCutEfficacious(scip, sol, row))
+   if (SCIPisCutEfficacious(scip, sol, row))
    {
       SCIP_Bool infeasible;
       SCIP_CALL(SCIPaddRow(scip, row, FALSE, &infeasible));
       nGeneratedCons++;
-      cout << "number of generated constraints: " << nGeneratedCons << endl;
+      cout << "number of added constraints: " << nGeneratedCons << endl;
       /* SCIP_CONSDATA* consdata;
       consdata = SCIPconsGetData(cons); */
 
-      SCIPprintRow(scip, row, NULL);
+      //SCIPprintRow(scip, row, NULL);
 
       if (infeasible)
          *result = SCIP_CUTOFF;
@@ -307,10 +307,11 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
    SCIP_CALL(SCIPincludeDefaultPlugins(new_scip));
    SCIP_CALL(SCIPsetSeparating(new_scip, SCIP_PARAMSETTING_OFF, TRUE));
+   SCIPsetPresolving(new_scip, SCIP_PARAMSETTING_OFF, TRUE);
 
    // create empty problem
    SCIP_CALL(SCIPcreateProb(new_scip, "GPC_separation", 0, 0, 0, 0, 0, 0, 0));
-   SCIP_CALL(SCIPsetIntParam(new_scip, "display/verblevel", 3));
+   SCIP_CALL(SCIPsetIntParam(new_scip, "display/verblevel", 1));
 
    // declaring variables
    DNodeSCIPVarMap belongsToX(instance.g);  //indicates membership of nodes to set X
@@ -387,7 +388,6 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
    //create constraint to force a minimum size of two for set X
    //or size (1 - alpha) * n if the lifting is applied.
-   //double lb = 2 + (floor((1 - instance.alpha) * instance.n) - 2) * liftingRHS;
    ScipCons *cons1 = new ScipCons(new_scip, 2.0, SCIPinfinity(new_scip));
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
@@ -443,7 +443,6 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       double value = SCIPgetSolVal(new_scip, localSol, belongsToX[v]);
       if (value > 0.5)
       {
-         //std::cout << SCIPvarGetName(belongsToX[v]) << " = " << value << std::endl;
          generalizedSet.insert(v);
       }
    }
@@ -475,11 +474,15 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    }
    else
    {
-      addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, instance.g.nodeFromId(0), TRUE);
+      addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, INVALID, TRUE);
    }
 
-   //cout << "ILP for separation solved\n";
-   //exit(0);
+   // node has become infeasible
+   if (*result == SCIP_CUTOFF)
+   {
+      cout << "node has become infeasible\n";
+      return SCIP_OKAY;
+   }
 
    return SCIP_OKAY;
 }
@@ -547,14 +550,32 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
    for (int i = 0; i < nconss; i++)
    {
       //implement the fischetti's model for separation
-      SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+      //SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+      SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
 
-      SCIPprintCons(scip, conss[i], NULL);
-      cout << "--------END OF SEPARATION---------\n";
+      //SCIPprintCons(scip, conss[i], NULL);
+   }
+
+   /* get data */
+   SCIP_ROW **rows;
+   int nrows;
+   
+   SCIP_CALL(SCIPgetLPRowsData(scip, &rows, &nrows));
+   assert(nrows > 0);
+   assert(rows != NULL);
+   cout << "number of rows after add a cut: " << nrows << endl;
+
+   string name = "GPC_separation";
+   for (int i = 0; i < nrows; i++)
+   {
+      if (SCIProwGetName(rows[i]) == name)
+      {
+         SCIPprintRow(scip, rows[i], NULL);
+      }
    }
 
    //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
-
+   cout << "--------END OF SEPARATION---------\n";
    return SCIP_OKAY;
 }
 
@@ -570,8 +591,8 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 {
    cout << "CONSSEPASOL()" << endl;
    // heuristic separation method for an primal solution
-   //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
-   SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+   SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
+   //SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
 
    return SCIP_OKAY;
 }
@@ -796,12 +817,24 @@ SCIP_DECL_CONSDELVARS(GeneralizedPropagation::scip_delvars)
 
 SCIP_DECL_CONSPRINT(GeneralizedPropagation::scip_print)
 {
-   /* SCIP_CONSDATA* consdata;
-   consdata = SCIPconsGetData(cons); */
-   //SCIPprintCons(scip, cons, file);
+   /* SCIP_ROW **rows;
+   int nrows;
 
-   cout << "TODO\n";
-   //exit(0);
+   // get data
+   SCIP_CALL(SCIPgetLPRowsData(scip, &rows, &nrows));
+   assert(nrows > 0);
+   assert(rows != NULL);
+   cout << "number of rows after add a cut: " << nrows << endl;
+
+   string name = "GPC_separation";
+   for (int i = 0; i < nrows; i++)
+   {
+      if (SCIProwGetName(rows[i]) == name)
+      {
+         SCIPprintRow(scip, rows[i], file);         
+      }
+   } */
+
    return SCIP_OKAY;
 }
 
