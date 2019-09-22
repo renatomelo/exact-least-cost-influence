@@ -67,38 +67,6 @@ SCIP_Bool findTour(
    return false;
 }
 
-set<DNode> greedSetExtensionHeur(
-    SCIP *scip,
-    SCIP_SOL *sol,
-    GLCIPInstance &instance,
-    DNodeSCIPVarMap &x,
-    ArcSCIPVarMap &z,
-    DNodeInfSetsMap &infSet)
-{
-   set<DNode> generalizedSet;
-
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      double infSetValue = 0;
-      //get the empty influensin-set var
-      for (unsigned int i = 0; i < infSet[v].size(); i++)
-      {
-         if (infSet[v][i].nodes.empty())
-         {
-            infSetValue = SCIPgetSolVal(scip, sol, infSet[v][i].var);
-            break;
-         }
-      }
-
-      // x[v] > 0
-      if (SCIPgetSolVal(scip, sol, x[v]) > SCIPepsilon(scip) && (infSetValue < SCIPgetSolVal(scip, sol, x[v])))
-      {
-      }
-   }
-
-   return generalizedSet;
-}
-
 /**
  * Create a copy of a given graph
  */
@@ -195,15 +163,124 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    return SCIP_OKAY;
 }
 
+SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
+    SCIP *scip,
+    SCIP_CONSHDLR *conshdlr, //the constraint handler itself
+    SCIP_SOL *sol,           //primal solution that should be separated
+    SCIP_RESULT *result      //pointer to store the result of the separation call
+)
+{
+   set<DNode> generalizedSet;
+   int count = 0;
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      DNode k = INVALID;
+      for (unsigned int i = 0; i < infSet[v].size(); i++)
+      {
+         //get the empty influensin-set var
+         if (infSet[v][i].nodes.empty())
+         {
+            double value = SCIPgetSolVal(scip, sol, infSet[v][i].var);
+            // x[v] > 0
+            if (SCIPgetSolVal(scip, sol, x[v]) > SCIPepsilon(scip) && (value < SCIPgetSolVal(scip, sol, x[v])))
+            {
+               //add v to X
+               generalizedSet.insert(v);
+               k = v;
+               cout << "k is the vertex: " << instance.nodeName[k] << endl;
+               break;
+            }
+         }
+      }
+      cout << "count " << count++ << endl;
+
+      //build a candidate list
+      set<DNode> candidates;
+      for (DNodeIt u(instance.g); u != INVALID; ++u)
+      {
+         if (generalizedSet.count(u) == 0)
+         {
+            //add to the candidate list every vertex that has arc to a element of X
+            for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+            {
+               DNode w = instance.g.target(a);
+               if (generalizedSet.count(w) != 0)
+               {
+                  candidates.insert(u);
+                  cout << "vertex " << instance.nodeName[u] << " added to the candidate list\n";
+                  break;
+               }
+            }
+         }
+      }
+      //find node with the least contribution to LHS of GPC
+      double min = SCIPinfinity(scip);
+      DNode l = INVALID;
+      for (DNode j : candidates)
+      {
+         double sum = 0;
+         for (unsigned int i = 0; i < infSet[j].size(); i++)
+         {
+            set<DNode> intersection;
+            set_intersection(generalizedSet.begin(), generalizedSet.end(),
+                             infSet[j][i].nodes.begin(), infSet[j][i].nodes.end(),
+                             std::inserter(intersection, intersection.begin()));
+
+            if (intersection.empty())
+            {
+               sum += SCIPgetSolVal(scip, sol, infSet[j][i].var);
+            }
+         }
+
+         if (sum < min)
+         {
+            min = sum;
+            l = j;
+         }
+      }
+
+      //add to X the candidate node which leads to the smallest LHS of GPC
+      if (l != INVALID)
+      {
+         cout << "adding node " << instance.nodeName[l] << " to X\n";
+         generalizedSet.insert(l);
+      }
+      else
+         continue;
+
+      //check whether GPC for set X and node k is violated, in which case we add it to the model
+      double sum = 0;
+      for (DNode j : generalizedSet)
+      {
+         for (unsigned int i = 0; i < infSet[j].size(); i++)
+         {
+            set<DNode> intersection;
+            set_intersection(generalizedSet.begin(), generalizedSet.end(),
+                             infSet[j][i].nodes.begin(), infSet[j][i].nodes.end(),
+                             std::inserter(intersection, intersection.begin()));
+
+            if (intersection.empty())
+            {
+               sum += SCIPgetSolVal(scip, sol, infSet[j][i].var);
+            }
+         }
+      }
+      if (SCIPisLT(scip, sum, SCIPgetSolVal(scip, sol, x[k])))
+      {
+         cout << "adding violated inequality\n";
+         addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, k, FALSE);
+      }
+   }
+
+   return SCIP_OKAY;
+   ;
+}
+
 SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
     SCIP *scip,
     SCIP_CONSHDLR *conshdlr, //the constraint handler itself
-                             //    SCIP_CONS **conss,        //array of constraint to process
-                             //    int nConss,               //number of constraints to process
-                             //    int nUsefulConss,         //number of useful (non-obsolete) constraints to process
     SCIP_SOL *sol,           //primal solution that should be separated
     SCIP_RESULT *result      //pointer to store the result of the separation call
-                             //    set<DNode> generalizedSet // set of vertices to be separated
 )
 {
    cout << "HEURISITC SEPARATION()" << endl;
@@ -551,7 +628,8 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
    {
       //implement the fischetti's model for separation
       //SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
-      SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
+      //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
+      SCIP_CALL(greedSetExtensionHeur(scip, conshdlr, NULL, result));
 
       //SCIPprintCons(scip, conss[i], NULL);
    }
@@ -559,7 +637,7 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
    /* get data */
    SCIP_ROW **rows;
    int nrows;
-   
+
    SCIP_CALL(SCIPgetLPRowsData(scip, &rows, &nrows));
    assert(nrows > 0);
    assert(rows != NULL);
@@ -591,8 +669,9 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 {
    cout << "CONSSEPASOL()" << endl;
    // heuristic separation method for an primal solution
-   SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
+   //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
    //SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+   SCIP_CALL(greedSetExtensionHeur(scip, conshdlr, NULL, result));
 
    return SCIP_OKAY;
 }
