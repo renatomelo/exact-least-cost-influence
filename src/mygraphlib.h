@@ -117,6 +117,7 @@ typedef Digraph::ArcMap<int> ArcIntMap;
 typedef Digraph::ArcMap<string> ArcStringMap;
 typedef Digraph::ArcMap<int> ArcColorMap;
 typedef Digraph::ArcMap<bool> ArcBoolMap;
+typedef Digraph::ArcMap<Arc> ArcArcMap;
 
 typedef Digraph::Node DNode;
 typedef Digraph::NodeIt DNodeIt;

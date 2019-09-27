@@ -105,7 +105,8 @@ void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
+        //ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
+        ScipCons *cons = new ScipCons(scip, 0, 0);
 
         // summation of all influencing-set varialbes related to a vertex v
         for (unsigned int i = 0; i < infSet[v].size(); i++)
@@ -127,7 +128,8 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
 {
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
-        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0);
+        //ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0);
+        ScipCons *cons = new ScipCons(scip, 0, 0);
         DNode u = instance.g.source(a);
         DNode v = instance.g.target(a);
 
@@ -185,7 +187,7 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     {
         DNode u = graph.source(a);
         DNode v = graph.target(a);
-        ScipVar *var = new ScipBinVar(scip, "z_" + instance.nodeName[u] + "" + instance.nodeName[v], 0);
+        ScipVar *var = new ScipBinVar(scip, "z_" + instance.nodeName[u] + "," + instance.nodeName[v], 0);
         z[a] = var->var;
     }
 
@@ -212,12 +214,13 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
             {
                 std::stringstream stream;
                 for (DNode u : infSet[v][i].nodes)
-                    stream << instance.nodeName[u];
-                name = "infSetVar_" + instance.nodeName[v] + "_" + stream.str();
+                    stream << instance.nodeName[u] << ",";
+                name = "infSetVar_" + instance.nodeName[v] + "_{" + stream.str() + "}";
             }
 
             ScipVar *var = new ScipContVar(scip, name, 0, SCIPinfinity(scip), cost);
             infSet[v][i].var = var->var;
+            //infSet[v][i].cost = max(0.001, cost);
             infSet[v][i].cost = cost;
         }
     }

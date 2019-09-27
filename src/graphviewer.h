@@ -16,7 +16,11 @@ class GraphViewer
     public:
         static void ViewGLCIPSolution(GLCIPInstance &instance, GLCIPSolution &solution, string title);
         static void ViewGLCIPFracSolution(GLCIPInstance &instance, ArcValueMap &weight, string title);
-        static void ViewGLCIPSupportGraph(GLCIPInstance &instance, Digraph &g, string title);
+        static void ViewGLCIPSupportGraph(
+            GLCIPInstance &instance, 
+            Digraph &g, 
+            string title, 
+            DNodeDNodeMap &nodeRef);
 };
 
 #endif // GRAPHVIEWER_H

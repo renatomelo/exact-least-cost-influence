@@ -22,7 +22,7 @@ void GraphViewer::ViewGLCIPSolution(GLCIPInstance &instance, GLCIPSolution &solu
 
     // color nodes according to the solution
     for(DNodeIt v(instance.g); v != INVALID; ++v){
-        if(solution.incentives[v] > 0)
+        if(solution.incentives[v] >= 0.5)
             GA.SetColor(v, GraphViewer::colors[1]);
         else
             GA.SetColor(v, GraphViewer::colors[0]);
@@ -70,15 +70,22 @@ void GraphViewer::ViewGLCIPFracSolution(GLCIPInstance &instance, ArcValueMap &we
     GA.View();
 }
 
-void GraphViewer::ViewGLCIPSupportGraph(GLCIPInstance &instance, Digraph &g, string title){
+void GraphViewer::ViewGLCIPSupportGraph(GLCIPInstance &instance, Digraph &g, string title, DNodeDNodeMap &nodeRef){
     // assign names to the nodes
     DNodeStringMap nodeNames(g);
     for(DNodeIt v(g); v != INVALID; ++v){
-        nodeNames[v] = "\"" + instance.nodeName[v] + "\"";
+        nodeNames[v] = "\"" + instance.nodeName[nodeRef[v]] + "\"";
+    }
+    
+    DNodePosMap posx(g);
+    DNodePosMap posy(g);
+    for(DNodeIt v(g); v != INVALID; ++v){
+        posx[v] = instance.posx[nodeRef[v]];
+        posy[v] = instance.posy[nodeRef[v]];
     }
 
     // set graph attributes for the visualizer
-    DigraphAttributes GA(g, nodeNames, instance.posx, instance.posy);
+    DigraphAttributes GA(g, nodeNames, posx, posy);
 
     GA.SetDefaultDNodeAttrib("color = Gray shape = ellipse style = bold fontsize = 20");
 
