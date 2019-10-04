@@ -48,7 +48,7 @@ public:
         DNodeInfSetsMap &p_infSet) : ObjConshdlr(scip,
                                                  "GPC",
                                                  "GLCIP generalized propagation constraints",
-                                                 -1, -1, -1, 1, -1, 1, 0,
+                                                 -1, 1, -1, 1, -1, 1, 0,
                                                  FALSE, FALSE, TRUE, SCIP_PROPTIMING_BEFORELP, SCIP_PRESOLTIMING_FAST),
                                      instance(p_instance),
                                      x(p_x),
