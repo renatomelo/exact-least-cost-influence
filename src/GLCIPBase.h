@@ -95,7 +95,7 @@ class CovModelAllVariables: public GLCIPBase
 public:
     CovModelAllVariables();
     ~CovModelAllVariables();
-    static vector<InfluencingSet> powerSet(vector<DNode> neighbors);
+    static vector<InfluencingSet> powerSet(GLCIPInstance &instance, vector<DNode> neighbors, DNode &v);
     static double costInfluencingSet(GLCIPInstance &instance, DNode v, set<DNode> nodes);
     static void addPropagationConstraints(SCIP *scip,
                                           GLCIPInstance &instance, 

@@ -44,7 +44,7 @@
     }
 } */
 
-vector<InfluencingSet> CovModelAllVariables::powerSet(vector<DNode> neighbors)
+vector<InfluencingSet> CovModelAllVariables::powerSet(GLCIPInstance &instance, vector<DNode> neighbors, DNode &v)
 {
     unsigned int pSize = pow(2, neighbors.size());
 
@@ -62,7 +62,37 @@ vector<InfluencingSet> CovModelAllVariables::powerSet(vector<DNode> neighbors)
                 subset.nodes.insert(neighbors[j]);
             }
         }
-        pSet.push_back(subset);
+        //add to the list only if is minimal
+        double minCost = costInfluencingSet(instance, v, subset.nodes);
+        //cout << "minCost = " << minCost << endl;
+        int sum = 0;
+        for (DNode u : subset.nodes)
+        {
+            Arc a = findArc(instance.g, u, v);
+            assert(a != INVALID);
+
+            sum += instance.influence[a];
+        }
+        double slack = (sum + minCost) - instance.threshold[v];
+        //cout << "slack = " << slack << endl;
+
+        bool isMinimal = TRUE;
+        for (DNode u : subset.nodes)
+        {
+            Arc a = findArc(instance.g, u, v);
+            assert(a != INVALID);
+
+            // cout << "influence weight from (" << instance.nodeName[u] << ") = "
+            //     << instance.influence[a] << endl; 
+            
+            if (instance.influence[a] < slack)
+            {
+                isMinimal = FALSE;
+            }
+        }
+
+        if (isMinimal) pSet.push_back(subset);
+        //else  cout << "influencing set NOT minimal\n";
     }
     return pSet;
 }
@@ -78,6 +108,7 @@ double CovModelAllVariables::costInfluencingSet(GLCIPInstance &instance, DNode v
     for (DNode u : nodes)
     {
         Arc a = findArc(instance.g, u, v);
+        assert(a != INVALID);
         //std::cout << instance.nodeName[u] + " ";
         exertedInfluence += instance.influence[a];
     }
@@ -106,7 +137,8 @@ void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
         //ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
-        ScipCons *cons = new ScipCons(scip, 0, 0);
+        ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
+        //ScipCons *cons = new ScipCons(scip, 0, 0);
 
         // summation of all influencing-set varialbes related to a vertex v
         for (unsigned int i = 0; i < infSet[v].size(); i++)
@@ -128,8 +160,8 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
 {
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
-        //ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0);
-        ScipCons *cons = new ScipCons(scip, 0, 0);
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0);
+        //ScipCons *cons = new ScipCons(scip, 0, 0);
         DNode u = instance.g.source(a);
         DNode v = instance.g.target(a);
 
@@ -150,7 +182,6 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
 
 bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
-    Digraph &graph = instance.g;
     SCIP *scip = NULL;
 
     // initialize SCIP enviroment
@@ -171,37 +202,37 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
     SCIP_CALL(SCIPsetBoolParam(scip, "visual/dispsols", TRUE));
 
-    DNodeSCIPVarMap x(graph); // active-vertex variables
-    ArcSCIPVarMap z(graph);   // arc-influence variables
+    DNodeSCIPVarMap x(instance.g); // active-vertex variables
+    ArcSCIPVarMap z(instance.g);   // arc-influence variables
     //DNodeSCIPVarsMap infSet(graph); // influencing-set variables
 
     // create variables x
-    for (DNodeIt v(graph); v != INVALID; ++v)
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
         ScipVar *var = new ScipBinVar(scip, "x_" + instance.nodeName[v], 0);
         x[v] = var->var;
     }
 
     // create variables z
-    for (ArcIt a(graph); a != INVALID; ++a)
+    for (ArcIt a(instance.g); a != INVALID; ++a)
     {
-        DNode u = graph.source(a);
-        DNode v = graph.target(a);
+        DNode u = instance.g.source(a);
+        DNode v = instance.g.target(a);
         ScipVar *var = new ScipBinVar(scip, "z_" + instance.nodeName[u] + "," + instance.nodeName[v], 0);
         z[a] = var->var;
     }
 
     // create influencing-set variables
-    DNodeInfSetsMap infSet(graph);
-    for (DNodeIt v(graph); v != INVALID; ++v)
+    DNodeInfSetsMap infSet(instance.g);
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
         vector<DNode> neighbors;
 
-        for (InArcIt a(graph, v); a != INVALID; ++a)
+        for (InArcIt a(instance.g, v); a != INVALID; ++a)
         {
-            neighbors.push_back(graph.source(a));
+            neighbors.push_back(instance.g.source(a));
         }
-        infSet[v] = powerSet(neighbors);
+        infSet[v] = powerSet(instance, neighbors, v);
 
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
@@ -209,13 +240,13 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
             string name;
             if (infSet[v][i].nodes.empty())
-                name = "infSetVar_" + instance.nodeName[v] + "_empty";
+                name = "Lambda_" + instance.nodeName[v] + "_empty";
             else
             {
                 std::stringstream stream;
                 for (DNode u : infSet[v][i].nodes)
                     stream << instance.nodeName[u] << ",";
-                name = "infSetVar_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+                name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
             }
 
             ScipVar *var = new ScipContVar(scip, name, 0, SCIPinfinity(scip), cost);
@@ -240,16 +271,6 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     // add all cycles of size up to 4
     addSmallCycleConstraints(scip, instance, x, z);
 
-    // add cutting planes
-    //ArcModel::addCuttingPlanes(scip, instance, x, z);
-    /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
-    SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
-
-    SCIP_CONS *cons;
-    SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
-    SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
-
     // add generalized propagation constraints
     GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
@@ -259,6 +280,18 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
     // end of GPC
+
+    // add cutting planes
+    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
+
+    SCIP_CONS *cons1;
+    SCIP_CALL(cuts.createCycleCuts(scip, &cons1, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
+    SCIP_CALL(SCIPaddCons(scip, cons1));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons1));
+    //end of cutting planes
+
+    SCIP_CALL(SCIPwriteOrigProblem(scip, "glcip_original.lp", "lp", FALSE));
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));

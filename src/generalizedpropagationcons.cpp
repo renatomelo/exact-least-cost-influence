@@ -2,6 +2,7 @@
  * @brief  Generalized propagation constraint handler for GLCIP problems
  */
 #include "generalizedpropagationcons.h"
+#include <stack>
 
 typedef lemon::Dijkstra<Digraph, ArcValueMap> SptSolver;
 
@@ -11,7 +12,6 @@ struct SCIP_ConsData
    SCIP_ROW *row;
 };
 
-//TODO create the suport graph and test if it is a DAG
 //peforms a DFS to verify if there is cycle in the graph suport of the feasible solution
 SCIP_Bool findDirectedCycle(
     SCIP *scip,
@@ -20,61 +20,56 @@ SCIP_Bool findDirectedCycle(
     DNodeSCIPVarMap &x,
     ArcSCIPVarMap &z)
 {
-   DNodeIntMap color(instance.g); //0=white, 1=gray, 2=black
+   DNodeBoolMap visited(instance.g);
+   DNodeBoolMap onStack(instance.g);
 
    //initialization
    for (DNodeIt v(instance.g); v != INVALID; ++v)
-      color[v] = 0;
+   {
+      visited[v] = FALSE;
+      onStack[v] = FALSE;
+   }
 
-   vector<DNode> stack;
+   stack<DNode> s;
    for (DNodeIt u(instance.g); u != INVALID; ++u)
    {
-      double value = SCIPgetSolVal(scip, sol, x[u]);
-      //if (SCIPisIntegral(scip, value) && SCIPisEQ(scip, value, 1))
-      if ((color[u] == 0) && SCIPisGT(scip, value, 0))
+      if (visited[u])
+         continue;
+
+      s.push(u);
+      while (!s.empty())
       {
-         stack.push_back(u);
+         DNode v = s.top();
 
-         while (stack.size() > 0)
+         if (!visited[v])
          {
-            DNode v = stack.back();
-            stack.pop_back();
-            color[v] = 1;
+            visited[v] = TRUE;
+            onStack[v] = TRUE;
+         }
+         else
+         {
+            onStack[v] = FALSE;
+            s.pop();
+         }
 
-            for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+         for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+         {
+            if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, z[a]), 0.0))
+               continue;
+
+            DNode w = instance.g.target(a);
+            if (!visited[w])
             {
-               if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, z[a]), 0))
-                  continue;
-
-               DNode w = instance.g.target(a);
-               if (SCIPisGT(scip, SCIPgetSolVal(scip, sol, x[w]), 0) && (color[w] == 0))
-               {
-                  stack.push_back(w);
-               }
-               else if (color[w] == 1)
-               {
-                  cout << "tour founded!" << endl;
-                  return true;
-               }
+               s.push(w);
             }
-
-            color[v] = 2;
+            else if (onStack[w])
+            {
+               return TRUE;
+            }
          }
       }
    }
-
-   return false;
-}
-
-/**
- * Create a copy of a given graph
- */
-//void digraph_copy(Digraph &old_grpah, Digraph &new_graph, Digraph::NodeMap<DNode> &nodeReference, Digraph::ArcMap<Arc> arcReference(new_graph))
-void digraph_copy(Digraph &old_grpah, Digraph &new_graph)
-{
-   Digraph::NodeMap<DNode> nodeReference(old_grpah);
-   Digraph::ArcMap<Arc> arcReference(new_graph);
-   digraphCopy(old_grpah, new_graph).nodeRef(nodeReference).arcCrossRef(arcReference).run();
+   return FALSE;
 }
 
 bool intersects(set<DNode> &set1, set<DNode> &set2)
@@ -715,7 +710,7 @@ SCIP_RETCODE printRows(SCIP *scip)
  */
 SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
 {
-   //cout << "CONSSEPALP()" << endl;
+   //cout << "(GPC) CONSSEPALP()" << endl;
 
    //implement the fischetti's model for separation
    SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
@@ -745,6 +740,28 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
    //SCIP_CALL(greedSetExtensionHeur(scip, conshdlr, NULL, result));
 
    return SCIP_OKAY;
+}
+
+void getSuportGraph(
+   SCIP* scip,
+   GLCIPInstance& instance, 
+   SCIP_SOL* sol, 
+   ArcSCIPVarMap& z, 
+   Digraph &new_graph)
+{
+   DNodeDNodeMap nodeRef(new_graph);
+   ArcArcMap arcRef(new_graph);
+   digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
+
+   for (ArcIt a(new_graph); a != INVALID; ++a)
+   {
+      if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, z[arcRef[a]]), 0))
+      {
+         new_graph.erase(a);
+      }
+   }
+
+   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
 }
 
 /** constraint enforcing method of constraint handler for LP solutions
@@ -784,36 +801,26 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
 
    //construct the suport graph
    Digraph new_graph;
-   DNodeDNodeMap nodeRef(new_graph);
-   ArcArcMap arcRef(new_graph);
-   digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
 
-   for (ArcIt a(new_graph); a != INVALID; ++a)
-   {
-      if (SCIPisEQ(scip, SCIPgetVarSol(scip, z[arcRef[a]]), 0))
-      {
-         new_graph.erase(a);
-      }
-   }
+   getSuportGraph(scip, instance, NULL, z, new_graph);
 
-   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef, arcRef);
-   
-   // if a tour was found, we generate a cut constraint
+   // if a cycle is found, the solution must be infeasible
    if (!dag(new_graph))
    {
       *result = SCIP_INFEASIBLE;
-      //cout << "isn't acyclic\n";
+      //cout << "(COPIED GRAPH) isn't acyclic\n";
    }
 
-   //if (findTour(scip, NULL, instance, x, z))
-   /* if (!isValid(scip, NULL, instance, x, z))
+/*    if (findDirectedCycle(scip, NULL, instance, x, z))
    {
-      //cout << "violation: solution has a cycle\n";
+      //cout << "(DFS) violation: solution has a cycle\n";
+      exactSeparation(scip, conshdlr, NULL, result);
       *result = SCIP_INFEASIBLE;
    } */
 
    return SCIP_OKAY;
 }
+
 
 /** constraint enforcing method of constraint handler for pseudo solutions
  *
@@ -852,31 +859,20 @@ SCIP_DECL_CONSENFOPS(GeneralizedPropagation::scip_enfops)
 
    //cout << "Construct the suport graph" << endl;
    Digraph new_graph;
-   DNodeDNodeMap nodeRef(new_graph);
-   ArcArcMap arcRef(new_graph);
-   digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
 
-   for (ArcIt a(new_graph); a != INVALID; ++a)
-   {
-      if (SCIPisEQ(scip, SCIPgetVarSol(scip, z[arcRef[a]]), 0))
-      {
-         new_graph.erase(a);
-      }
-   }
-
-   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph");
+   getSuportGraph(scip, instance, NULL, z, new_graph);
 
    // if a cycle is found, the solution must be infeasible
    if (!dag(new_graph))
    {
       *result = SCIP_INFEASIBLE;
-      //cout << "isn't acyclic\n";
+      //cout << "(COPIED GRAPH) isn't acyclic\n";
    }
 
-   //if (findTour(scip, NULL, instance, x, z))
-   /* if (!isValid(scip, NULL, instance, x, z))
+  /*  if (findDirectedCycle(scip, NULL, instance, x, z))
    {
-      //cout << "violation: solution has a cycle\n";
+      //cout << "(DFS) violation: solution has a cycle\n";
+      exactSeparation(scip, conshdlr, NULL, result);
       *result = SCIP_INFEASIBLE;
    } */
 
@@ -911,31 +907,27 @@ SCIP_DECL_CONSCHECK(GeneralizedPropagation::scip_check)
    //cout << "CONSCHECK()\n";
    //construct the suport graph
    Digraph new_graph;
-   DNodeDNodeMap nodeRef(new_graph);
-   ArcArcMap arcRef(new_graph);
-   digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
-
-   for (ArcIt a(new_graph); a != INVALID; ++a)
-   {
-      if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, z[arcRef[a]]), 0))
-      {
-         new_graph.erase(a);
-      }
-   }
-
-   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
+   getSuportGraph(scip, instance, NULL, z, new_graph);
 
    // if a cycle is found, the solution must be infeasible
    if (!dag(new_graph))
    {
       *result = SCIP_INFEASIBLE;
-      //cout << "violation: solution has a cycle\n";
+      //cout << "(COPIED GRAPH) violation: solution has a cycle\n";
    }
 
-   //if (findTour(scip, sol, instance, x, z))
-   /* if (!isValid(scip, sol, instance, x, z))
+   /* ArcValueMap weight(instance.g);
+   for (ArcIt a(instance.g); a != INVALID; ++a)
    {
-      //cout << "violation: solution has a cycle\n";
+      weight[a] = SCIPgetSolVal(scip, sol, z[a]);
+   }
+   GraphViewer::ViewGLCIPFracSolution(instance, weight, "Fractional Sol"); */
+
+   //if (findDirectedCycle(scip, sol, instance, x, z))
+   /* if (!isValid(scip, NULL, instance, x, z))
+   {
+      //cout << "(DFS) violation: solution has a cycle\n";
+      exactSeparation(scip, conshdlr, sol, result);
       *result = SCIP_INFEASIBLE;
    } */
 
