@@ -24,9 +24,9 @@ public:
         DNodeInfSetsMap &p_infSet) : ObjConshdlr(scip,
                                                  "GPC",
                                                  "GLCIP generalized propagation constraints",
-                                                 1000000,   //priority for separation
-                                                 -1,   //priority for constraint enforcing
-                                                 200000,    //priority for checking infeasibility (and propagation)
+                                                 1,   //priority for separation
+                                                 -2,   //priority for constraint enforcing
+                                                 1,    //priority for checking infeasibility (and propagation)
                                                  1.0,       //frequency for separating cuts; zero means to separate only in the root node
                                                  -1.0,      //frequency for propagating domains; zero means only preprocessing propagation
                                                  1.0,       /* frequency for using all instead of only the useful constraints in separation,

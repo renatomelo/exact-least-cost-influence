@@ -1,11 +1,11 @@
 #include "GLCIPBase.h"
 
 // add a cycle founded by the bfs algorithm
-void GLCIPBase::addCycleConstraints(SCIP *scip, 
-                                    GLCIPInstance &instance, 
-                                    DNodeSCIPVarMap &x, 
-                                    ArcSCIPVarMap &z, 
-                                    DNodeIntMap &predMap, 
+void GLCIPBase::addCycleConstraints(SCIP *scip,
+                                    GLCIPInstance &instance,
+                                    DNodeSCIPVarMap &x,
+                                    ArcSCIPVarMap &z,
+                                    DNodeIntMap &predMap,
                                     Arc &backArc)
 {
     DNode s = instance.g.source(backArc);
@@ -28,6 +28,7 @@ void GLCIPBase::addCycleConstraints(SCIP *scip,
         v = u;
     } while (v != t);
 
+    cout << "small cycle found: ";
     // now add the corresponding constraints
     for (unsigned int i = 0; i < nodes.size(); i++)
     {
@@ -48,9 +49,11 @@ void GLCIPBase::addCycleConstraints(SCIP *scip,
                 cons->addVar(x[w], -1.0);
             }
         }
+        cout << instance.nodeName[nodes[i]] << " ";
 
         cons->commit();
     }
+    cout << endl;
 }
 
 // run a depth first search with maximum height 3
@@ -91,9 +94,9 @@ void GLCIPBase::dfsSmallCycles(SCIP *scip,
 }
 
 // add cycle removal constraints for cycles of size up to 4
-void GLCIPBase::addSmallCycleConstraints(SCIP *scip, 
-                                         GLCIPInstance &instance, 
-                                         DNodeSCIPVarMap &x, 
+void GLCIPBase::addSmallCycleConstraints(SCIP *scip,
+                                         GLCIPInstance &instance,
+                                         DNodeSCIPVarMap &x,
                                          ArcSCIPVarMap &z)
 {
     for (DNodeIt r(instance.g); r != INVALID; ++r)
@@ -112,9 +115,9 @@ void GLCIPBase::addSmallCycleConstraints(SCIP *scip,
 /**
  * add arc-influence constraints - a vertex v needs to be active to send influence to w
  */
-void GLCIPBase::addLinkingConstraints(SCIP *scip, 
-                                      GLCIPInstance &instance, 
-                                      DNodeSCIPVarMap &x, 
+void GLCIPBase::addLinkingConstraints(SCIP *scip,
+                                      GLCIPInstance &instance,
+                                      DNodeSCIPVarMap &x,
                                       ArcSCIPVarMap &z)
 {
     for (ArcIt a(instance.g); a != INVALID; ++a)
@@ -123,7 +126,7 @@ void GLCIPBase::addLinkingConstraints(SCIP *scip,
         DNode w = instance.g.target(a);
         Arc back = findArc(instance.g, w, v);
 
-        if (back == INVALID)
+        //if (back == INVALID)
         {
             ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
 
@@ -138,8 +141,8 @@ void GLCIPBase::addLinkingConstraints(SCIP *scip,
 /**
  * the number of activated vertices is at least (alpha * num_vertices) 
  */
-void GLCIPBase::addCoverageConstraints(SCIP *scip, 
-                                       GLCIPInstance &instance, 
+void GLCIPBase::addCoverageConstraints(SCIP *scip,
+                                       GLCIPInstance &instance,
                                        DNodeSCIPVarMap &x)
 {
     ScipCons *covConstraint = new ScipCons(scip, ceil(instance.alpha * instance.n), SCIPinfinity(scip));
@@ -154,8 +157,8 @@ void GLCIPBase::addCoverageConstraints(SCIP *scip,
 /**
  * Computes the cost paid to activate a vertex v with a given weight of influence
  */
-double GLCIPBase::cheapestIncentive(const GLCIPInstance &instance, 
-                                    const DNode &v, 
+double GLCIPBase::cheapestIncentive(const GLCIPInstance &instance,
+                                    const DNode &v,
                                     double exertedInfluence)
 {
     double cost = 0;
@@ -175,8 +178,8 @@ double GLCIPBase::cheapestIncentive(const GLCIPInstance &instance,
 /**
  * Computes the cost paid to activate a vertex v with a given set of incoming neigobors
  */
-double GLCIPBase::costInfluencingSet(const GLCIPInstance &instance, 
-                                     const DNode &v, 
+double GLCIPBase::costInfluencingSet(const GLCIPInstance &instance,
+                                     const DNode &v,
                                      const set<DNode> &nodes)
 {
     int thr = instance.threshold[v];

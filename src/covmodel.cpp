@@ -443,9 +443,9 @@ void CovModel::constructSoltion(SCIP *scip,
         solution.influence[a] = false;
         if (aux > 0.1)
         {
-            DNode u = instance.g.source(a);
+            /* DNode u = instance.g.source(a);
             DNode v = instance.g.target(a);
-            std::cout << "z[" << instance.nodeName[u] << "," << instance.nodeName[v] << "] = " << aux << std::endl;
+            std::cout << "z[" << instance.nodeName[u] << "," << instance.nodeName[v] << "] = " << aux << std::endl; */
             solution.influence[a] = true;
         }
     }

@@ -1,5 +1,6 @@
 #include "GLCIPBase.h"
 #include "generalizedpropagationcons.h"
+#include <stack>
 
 /**
  * Constructs the solution of the GLCIP
@@ -83,15 +84,16 @@ vector<InfluencingSet> CovModelAllVariables::powerSet(GLCIPInstance &instance, v
             assert(a != INVALID);
 
             // cout << "influence weight from (" << instance.nodeName[u] << ") = "
-            //     << instance.influence[a] << endl; 
-            
+            //     << instance.influence[a] << endl;
+
             if (instance.influence[a] < slack)
             {
                 isMinimal = FALSE;
             }
         }
 
-        if (isMinimal) pSet.push_back(subset);
+        if (isMinimal)
+            pSet.push_back(subset);
         //else  cout << "influencing set NOT minimal\n";
     }
     return pSet;
@@ -127,7 +129,7 @@ double CovModelAllVariables::costInfluencingSet(GLCIPInstance &instance, DNode v
 }
 
 /**
- * exactly one influencing set needs to be selected for each active node
+ * at least one influencing set needs to be selected for each active node
  */
 void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
                                                      GLCIPInstance &instance,
@@ -136,7 +138,6 @@ void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        //ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
         ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
         //ScipCons *cons = new ScipCons(scip, 0, 0);
 
@@ -146,6 +147,28 @@ void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
             cons->addVar(infSet[v][i].var, 1);
         }
         cons->addVar(x[v], -1);
+        cons->commit();
+    }
+}
+
+/**
+ * at most one influencing set needs to be selected for each active node
+ */
+void unicInfSetConstraints(SCIP *scip,
+                           GLCIPInstance &instance,
+                           DNodeSCIPVarMap &x,
+                           DNodeInfSetsMap &infSet)
+{
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 1);
+        //ScipCons *cons = new ScipCons(scip, 0, 0);
+
+        // summation of all influencing-set varialbes related to a vertex v
+        for (unsigned int i = 0; i < infSet[v].size(); i++)
+        {
+            cons->addVar(infSet[v][i].var, 1);
+        }
         cons->commit();
     }
 }
@@ -161,7 +184,6 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
         ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0);
-        //ScipCons *cons = new ScipCons(scip, 0, 0);
         DNode u = instance.g.source(a);
         DNode v = instance.g.target(a);
 
@@ -173,6 +195,11 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
             {
                 cons->addVar(infSet[v][i].var, 1);
             }
+            // trying to force the model hold when using inequality
+            /* if (infSet[v][i].nodes.size() == 0)
+            {
+                cons->addVar(infSet[v][i].var, 1);
+            } */
         }
 
         cons->addVar(z[a], -1);
@@ -204,7 +231,6 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
     DNodeSCIPVarMap x(instance.g); // active-vertex variables
     ArcSCIPVarMap z(instance.g);   // arc-influence variables
-    //DNodeSCIPVarsMap infSet(graph); // influencing-set variables
 
     // create variables x
     for (DNodeIt v(instance.g); v != INVALID; ++v)
@@ -251,13 +277,15 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
             ScipVar *var = new ScipContVar(scip, name, 0, SCIPinfinity(scip), cost);
             infSet[v][i].var = var->var;
-            //infSet[v][i].cost = max(0.001, cost);
             infSet[v][i].cost = cost;
         }
     }
 
     // Propagation constraints:
     addPropagationConstraints(scip, instance, x, infSet);
+
+    //at most one influencing-set can activate each vertex
+    //unicInfSetConstraints(scip, instance, x, infSet);
 
     // add the chosen arcs constraints
     addChosenArcsConstraints(scip, instance, z, infSet);
@@ -269,8 +297,71 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     addCoverageConstraints(scip, instance, x);
 
     // add all cycles of size up to 4
-    addSmallCycleConstraints(scip, instance, x, z);
+    //addSmallCycleConstraints(scip, instance, x, z);
 
+    //cout << "\ntrying a brute force" << endl;
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            DNode u = instance.g.target(a);
+            if (findArc(instance.g, u, v) != INVALID)
+            {
+                //adding inequality
+                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+
+                cons->addVar(z[a], 1);
+                cons->addVar(z[findArc(instance.g, u, v)], 1);
+
+                cons->addVar(x[v], -1);
+                cons->commit();
+            }
+            else
+            {
+                for (OutArcIt b(instance.g, u); b != INVALID; ++b)
+                {
+                    DNode w = instance.g.target(b);
+                    if (findArc(instance.g, w, v) != INVALID)
+                    {
+                        //adding inequality
+                        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+
+                        cons->addVar(z[a], 1);
+                        cons->addVar(z[b], 1);
+                        cons->addVar(z[findArc(instance.g, w, v)], 1);
+
+                        cons->addVar(x[v], -1);
+                        cons->commit();
+                    }
+                    else
+                    {
+                        for (OutArcIt c(instance.g, w); c != INVALID; ++c)
+                        {
+                            DNode y = instance.g.target(c);
+                            if (findArc(instance.g, y, v) != INVALID)
+                            {
+                                //adding inequality
+                                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+
+                                cons->addVar(z[a], 1);
+                                cons->addVar(z[b], 1);
+                                cons->addVar(z[c], 1);
+                                cons->addVar(z[findArc(instance.g, y, v)], 1);
+
+                                cons->addVar(x[v], -1);
+                                cons->commit();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    SCIP_CALL(SCIPwriteOrigProblem(scip, "glcip_original.lp", "lp", FALSE));
+
+    //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP");
+    //exit(0);
     // add generalized propagation constraints
     GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
@@ -282,16 +373,14 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     // end of GPC
 
     // add cutting planes
-    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
     SCIP_CONS *cons1;
     SCIP_CALL(cuts.createCycleCuts(scip, &cons1, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons1));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons1));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons1)); */
     //end of cutting planes
-
-    SCIP_CALL(SCIPwriteOrigProblem(scip, "glcip_original.lp", "lp", FALSE));
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));
@@ -302,14 +391,15 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
         return 0;
     }
 
-    std::cout << SCIPgetSolvingTime(scip) << std::endl;
+    //std::cout << SCIPgetSolvingTime(scip) << std::endl;
     // Construct solution
-    CovModel::constructSoltion(scip, instance, solution, z, infSet);
+    //CovModel::constructSoltion(scip, instance, solution, z, infSet);
 
-    if (CovModel::isFeasible(instance, solution))
+    /* if (CovModel::isFeasible(instance, solution))
         std::cout << "The solution is feasible" << std::endl;
     else
-        std::cout << "The solution is NOT feasible" << std::endl;
+        std::cout << "The solution is NOT feasible" << std::endl */
+    ;
 
     return SCIP_OKAY;
 }

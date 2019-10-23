@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
     }
     if(params.alg.compare("cov") == 0){
         CovModelAllVariables::run(instance, solution, params.timeLimit);
-        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
+        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
     }
     if(params.alg.compare("covcg") == 0){
         CovModel::run(instance, solution, params.timeLimit);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
 void readCheckParams(Params &params,int argc, char *argv[])
 {
     params.alg        = "";
-    params.timeLimit  = 3600;
+    params.timeLimit  = 10800;
     params.inputFile  = "";
     params.graph = false;
     params.alpha = 0.5;

@@ -60,7 +60,7 @@ SCIP_DECL_CONSTRANS(CycleCutsGenerator::scip_trans)
 // separation method of constraint handler for LP solution
 SCIP_DECL_CONSSEPALP(CycleCutsGenerator::scip_sepalp)
 {
-    //cout << "(GCC) consepalp\n";
+    cout << "(GCC) consepalp\n";
     bool feasible = true;
     SCIP_CALL(findCycleCuts(scip, conshdlr, NULL, result, &feasible));
     return SCIP_OKAY;
@@ -79,7 +79,7 @@ SCIP_DECL_CONSSEPASOL(CycleCutsGenerator::scip_sepasol)
 // constraint enforcing method of constraint handler for LP solutions
 SCIP_DECL_CONSENFOLP(CycleCutsGenerator::scip_enfolp)
 {
-    //cout << "consenfolp\n";
+    cout << "consenfolp\n";
     bool check = isValid(scip, NULL);
     if(check)
         *result = SCIP_FEASIBLE;
@@ -111,7 +111,7 @@ SCIP_DECL_CONSENFOPS(CycleCutsGenerator::scip_enfops)
 // feasibility check method of constraint handler for primal solutions
 SCIP_DECL_CONSCHECK(CycleCutsGenerator::scip_check)
 {
-    //cout << "conscheck\n";
+    cout << "conscheck\n";
     bool check = isValid(scip, sol);
     if(check)
         *result = SCIP_FEASIBLE;
