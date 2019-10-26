@@ -120,9 +120,12 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
 
    SCIP_CALL(SCIPcacheRowExtensions(scip, row));
 
+   Phi gpcrow;
    if (!lifting)
+   {
       SCIPaddVarToRow(scip, row, x[k], -1.0);
-
+      gpcrow.k = k;
+   }
    /*  cout << "elements in X : ";
    for (DNode v : generalizedSet)
    {
@@ -140,8 +143,10 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
          if (!intersects(generalizedSet, infSet[v][i].nodes))
          {
             SCIPaddVarToRow(scip, row, infSet[v][i].var, 1.0);
+            //TODO save here the valid influencing-sets 
          }
       }
+      gpcrow.generalizedSet.insert(v);
    }
 
    SCIP_CALL(SCIPflushRowExtensions(scip, row));
@@ -151,14 +156,19 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    {
       SCIP_Bool infeasible;
       SCIP_CALL(SCIPaddRow(scip, row, TRUE, &infeasible));
-      nGeneratedCons++;
-      //cout << "number of added constraints: " << nGeneratedCons << endl;
       //SCIPprintRow(scip, row, NULL);
 
       if (infeasible)
          *result = SCIP_CUTOFF;
+      else
+      {
+         //save the added constraint to use in the price
+         gpcrow.row = row;
+         gpcrows.push_back(gpcrow);
+      }
+      
    }
-   SCIP_CALL(SCIPreleaseRow(scip, &row));
+   //SCIP_CALL(SCIPreleaseRow(scip, &row));
 
    return SCIP_OKAY;
 }
@@ -286,7 +296,7 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
     SCIP_RESULT *result      //pointer to store the result of the separation call
 )
 {
-   cout << "HEURISITC SEPARATION()" << endl;
+   //cout << "HEURISITC SEPARATION()" << endl;
 
    assert(result != NULL);
    *result = SCIP_DIDNOTFIND;
@@ -315,18 +325,18 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
             //if (spt.reached(v) && (spt.dist(v) + weight[a] < SCIPgetSolVal(scip, sol, x[u])))
             if (spt.reached(v))
             {
-               cout << "cycle found: ";
+               //cout << "cycle found: ";
                set<DNode> cycle;
                for (DNode w = v; w != u; w = spt.predNode(w))
                {
                   if (w != INVALID && spt.reached(w))
                   {
                      cycle.insert(w);
-                     cout << instance.nodeName[w] << ", ";
+                     //cout << instance.nodeName[w] << ", ";
                   }
                }
                cycle.insert(u);
-               cout << instance.nodeName[u] << endl;
+               //cout << instance.nodeName[u] << endl;
 
                //choose the maximum x[k]
                double max_k = -1;
@@ -359,13 +369,13 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                      }
                   }
                }
-               cout << "sum = " << sum << ", value of x[k] = " << SCIPgetSolVal(scip, sol, x[k]) << endl;
+               //cout << "sum = " << sum << ", value of x[k] = " << SCIPgetSolVal(scip, sol, x[k]) << endl;
 
                if (SCIPisLT(scip, sum, SCIPgetSolVal(scip, sol, x[k])))
                {
                   *result = SCIP_SEPARATED;
 
-                  cout << "adding violated inequality\n";
+                  //cout << "adding violated inequality\n";
                   addGeneralizedPropCons(scip, conshdlr, sol, result, cycle, k, FALSE);
 
                   // node has become infeasible
@@ -441,7 +451,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    *result = SCIP_DIDNOTFIND;
 
    //show fractional solution
-   printFractionalSol(scip, instance, sol, x, z, infSet);
+   //printFractionalSol(scip, instance, sol, x, z, infSet);
 
    SCIP *new_scip = NULL;
 
@@ -454,7 +464,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
    // create empty problem
    SCIP_CALL(SCIPcreateProb(new_scip, "GPC_separation", 0, 0, 0, 0, 0, 0, 0));
-   SCIP_CALL(SCIPsetIntParam(new_scip, "display/verblevel", 3));
+   SCIP_CALL(SCIPsetIntParam(new_scip, "display/verblevel", 1));
 
    // declaring variables
    DNodeSCIPVarMap belongsToX(instance.g);  //indicates membership of nodes to set X
@@ -571,7 +581,6 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       }
    }
 
-   //cout << "SCIPsolve()\n";
    SCIP_CALL(SCIPsolve(new_scip));
 
    //get the vertices that belgong to X
@@ -586,18 +595,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
          generalizedSet.insert(v);
       }
    }
-
    //cout << "lifting the RHS = " << SCIPgetSolVal(new_scip, localSol, liftingRHS) << "\n";
-
-   //get the value of the valid influensing-set variables
-   /* for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      for (unsigned int i = 0; i < validInfSet[v].size(); i++)
-      {
-         double value = SCIPgetSolVal(new_scip, localSol, validInfSet[v][i].var);
-         cout << SCIPvarGetName(validInfSet[v][i].var) << " = " << value << endl;
-      }
-   } */
 
    //check if solution value is negative (and hence a violated constraint was found)
    if (SCIPisNegative(new_scip, SCIPgetPrimalbound(new_scip)))
@@ -691,7 +689,7 @@ SCIP_DECL_CONSDELETE(GeneralizedPropagation::scip_delete)
 /** transforms constraint data into data belonging to the transformed problem */
 SCIP_DECL_CONSTRANS(GeneralizedPropagation::scip_trans)
 {
-   cout << "CONSTRANS()\n";
+   //cout << "CONSTRANS()\n";
 
    /* create target constraint */
    SCIP_CALL(SCIPcreateCons(scip, targetcons, SCIPconsGetName(sourcecons), conshdlr, NULL,
@@ -753,7 +751,6 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
    //implement the fischetti's model for separation
    SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
    //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
-   //SCIP_CALL(greedSetExtensionHeur(scip, conshdlr, NULL, result));
 
    //printRows(scip);
 
@@ -773,9 +770,7 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 {
    cout << "CONSSEPASOL()" << endl;
    // heuristic separation method for an primal solution
-   //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, sol, result));
    SCIP_CALL(exactSeparation(scip, conshdlr, sol, result));
-   //SCIP_CALL(greedSetExtensionHeur(scip, conshdlr, sol, result));
 
    return SCIP_OKAY;
 }
@@ -802,7 +797,6 @@ void getSuportGraph(
    //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
 }
 
-//TODO: maybe is the case of try other way of handle the consenfolp
 /** constraint enforcing method of constraint handler for LP solutions
  *
  *  The method is called at the end of the node processing loop for a node where the LP was solved.
@@ -861,7 +855,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
       {
          if (SCIPisPositive(scip, SCIPgetVarSol(scip, infSet[v][i].var)))
          {
-            cout << SCIPvarGetName(infSet[v][i].var) << " = "
+            cout << SCIPvarGetName(infSet[v][i].var) << "\t = "
                  << SCIPgetVarSol(scip, infSet[v][i].var) << endl;
          }
       }
@@ -873,7 +867,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
    if (!dag(new_graph))
    {
       *result = SCIP_INFEASIBLE;
-      cout << "(SUPORT GRAPH) solution has a cycle\n";
+      //cout << "(SUPORT GRAPH) solution has a cycle\n";
 
       SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
 
@@ -881,15 +875,18 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
       {
          cout << "SCIP_DIDNOTFIND\n";
          *result = SCIP_INFEASIBLE;
-         //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
+         //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
       }
-      cout << "number of pseudo candidates = " << SCIPgetNPseudoBranchCands(scip) << endl;
+      //cout << "number of pseudo candidates = " << SCIPgetNPseudoBranchCands(scip) << endl;
       if (SCIPgetNPseudoBranchCands(scip) == 0)
       {
+         // if you just return INFEASIBLE without any branching candidates available, 
+         // SCIP will have no chance to resolve this infeasibility. Therefore, you 
+         // should return SCIP_CUTOFF, meaning that the node with its current 
+         // variable bounds (or fixings) contains no feasible solution.
          cout << "SCIP_CUTOFF\n";
          *result = SCIP_CUTOFF;
-         //sepaGeneralizedPropCons(scip, conshdlr, NULL, result);
-         exit(0);
+         //exit(0);
       }
    }
 
@@ -1042,7 +1039,7 @@ SCIP_DECL_CONSPROP(GeneralizedPropagation::scip_prop)
  */
 SCIP_DECL_CONSLOCK(GeneralizedPropagation::scip_lock)
 {
-   cout << "CONSLOCK\n";
+   //cout << "CONSLOCK\n";
 
    // round z up may cause cycle inequalities to be infeasible
    for (ArcIt a(instance.g); a != INVALID; ++a)

@@ -12,21 +12,25 @@ ObjPricerGLCIP::ObjPricerGLCIP(
     DNodeSCIPVarMap &p_vert_var, /**< matrix of arc variables */
     ArcConsMap &p_arc_con,       /**< matrix of arc constraints */
     DNodeConsMap &p_vert_con,    /**< array of partitioning constraints */
-    DNodeInfSetsMap &p_inf_set,
-    ArcBoolMap &p_isAble,
-    ArcIntMap &p_isOnSolution)
-    : ObjPricer(scip, p_name, "Finds influencing set with negative reduced cost.", 0, TRUE),
+    vector<Phi> &p_gpcrows,
+    DNodeInfSetsMap &p_inf_set)
+    //ArcBoolMap &p_isAble,
+    //ArcIntMap &p_isOnSolution)
+    : ObjPricer(
+      scip, p_name, "Finds influencing set with negative reduced cost.", 0, TRUE),
       instance(p_instance),
       z(p_arc_var),
       x(p_vert_var),
       arcCons(p_arc_con),
       vertCons(p_vert_con),
-      infSet(p_inf_set),
-      isAble(p_isAble),
-      isOnSolution(p_isOnSolution)
+      gpcrows(p_gpcrows),
+      infSet(p_inf_set)
+
+//isAble(p_isAble),
+//isOnSolution(p_isOnSolution)
 {
-   for (ArcIt a(instance.g); a != INVALID; ++a)
-      this->isOnSolution[a] = 0;
+   /* for (ArcIt a(instance.g); a != INVALID; ++a)
+      this->isOnSolution[a] = 0; */
 }
 
 ObjPricerGLCIP::~ObjPricerGLCIP() {}
@@ -39,7 +43,7 @@ ObjPricerGLCIP::~ObjPricerGLCIP() {}
  */
 SCIP_DECL_PRICERINIT(ObjPricerGLCIP::scip_init)
 {
-   //std::cout << "\n---------------------------- PRICER INIT CALLED ----------------------------" << std::endl;
+   std::cout << "\n---------------------------- PRICER INIT CALLED ----------------------------" << std::endl;
 
    for (ArcIt a(instance.g); a != INVALID; ++a)
    {
@@ -52,6 +56,8 @@ SCIP_DECL_PRICERINIT(ObjPricerGLCIP::scip_init)
       SCIP_CALL(SCIPgetTransformedCons(scip, vertCons[v], &vertCons[v]));
    }
 
+   // verify if is necessary to get the tranformed row generated in GPC
+
    return SCIP_OKAY;
 }
 
@@ -62,8 +68,8 @@ SCIP_DECL_PRICERINIT(ObjPricerGLCIP::scip_init)
  */
 SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
 {
-   /*  std::cout << "\n---------------------------- PRICING CALLED ----------------------------"
-             << std::endl; */
+   std::cout << "\n---------------------------- PRICING CALLED ----------------------------"
+             << std::endl;
    DNodeValueMap dualVertValues(instance.g);
    ArcValueMap dualArcValues(instance.g);
 
@@ -88,11 +94,16 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
          dualVertValues[v] = SCIPgetDualfarkasLinear(scip, vertCons[v]);
          std::cout << instance.nodeName[v] << ": " << dualVertValues[v] << std::endl;
       }
+
+      for (unsigned int i = 0; i < gpcrows.size(); i++)
+      {
+         gpcrows[i].dualVal = SCIProwGetDualfarkas(gpcrows[i].row);
+      }
    }
    else
    {
       //std::cout << "Dual arc solution: " << endl;
-      /* compute the dual solution of the variable associated wiht each arc coverage constraints */
+      //get the dual solution of the variable associated wiht each arc coverage constraints
       for (ArcIt a(instance.g); a != INVALID; ++a)
       {
          dualArcValues[a] = SCIPgetDualsolLinear(scip, arcCons[a]);
@@ -102,11 +113,18 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
          std::cout << dualArcValues[a] << std::endl; */
       }
       //std::cout << "vertex dual soluton: " << endl;
-      /* compute the dual solution of the variable associated wiht each vertex coverage constraints */
+      //get the dual solution of the variable associated wiht each vertex coverage constraints
       for (DNodeIt v(instance.g); v != INVALID; ++v)
       {
          dualVertValues[v] = SCIPgetDualsolLinear(scip, vertCons[v]);
          //std::cout << instance.nodeName[v] << ": " << dualVertValues[v] << std::endl;
+      }
+
+      for (unsigned int i = 0; i < gpcrows.size(); i++)
+      {
+         gpcrows[i].dualVal = SCIProwGetDualsol(gpcrows[i].row);
+         cout << "SCIProwGetDualsol(gpcrows[i].row) = " 
+               << SCIProwGetDualsol(gpcrows[i].row) << endl;
       }
    }
 
@@ -118,11 +136,11 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
       set<DNode> nodes;
       SCIP_Real reduced_cost = findMinCostInfluencingSet(scip, v, dualArcValues, dualVertValues[v], nodes);
 
-      //std::cout << "Pricing the vertex: " << instance.nodeName[v] << "  ";
+      std::cout << "Pricing the vertex: " << instance.nodeName[v] << "  ";
       /* add influencing set variable */
       if (SCIPisNegative(scip, reduced_cost))
       {
-         //std::cout << "Negative reduced cost: " << reduced_cost << std::endl;
+         std::cout << "negative reduced cost: " << reduced_cost << std::endl;
          //return addInfluencingSetVar(scip, v, nodes);
          retcode = addInfluencingSetVar(scip, v, nodes);
          if (retcode != SCIP_OKAY)
@@ -131,8 +149,8 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
       //std::cout << " size of infSet: " << nodes.size() << std::endl;
    }
 
-   /* std::cout << "\n---------------------------- EXITING PRICING ----------------------------"
-             << std::endl; */
+   std::cout << "\n---------------------------- EXITING PRICING ----------------------------"
+             << std::endl;
 
    //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
    return SCIP_OKAY;
@@ -152,8 +170,8 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
  */
 SCIP_DECL_PRICERREDCOST(ObjPricerGLCIP::scip_redcost)
 {
-   /* std::cout << "\n--------------------- CALL SCIP_PRICER_REDUCED_COST ----------------------"
-             << std::endl; */
+   std::cout << "\n--------------------- CALL SCIP_PRICER_REDUCED_COST ----------------------"
+             << std::endl;
    /* set result pointer, see above */
    *result = SCIP_SUCCESS;
 
@@ -196,12 +214,17 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    if (nodes.size() > 0)
    {
       std::stringstream stream;
+      const char *separator = "";
       for (DNode u : nodes)
-         stream << instance.nodeName[u];
-      name = "infSetVar_" + instance.nodeName[v] + "_" + stream.str();
+      {
+         stream << separator << instance.nodeName[u];
+         separator = ",";
+      }
+
+      name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
    }
    else
-      name = "infSetVar_" + instance.nodeName[v] + "_empty";
+      name = "Lambda_" + instance.nodeName[v] + "_empty";
 
    double cost = GLCIPBase::costInfluencingSet(instance, v, nodes);
    SCIP_VAR *var;
@@ -223,8 +246,9 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    InfluencingSet in;
    in.var = var;
    in.cost = cost;
-   /* std::cout << "Adding variable for vertex: " << instance.nodeName[v] << " "
-             << name << ", cost = " << cost << std::endl; */
+
+   std::cout << "adding variable for vertex: " << instance.nodeName[v] << " "
+             << name << ", cost = " << cost << std::endl;
    if (nodes.size() != 0)
    {
       for (DNode u : nodes)
@@ -234,14 +258,14 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
          assert(a != INVALID);
          SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
          in.nodes.insert(u);
-         isAble[a] = TRUE;
+         //isAble[a] = TRUE;
       }
    }
 
    // save the variable
    infSet[v].push_back(in);
 
-   //std::cout << "Adding var: " << SCIPvarGetName(var) << std::endl;
+   std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
 
    SCIP_CALL(SCIPreleaseVar(scip, &var));
    return SCIP_OKAY;
@@ -277,27 +301,27 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    double *wt = new double[n];
    double *costs = new double[n];
 
-   /* std::cout << "looking the influencing-set of node " << instance.nodeName[v]
-             << " at BnB node " << SCIPgetFocusDepth(scip) << "\n"; */
+   std::cout << "looking the influencing-set of node " << instance.nodeName[v]
+             << " at BnB node " << SCIPgetFocusDepth(scip) << "\n";
 
    //initialize weight of influence vector and costs vector
-   double extInf = 0;
+   //double extInf = 0; // external influence
    int i = 0;
    vector<DNode> neighbors(n);
    for (InArcIt a(instance.g, v); a != INVALID; ++a)
    {
-      if (isOnSolution[a] == 0)
+      //if (isOnSolution[a] == 0)
       {
-         /*  std::cout << "arc " << SCIPvarGetName(z[a]) << " explored at node " 
-                   << SCIPgetFocusDepth(scip) << "\n"; */
+         //std::cout << "arc " << SCIPvarGetName(z[a]) << " explored at node "
+         //          << SCIPgetFocusDepth(scip) << "\n";
          neighbors[i] = instance.g.source(a);
          costs[i] = dualArcValue[a];
          wt[i++] = instance.influence[a];
       }
-      else if (isOnSolution[a] == -1)
+      /* else if (isOnSolution[a] == -1)
       {
-         /* std::cout << "arc " << SCIPvarGetName(z[a]) << " marked to NOT be in solution at node "
-                   << SCIPgetFocusDepth(scip) << "\n"; */
+         //std::cout << "arc " << SCIPvarGetName(z[a]) << " marked to NOT be in solution at node "
+         //          << SCIPgetFocusDepth(scip) << "\n";
          n--; //reduces the size of the knapsack
          if (n == 0)
             return (GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue);
@@ -316,7 +340,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
 
          if (W <= 0)
             return (GLCIPBase::cheapestIncentive(instance, v, extInf) - dualVertValue + dualArcValue[a]);
-      }
+      } */
    }
 
    // fill 0th column
@@ -344,12 +368,12 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
                              minCost[i - 1][col] + costs[i - 1] +
                                  GLCIPBase::cheapestIncentive(instance, v, j) -
                                  GLCIPBase::cheapestIncentive(instance, v, col));
-         /* std::cout << "Cheapest incentive of " << instance.nodeName[v] << " with j = " << j << ": " << cheapestIncentive(v, j)
+         /* std::cout << "cheapest incentive of " << instance.nodeName[v] << " with j = " << j << ": " << cheapestIncentive(v, j)
                    << ", and col = " << col << ": " << cheapestIncentive(v, col) << std::endl; */
          // stop whether the reduced cost is negative
          if (SCIPisNegative(scip, minCost[i][j]))
          {
-            /* std::cout << "Table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
+            std::cout << "table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
             for (int p = 0; p <= n; p++)
             {
                for (int q = 0; q <= W; q++)
@@ -357,7 +381,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
                   std::cout << minCost[p][q] << "\t";
                }
                std::cout << std::endl;
-            } */
+            }
 
             //get the solution
             int k = j;
@@ -386,7 +410,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
       //std::cout << std::endl;
    }
 
-   /* std::cout << "Table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
+   std::cout << "Table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
    for (i = 0; i <= n; i++)
    {
       for (int j = 0; j <= W; j++)
@@ -394,7 +418,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
          std::cout << minCost[i][j] << "\t";
       }
       std::cout << std::endl;
-   } */
+   }
 
    redCost = minCost[n][W];
 

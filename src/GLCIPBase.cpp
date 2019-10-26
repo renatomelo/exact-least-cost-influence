@@ -28,7 +28,7 @@ void GLCIPBase::addCycleConstraints(SCIP *scip,
         v = u;
     } while (v != t);
 
-    cout << "small cycle found: ";
+    //cout << "small cycle found: ";
     // now add the corresponding constraints
     for (unsigned int i = 0; i < nodes.size(); i++)
     {
@@ -49,11 +49,11 @@ void GLCIPBase::addCycleConstraints(SCIP *scip,
                 cons->addVar(x[w], -1.0);
             }
         }
-        cout << instance.nodeName[nodes[i]] << " ";
+        //cout << instance.nodeName[nodes[i]] << " ";
 
         cons->commit();
     }
-    cout << endl;
+    //cout << endl;
 }
 
 // run a depth first search with maximum height 3
@@ -113,6 +113,74 @@ void GLCIPBase::addSmallCycleConstraints(SCIP *scip,
 }
 
 /**
+ * add cycle removal constraints for cycles of size up to 4
+ */
+void GLCIPBase::addAllSmallDirectedCycles(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    DNodeSCIPVarMap &x,
+    ArcSCIPVarMap &z)
+{
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            DNode u = instance.g.target(a);
+            if (findArc(instance.g, u, v) != INVALID)
+            {
+                //adding inequality
+                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+
+                cons->addVar(z[a], 1);
+                cons->addVar(z[findArc(instance.g, u, v)], 1);
+
+                cons->addVar(x[v], -1);
+                cons->commit();
+            }
+            else
+            {
+                for (OutArcIt b(instance.g, u); b != INVALID; ++b)
+                {
+                    DNode w = instance.g.target(b);
+                    if (findArc(instance.g, w, v) != INVALID)
+                    {
+                        //adding inequality
+                        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+
+                        cons->addVar(z[a], 1);
+                        cons->addVar(z[b], 1);
+                        cons->addVar(z[findArc(instance.g, w, v)], 1);
+
+                        cons->addVar(x[v], -1);
+                        cons->commit();
+                    }
+                    else
+                    {
+                        for (OutArcIt c(instance.g, w); c != INVALID; ++c)
+                        {
+                            DNode y = instance.g.target(c);
+                            if (findArc(instance.g, y, v) != INVALID)
+                            {
+                                //adding inequality
+                                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+
+                                cons->addVar(z[a], 1);
+                                cons->addVar(z[b], 1);
+                                cons->addVar(z[c], 1);
+                                cons->addVar(z[findArc(instance.g, y, v)], 1);
+
+                                cons->addVar(x[v], -1);
+                                cons->commit();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
  * add arc-influence constraints - a vertex v needs to be active to send influence to w
  */
 void GLCIPBase::addLinkingConstraints(SCIP *scip,
@@ -123,8 +191,8 @@ void GLCIPBase::addLinkingConstraints(SCIP *scip,
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
         DNode v = instance.g.source(a);
-        DNode w = instance.g.target(a);
-        Arc back = findArc(instance.g, w, v);
+        //DNode w = instance.g.target(a);
+        //Arc back = findArc(instance.g, w, v);
 
         //if (back == INVALID)
         {

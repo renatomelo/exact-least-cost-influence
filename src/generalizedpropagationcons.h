@@ -13,7 +13,8 @@ private:
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
     DNodeInfSetsMap &infSet;
-    unsigned long int nGeneratedCons = 0;
+    vector<Phi> &gpcrows;
+    //unsigned long int nGeneratedCons = 0;
 
 public:
     GeneralizedPropagation(
@@ -21,26 +22,28 @@ public:
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
         ArcSCIPVarMap &p_z,
-        DNodeInfSetsMap &p_infSet) : ObjConshdlr(scip,
-                                                 "GPC",
-                                                 "GLCIP generalized propagation constraints",
-                                                 1,   //priority for separation
-                                                 -2,   //priority for constraint enforcing
-                                                 1,    //priority for checking infeasibility (and propagation)
-                                                 1.0,       //frequency for separating cuts; zero means to separate only in the root node
-                                                 -1.0,      //frequency for propagating domains; zero means only preprocessing propagation
-                                                 1.0,       /* frequency for using all instead of only the useful constraints in separation,
-                                                            *  propagation and enforcement, -1 for no eager evaluations, 0 for first only */
-                                                 0.0,       //maximal number of presolving rounds the constraint handler participates in (-1: no limit)
-                                                 FALSE,     //should separation method be delayed, if other separators found cuts?
-                                                 FALSE,
-                                                 TRUE,
-                                                 SCIP_PROPTIMING_BEFORELP,
-                                                 SCIP_PRESOLTIMING_FAST),
-                                     instance(p_instance),
-                                     x(p_x),
-                                     z(p_z),
-                                     infSet(p_infSet)
+        DNodeInfSetsMap &p_infSet,
+        vector<Phi> &p_gpcrows) : ObjConshdlr(scip,
+                                              "GPC",
+                                              "GLCIP generalized propagation constraints",
+                                              1,     //priority for separation
+                                              -2,    //priority for constraint enforcing
+                                              1,     //priority for checking infeasibility (and propagation)
+                                              1.0,   //frequency for separating cuts; zero means to separate only in the root node
+                                              -1.0,  //frequency for propagating domains; zero means only preprocessing propagation
+                                              1.0,   /* frequency for using all instead of only the useful constraints in separation,
+                                                      *  propagation and enforcement, -1 for no eager evaluations, 0 for first only */
+                                              0.0,   //maximal number of presolving rounds the constraint handler participates in (-1: no limit)
+                                              FALSE, //should separation method be delayed, if other separators found cuts?
+                                              FALSE,
+                                              TRUE,
+                                              SCIP_PROPTIMING_BEFORELP,
+                                              SCIP_PRESOLTIMING_FAST),
+                                  instance(p_instance),
+                                  x(p_x),
+                                  z(p_z),
+                                  infSet(p_infSet),
+                                  gpcrows(p_gpcrows)
     {
     }
 

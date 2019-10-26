@@ -2,49 +2,6 @@
 #include "generalizedpropagationcons.h"
 #include <stack>
 
-/**
- * Constructs the solution of the GLCIP
- */
-/* void constructSoltion(SCIP *scip, GLCIPInstance &instance, GLCIPSolution &solution, ArcSCIPVarMap& z, DNodeInfSetsMap& infSet)
-{
-    SCIP_SOL *sol = SCIPgetBestSol(scip);
-
-    for (DNodeIt v(instance.g); v != INVALID; ++v)
-    {
-        solution.incentives[v] = 0.0;
-        // get the value of influencing-set variables
-        for (unsigned int i = 0; i < infSet[v].size(); i++)
-        {
-            double solVal = SCIPgetSolVal(scip, sol, infSet[v][i].var);
-            // use it to find the amount of incentive paid
-            if (solVal > 0.1)
-            {
-                solution.incentives[v] = infSet[v][i].cost;
-                std::cout << "InfluencingSetVar[" + instance.nodeName[v] + "," << solution.incentives[v] << "]  \t= "
-                          << solVal << std::endl;
-            }
-        }
-    }
-    std::cout << std::endl;
-
-    for (ArcIt a(instance.g); a != INVALID; ++a)
-    {
-        double aux = SCIPgetSolVal(scip, sol, z[a]);
-
-        if (aux > 0.1)
-        {
-            DNode u = instance.g.source(a);
-            DNode v = instance.g.target(a);
-            std::cout << "z[" << instance.nodeName[u] << "," << instance.nodeName[v] << "] = " << aux << std::endl;
-            solution.influence[a] = true;
-        }
-        else
-        {
-            solution.influence[a] = false;
-        }
-    }
-} */
-
 vector<InfluencingSet> CovModelAllVariables::powerSet(GLCIPInstance &instance, vector<DNode> neighbors, DNode &v)
 {
     unsigned int pSize = pow(2, neighbors.size());
@@ -98,6 +55,7 @@ vector<InfluencingSet> CovModelAllVariables::powerSet(GLCIPInstance &instance, v
     }
     return pSet;
 }
+
 /**
  * Computes the cost paid to activate a vertex v with a given set of incoming neigobors
  */
@@ -270,8 +228,14 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
             else
             {
                 std::stringstream stream;
+
+                const char *separator = "";
                 for (DNode u : infSet[v][i].nodes)
-                    stream << instance.nodeName[u] << ",";
+                {
+                    stream << separator << instance.nodeName[u];
+                    separator = ",";
+                }
+
                 name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
             }
 
@@ -297,66 +261,8 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     addCoverageConstraints(scip, instance, x);
 
     // add all cycles of size up to 4
-    //addSmallCycleConstraints(scip, instance, x, z);
-
-    //cout << "\ntrying a brute force" << endl;
-    for (DNodeIt v(instance.g); v != INVALID; ++v)
-    {
-        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
-        {
-            DNode u = instance.g.target(a);
-            if (findArc(instance.g, u, v) != INVALID)
-            {
-                //adding inequality
-                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
-
-                cons->addVar(z[a], 1);
-                cons->addVar(z[findArc(instance.g, u, v)], 1);
-
-                cons->addVar(x[v], -1);
-                cons->commit();
-            }
-            else
-            {
-                for (OutArcIt b(instance.g, u); b != INVALID; ++b)
-                {
-                    DNode w = instance.g.target(b);
-                    if (findArc(instance.g, w, v) != INVALID)
-                    {
-                        //adding inequality
-                        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
-
-                        cons->addVar(z[a], 1);
-                        cons->addVar(z[b], 1);
-                        cons->addVar(z[findArc(instance.g, w, v)], 1);
-
-                        cons->addVar(x[v], -1);
-                        cons->commit();
-                    }
-                    else
-                    {
-                        for (OutArcIt c(instance.g, w); c != INVALID; ++c)
-                        {
-                            DNode y = instance.g.target(c);
-                            if (findArc(instance.g, y, v) != INVALID)
-                            {
-                                //adding inequality
-                                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
-
-                                cons->addVar(z[a], 1);
-                                cons->addVar(z[b], 1);
-                                cons->addVar(z[c], 1);
-                                cons->addVar(z[findArc(instance.g, y, v)], 1);
-
-                                cons->addVar(x[v], -1);
-                                cons->commit();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //addAllSmallDirectedCycles(scip, instance, x, z);
+    addSmallCycleConstraints(scip, instance, x, z);
 
     SCIP_CALL(SCIPwriteOrigProblem(scip, "glcip_original.lp", "lp", FALSE));
 

@@ -38,31 +38,58 @@ class GLCIPBase
 {
 public:
     
-    static void addLinkingConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+    static void addLinkingConstraints(
+        SCIP *scip, 
+        GLCIPInstance &instance, 
+        DNodeSCIPVarMap &x, 
+        ArcSCIPVarMap &z);
 
-    static void addCoverageConstraints (SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x);
+    static void addCoverageConstraints (
+        SCIP *scip, 
+        GLCIPInstance &instance, 
+        DNodeSCIPVarMap &x);
 
-    static void addCycleConstraints(SCIP *scip,
-                                    GLCIPInstance &instance, 
-                                    DNodeSCIPVarMap &x, 
-                                    ArcSCIPVarMap &z, 
-                                    DNodeIntMap &predMap, 
-                                    Arc &backArc);
+    static void addCycleConstraints(
+        SCIP *scip,
+        GLCIPInstance &instance, 
+        DNodeSCIPVarMap &x, 
+        ArcSCIPVarMap &z, 
+        DNodeIntMap &predMap, 
+        Arc &backArc);
 
-    static void dfsSmallCycles(SCIP *scip, 
-                                GLCIPInstance &instance, 
-                                DNodeSCIPVarMap &x, 
-                                ArcSCIPVarMap &z, 
-                                DNodeIntMap &colors,
-                                DNodeIntMap &predMap, 
-                                DNode curr, 
-                                int level, 
-                                int rootId);
+    static void dfsSmallCycles(
+        SCIP *scip, 
+        GLCIPInstance &instance, 
+        DNodeSCIPVarMap &x, 
+        ArcSCIPVarMap &z, 
+        DNodeIntMap &colors,
+        DNodeIntMap &predMap, 
+        DNode curr, 
+        int level, 
+        int rootId);
                                 
-    static void addSmallCycleConstraints(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+    static void addSmallCycleConstraints(
+        SCIP *scip, GLCIPInstance &instance,
+        DNodeSCIPVarMap &x,
+        ArcSCIPVarMap &z);
+    /**
+     * method created to substitute the methods above
+     */ 
+    static void addAllSmallDirectedCycles(
+        SCIP *scip, 
+        GLCIPInstance &instance, 
+        DNodeSCIPVarMap &x, 
+        ArcSCIPVarMap &z);
 
-    static double cheapestIncentive(const GLCIPInstance &instance, const DNode &v, double exertedInfluence);
-    static double costInfluencingSet(const GLCIPInstance &instance, const DNode &v, const set<DNode> &nodes);
+    static double cheapestIncentive(
+        const GLCIPInstance &instance,
+        const DNode &v,
+        double exertedInfluence);
+    
+    static double costInfluencingSet(
+        const GLCIPInstance &instance,
+        const DNode &v, 
+        const set<DNode> &nodes);
 //     static void addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
 };
 
@@ -84,6 +111,14 @@ typedef struct influencing_set{
     double cost;
 }InfluencingSet;
 
+// data structure for each generalized set X and a vertex i of GPCs
+typedef struct phi{
+    set<DNode> generalizedSet;
+    SCIP_ROW* row;
+    DNode k;
+    SCIP_Real dualVal;
+}Phi;
+
 typedef Digraph::NodeMap< vector<InfluencingSet> > DNodeInfSetsMap;
 
 /**
@@ -95,16 +130,23 @@ class CovModelAllVariables: public GLCIPBase
 public:
     CovModelAllVariables();
     ~CovModelAllVariables();
-    static vector<InfluencingSet> powerSet(GLCIPInstance &instance, vector<DNode> neighbors, DNode &v);
+    static vector<InfluencingSet> powerSet(
+        GLCIPInstance &instance,
+        vector<DNode> neighbors, 
+        DNode &v);
+    
     static double costInfluencingSet(GLCIPInstance &instance, DNode v, set<DNode> nodes);
+    
     static void addPropagationConstraints(SCIP *scip,
                                           GLCIPInstance &instance, 
                                           DNodeSCIPVarMap &x, 
                                           DNodeInfSetsMap &infSet);
+    
     static void addChosenArcsConstraints(SCIP *scip, 
                                          GLCIPInstance &instance, 
                                          ArcSCIPVarMap &z, 
                                          DNodeInfSetsMap &infSet);
+    
     static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 
@@ -112,11 +154,13 @@ class CovModel: public GLCIPBase
 {
 public:
     static bool isFeasible(GLCIPInstance &instance, GLCIPSolution &solution);
+   
     static void constructSoltion(SCIP *scip, 
                                   GLCIPInstance &instance, 
                                   GLCIPSolution &solution, 
                                   ArcSCIPVarMap& z, 
                                   DNodeInfSetsMap& infSet);
+    
     static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 

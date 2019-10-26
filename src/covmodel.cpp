@@ -210,8 +210,8 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             // give a representative name to the variable
             std::stringstream stream;
             for (DNode u : infSet[v][0].nodes)
-                stream << instance.nodeName[u];
-            name = "infSetVar_" + instance.nodeName[v] + "_" + stream.str();
+                stream << instance.nodeName[u] + ",";
+            name = "infSetVar_" + instance.nodeName[v] + "_{" + stream.str() + "}";
         }
         else
             name = "infSetVar_" + instance.nodeName[v] + "_empty";
@@ -526,7 +526,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
 
     //indicates whether an arc is able to be branched, that is, if source(arc)
-    //is in some non-empty influencing-set
+    //is in some non-empty influencing-set (useful in the pricer)
     ArcBoolMap isAble(graph);
     for (ArcIt a(graph); a != INVALID; ++a)
     {
@@ -547,8 +547,30 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
+    // add cutting planes
+    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
+
+    SCIP_CONS *cons;
+    SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts",
+                                   FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
+    SCIP_CALL(SCIPaddCons(scip, cons));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons));
+
+    // list to save all the GPC's rows added to de model
+    vector<Phi> gpcrows;
+    // add generalized propagation constraints
+    GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet, gpcrows);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
+
+    SCIP_CONS *cons1;
+    SCIP_CALL(gpc->createGenPropagationCons(scip, &cons1, "GPC"));
+    SCIP_CALL(SCIPaddCons(scip, cons1));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons1));
+    // end of GPC
+
     // include pricer
-    ArcIntMap isOnSolution(graph);
+    //ArcIntMap isOnSolution(graph);
     static const char *PRICER_NAME = "GLCIP_pricer";
     ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip,
                                                 PRICER_NAME,
@@ -557,9 +579,8 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                                                 x,
                                                 arcCons,
                                                 vertCons,
-                                                infSet,
-                                                isAble,
-                                                isOnSolution);
+                                                gpcrows,
+                                                infSet);
 
     SCIP_CALL(SCIPincludeObjPricer(scip, pricer, TRUE));
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
@@ -579,26 +600,6 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     /* static const char *EVENTHDLR_NAME = "GLCIP_eventhdlr";
     ObjEventhdlrGLCIP *event = new ObjEventhdlrGLCIP(scip, EVENTHDLR_NAME, instance);
     SCIP_CALL(SCIPincludeObjEventhdlr(scip, event, TRUE)); */
-
-    // add cutting planes
-    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
-    SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
-
-    SCIP_CONS *cons;
-    SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts",
-                                   FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
-    SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons));
-
-    // add generalized propagation constraints
-    /* GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet);
-    SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
-
-    SCIP_CONS *cons;
-    SCIP_CALL(gpc->createGenPropagationCons(scip, &cons, "GPC"));
-    SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
-    // end of GPC
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));
