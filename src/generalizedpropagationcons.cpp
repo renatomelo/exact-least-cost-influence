@@ -72,7 +72,7 @@ SCIP_Bool findDirectedCycle(
    return FALSE;
 }
 
-bool intersects(set<DNode> &set1, set<DNode> &set2)
+/* bool intersects(set<DNode> &set1, set<DNode> &set2)
 {
    if (set1.empty() || set2.empty())
       return false;
@@ -84,7 +84,7 @@ bool intersects(set<DNode> &set1, set<DNode> &set2)
    }
 
    return false;
-}
+} */
 
 /** 
  * separates generalized propagation constraints
@@ -140,7 +140,7 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    {
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
-         if (!intersects(generalizedSet, infSet[v][i].nodes))
+         if (!GLCIPBase::intersects(generalizedSet, infSet[v][i].nodes))
          {
             SCIPaddVarToRow(scip, row, infSet[v][i].var, 1.0);
             //TODO save here the valid influencing-sets 
@@ -235,7 +235,7 @@ SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
          double sum = 0;
          for (unsigned int p = 0; p < infSet[j].size(); p++)
          {
-            if (!intersects(generalizedSet, infSet[j][p].nodes))
+            if (!GLCIPBase::intersects(generalizedSet, infSet[j][p].nodes))
             {
                sum += SCIPgetSolVal(scip, sol, infSet[j][p].var);
             }
@@ -261,7 +261,7 @@ SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
          {
             for (unsigned int p = 0; p < infSet[j].size(); p++)
             {
-               if (!intersects(generalizedSet, infSet[j][p].nodes))
+               if (!GLCIPBase::intersects(generalizedSet, infSet[j][p].nodes))
                {
                   sum += SCIPgetSolVal(scip, sol, infSet[j][p].var);
                }
@@ -363,7 +363,7 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                {
                   for (unsigned int p = 0; p < infSet[j].size(); p++)
                   {
-                     if (!intersects(cycle, infSet[j][p].nodes))
+                     if (!GLCIPBase::intersects(cycle, infSet[j][p].nodes))
                      {
                         sum += SCIPgetSolVal(scip, sol, infSet[j][p].var);
                      }

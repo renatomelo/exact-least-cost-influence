@@ -271,3 +271,17 @@ double GLCIPBase::costInfluencingSet(const GLCIPInstance &instance,
     }
     return cost;
 }
+
+bool GLCIPBase::intersects(set<DNode> &set1, set<DNode> &set2)
+{
+   if (set1.empty() || set2.empty())
+      return false;
+
+   for (DNode v : set1)
+   {
+      if (set2.count(v))
+         return true;
+   }
+
+   return false;
+}

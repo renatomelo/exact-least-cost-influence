@@ -271,6 +271,21 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    return SCIP_OKAY;
 }
 
+SCIP_Real sumOfPhis(DNode v, set<DNode> nodes, vector<Phi> gpcrows)
+{
+   double sum = 0;
+
+   for (unsigned int i = 0; i < gpcrows.size(); i++)
+   {
+      if (gpcrows[i].generalizedSet.count(v) && !GLCIPBase::intersects(nodes, gpcrows[i].generalizedSet))
+      {
+         sum += gpcrows[i].dualVal;
+      }
+   }
+
+   return sum;
+}
+
 /** return negative reduced cost influencing set (uses minimum knapsack dynamic 
  *  programming algorithm)
  *  Algorithm:
@@ -348,8 +363,10 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    for (i = 0; i <= n; i++)
    {
       minCost[i] = new SCIP_Real[W + 1];
-      minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue;
+      minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue - sumOfPhis(v, nodes, gpcrows);
    }
+
+   cout << "sumOfPhis(v, nodes, gpcrows) = " << sumOfPhis(v, nodes, gpcrows) << endl;
    //std::cout << "\nIncentive cost with no influence from neighbors: "
    //<< cheapestIncentive(v, 0) << std::endl;
    // fill 0th row
@@ -362,6 +379,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    {
       for (int j = 0; j <= W; j++)
       {
+         set<DNode> tmpNodes;
          // get minimum cost by including or excluding the i-th node
          int col = max(j - wt[i - 1], 0.0); // to avoid negative index
          minCost[i][j] = min(minCost[i - 1][j],

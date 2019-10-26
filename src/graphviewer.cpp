@@ -14,7 +14,7 @@ void GraphViewer::ViewGLCIPSolution(GLCIPInstance &instance, GLCIPSolution &solu
 
         nodeNames[v] = "\"" + instance.nodeName[v] + "(" + s + ")" + "\"";
     }
-
+    
     // set graph attributes for the visualizer
     DigraphAttributes GA(instance.g, nodeNames, instance.posx, instance.posy);
 

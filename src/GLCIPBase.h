@@ -90,6 +90,8 @@ public:
         const GLCIPInstance &instance,
         const DNode &v, 
         const set<DNode> &nodes);
+
+    static bool intersects(set<DNode> &set1, set<DNode> &set2);
 //     static void addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
 };
 
