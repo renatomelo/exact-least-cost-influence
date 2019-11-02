@@ -269,7 +269,8 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP");
     //exit(0);
     // add generalized propagation constraints
-    GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet);
+    vector<Phi> gpcrows;
+    GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet, gpcrows);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
 
     SCIP_CONS *cons;

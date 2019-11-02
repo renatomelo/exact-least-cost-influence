@@ -91,7 +91,7 @@ SCIP_RETCODE checkVariable(
 
         //SCIP_PRICER* pricer = SCIPfindPricer(scip, "GLCIP_pricer");
         ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
-        pricer_glcip->isOnSolution[consdata->arc] = -1;
+        //pricer_glcip->isOnSolution[consdata->arc] = -1;
         //SCIP_PRICERDATA* pricerdata =  SCIPpricerGetData(scip, pricer);
         //SCIPpricerSetData()
 
@@ -118,7 +118,7 @@ SCIP_RETCODE checkVariable(
         //std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 1\n";
 
         ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
-        pricer_glcip->isOnSolution[consdata->arc] = 1;
+        //pricer_glcip->isOnSolution[consdata->arc] = 1;
 
         if (infeasible)
         {
@@ -330,7 +330,7 @@ SCIP_DECL_CONSDEACTIVE(ConshdlrArcMarker::scip_deactive)
     printConsData(consdata); */
 
     ObjPricerGLCIP* pricer_glcip = (ObjPricerGLCIP*)  SCIPfindObjPricer(scip, "GLCIP_pricer");
-    pricer_glcip->isOnSolution[consdata->arc] = 0;
+    //pricer_glcip->isOnSolution[consdata->arc] = 0;
 
     return SCIP_OKAY;
 }

@@ -143,7 +143,6 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
          if (!GLCIPBase::intersects(generalizedSet, infSet[v][i].nodes))
          {
             SCIPaddVarToRow(scip, row, infSet[v][i].var, 1.0);
-            //TODO save here the valid influencing-sets 
          }
       }
       gpcrow.generalizedSet.insert(v);
@@ -165,8 +164,19 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
          //save the added constraint to use in the price
          gpcrow.row = row;
          gpcrows.push_back(gpcrow);
+
+         /* for (DNode v : generalizedSet)
+         {
+            for (unsigned int i = 0; i < infSet[v].size(); i++)
+            {
+               if (!GLCIPBase::intersects(generalizedSet, infSet[v][i].nodes))
+               {
+                  //save the valid influencing-sets
+                  infSet[v][i].phis.insert(gpcrow);
+               }
+            }
+         } */
       }
-      
    }
    //SCIP_CALL(SCIPreleaseRow(scip, &row));
 
@@ -401,7 +411,7 @@ void printFractionalSol(SCIP *scip,
                         DNodeInfSetsMap &infSet)
 {
    cout << "\nFractional solution: \n";
-  /*  cout << "x variables\n";
+   /*  cout << "x variables\n";
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       cout << "x[" << instance.nodeName[v] << "] = " << SCIPgetSolVal(scip, sol, x[v]) << endl;
@@ -880,9 +890,9 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
       //cout << "number of pseudo candidates = " << SCIPgetNPseudoBranchCands(scip) << endl;
       if (SCIPgetNPseudoBranchCands(scip) == 0)
       {
-         // if you just return INFEASIBLE without any branching candidates available, 
-         // SCIP will have no chance to resolve this infeasibility. Therefore, you 
-         // should return SCIP_CUTOFF, meaning that the node with its current 
+         // if you just return INFEASIBLE without any branching candidates available,
+         // SCIP will have no chance to resolve this infeasibility. Therefore, you
+         // should return SCIP_CUTOFF, meaning that the node with its current
          // variable bounds (or fixings) contains no feasible solution.
          cout << "SCIP_CUTOFF\n";
          *result = SCIP_CUTOFF;

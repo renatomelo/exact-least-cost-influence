@@ -15,8 +15,8 @@ private:
    DNodeSCIPVarMap &x;     /**< map of vertex variables */
    ArcConsMap &arcCons;    /**< map of arc constraints */
    DNodeConsMap &vertCons; /**< map of partitioning constraints */
-   DNodeInfSetsMap &infSet;
    vector<Phi> &gpcrows;
+   DNodeInfSetsMap &infSet;
    //ArcBoolMap &isAble;
 
    //ArcBoolMap arcMarker;   // map to signals the decision about the arcs in the branching rule

@@ -106,13 +106,6 @@ public:
     static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 
-// structure to storage the set of nodes belonging to a influencing set
-typedef struct influencing_set{
-    set<DNode> nodes;
-    SCIP_VAR* var;
-    double cost;
-}InfluencingSet;
-
 // data structure for each generalized set X and a vertex i of GPCs
 typedef struct phi{
     set<DNode> generalizedSet;
@@ -120,6 +113,16 @@ typedef struct phi{
     DNode k;
     SCIP_Real dualVal;
 }Phi;
+
+// structure to storage the set of nodes belonging to a influencing set
+typedef struct influencing_set{
+    set<DNode> nodes;
+    SCIP_VAR* var;
+    double cost;
+
+    //set of all GPCs inequalities which the generalized-set X has no intersection with influencing-set nodes
+    //set<Phi> phis; 
+}InfluencingSet;
 
 typedef Digraph::NodeMap< vector<InfluencingSet> > DNodeInfSetsMap;
 
