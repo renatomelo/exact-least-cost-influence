@@ -129,7 +129,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
    {
       /* compute the minimum cost influencing set w.r.t. dual values */
       set<DNode> nodes;
-      SCIP_Real reduced_cost = findMinCostInfluencingSet(scip, v, dualArcValues, dualVertValues[v], nodes);
+      SCIP_Real reduced_cost = findMinCostInfluencingSet2(scip, v, dualArcValues, dualVertValues[v], nodes);
 
       std::cout << "Pricing the vertex: " << instance.nodeName[v] << "  ";
       /* add influencing set variable */
@@ -372,28 +372,11 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
       minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue;
    }
 
-   cout << "sumOfPhis(v, nodes, gpcrows) = " << sumOfPhis(v, nodes, gpcrows) << endl;
    //std::cout << "\nIncentive cost with no influence from neighbors: "
    //<< cheapestIncentive(v, 0) << std::endl;
    // fill 0th row
    for (i = 1; i <= W; i++)
       minCost[0][i] = 1e+9;
-
-   //initialization (no influence from neighbors)
-   vector<Phi> L0; 
-   cout << "before enter the function - gpcrows size = " << gpcrows.size() << endl;
-   getValidPhis(v, gpcrows, L0);
-
-   cout << "L0.size() = " << L0.size() << endl;
-
-   /* cout << "rows of gpc in which X contains node " << instance.nodeName[v] << ": \n";
-   for (unsigned int j = 0; j < L0.size(); j++)
-   {
-      //SCIPprintRow(scip, L0[j].row, NULL);
-      for (DNode w : L0[j].generalizedSet)
-         cout << instance.nodeName[w] << " ";
-      cout << endl;
-   } */
 
    // check the weight of influence from a vertex u over v for each u
    // and fill the matrix according to the condition
@@ -401,39 +384,15 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
    {
       for (int j = 0; j <= W; j++)
       {
-         set<DNode> tmpNodes;
-         tmpNodes.insert(neighbors[i - 1]);
-
-         // phi': {(X,k) \in Phi : i is not in X}
-
-         vector<Phi> prime;
-         for (unsigned int l = 0; l < L0.size(); l++)
-         {
-            if (!L0[l].generalizedSet.count(neighbors[i-1]))
-            {
-               prime.push_back(L0[i]);
-            }
-         }
-
-         double sum = 0;
-         // sum all the phis excluding the elements in prime
-         for (unsigned int l = 0; l < L0.size(); l++)
-         {
-            if (L0[l].generalizedSet.count(neighbors[i-1]))
-            {
-               sum += L0[l].dualVal;
-            }
-
-         }
-
          // get minimum cost by including or excluding the i-th node
          int col = max(j - wt[i - 1], 0.0); // to avoid negative index
          minCost[i][j] = min(minCost[i - 1][j],
-                             minCost[i - 1][col] + costs[i - 1] +
+                             minCost[i - 1][col] + costs[i - 1] + 
                                  GLCIPBase::cheapestIncentive(instance, v, j) -
                                  GLCIPBase::cheapestIncentive(instance, v, col));
          /* std::cout << "cheapest incentive of " << instance.nodeName[v] << " with j = " << j << ": " << cheapestIncentive(v, j)
                    << ", and col = " << col << ": " << cheapestIncentive(v, col) << std::endl; */
+
          // stop whether the reduced cost is negative
          if (SCIPisNegative(scip, minCost[i][j]))
          {
@@ -462,7 +421,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
 
             delete[] wt;
             delete[] costs;
-            //delete[] neighbors;
             for (i = 0; i <= n; i++)
                delete[] minCost[i];
             delete[] minCost;
@@ -496,7 +454,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
 }
 
 //new dynamic program for solving the pricing subproblem
-/* SCIP_Real SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
+SCIP_Real SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
     SCIP *scip,
     const DNode &v,                  // vertex to be influenced
     const ArcValueMap &dualArcValue, // dual solution of arc constraints
@@ -504,7 +462,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
     set<DNode> &nodes                // list of incoming neighbors
 )
 {
-   double redCost;
+   SCIP_Real redCost;
    nodes.clear();
    InDegMap<Digraph> inDegrees(instance.g);
    if (inDegrees[v] == 0)
@@ -521,6 +479,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
              << " at BnB node " << SCIPgetFocusDepth(scip) << "\n";
 
    //initialize weight of influence vector and costs vector
+   //double extInf = 0; // external influence
    int i = 0;
    vector<DNode> neighbors(n);
    for (InArcIt a(instance.g, v); a != INVALID; ++a)
@@ -530,5 +489,114 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet(
       wt[i++] = instance.influence[a];
    }
 
+   // fill 0th column
+   // initial reduced cost no influence from neighbors
+   for (i = 0; i <= n; i++)
+   {
+      minCost[i] = new SCIP_Real[W + 1];
+      minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue;
+   }
+
+   cout << "sumOfPhis(v, nodes, gpcrows) = " << sumOfPhis(v, nodes, gpcrows) << endl;
+   //std::cout << "\nIncentive cost with no influence from neighbors: "
+   //<< cheapestIncentive(v, 0) << std::endl;
+   // fill 0th row
+   for (i = 1; i <= W; i++)
+      minCost[0][i] = 1e+9;
+
+   //initialization (no influence from neighbors)
+   //vector< vector<Phi> > listOfPhis(n+1); 
+   vector< vector<PairOfPhisAndD> > listOfPairs(n+1);
+   PairOfPhisAndD firstPair;
+   firstPair.d = 0;
+   getValidPhis(v, gpcrows, firstPair.phis);
+   listOfPairs[0].push_back(firstPair);
+
+   cout << "listOfPairs[0][0].phis.size() = " << listOfPairs[0][0].phis.size() << endl;
+
+   cout << "rows of gpc in which X contains node " << instance.nodeName[v] << ": \n";
+   for (unsigned int l = 0; l < listOfPairs[0][0].phis.size(); l++)
+   {
+      //SCIPprintRow(scip, L0[j].row, NULL);
+      for (DNode w : listOfPairs[0][0].phis[l].generalizedSet)
+         cout << instance.nodeName[w] << " ";
+      cout << endl;
+   }
+
+   // check the weight of influence from a vertex u over v for each u
+   // and fill the matrix according to the condition
+   for (i = 1; i <= n; i++)
+   {
+      for (int j = 0; j <= W; j++)
+      {
+
+         PairOfPhisAndD p = listOfPairs[i-1][j];
+         // phi' = {(X,k) \in Phi : i is not in X}
+         vector<Phi> prime;
+         for (unsigned int l = 0; l < listOfPhis[i-1].size(); l++)
+         {
+            // remember that neighbors[i-1] is the i-th neigbor
+            if (!listOfPhis[i-1][l].generalizedSet.count(neighbors[i-1]))
+            {
+               prime.push_back(listOfPhis[i-1][l]);
+            }
+         }
+
+         double sum = 0;
+         // sum all the phis excluding the elements in prime
+         for (unsigned int l = 0; l < listOfPhis[i-1].size(); l++)
+         {
+            if (listOfPhis[i-1][l].generalizedSet.count(neighbors[i-1]))
+            {
+               sum += listOfPhis[i-1][l].dualVal;
+            }
+         }
+
+         cout << "sum of phis excluding the elements in prime: " << sum << endl;
+
+         // get minimum cost by including or excluding the i-th node
+         int col = max(j - wt[i - 1], 0.0); // to avoid negative index
+         minCost[i][j] = min(minCost[i - 1][j],
+                             minCost[i - 1][col] + costs[i - 1] + sum +
+                                 GLCIPBase::cheapestIncentive(instance, v, j) -
+                                 GLCIPBase::cheapestIncentive(instance, v, col));
+         //listOfPhis[i].push_back(prime);
+         
+         // stop whether the reduced cost is negative
+         if (SCIPisNegative(scip, minCost[i][j]))
+         {
+            //get the solution
+            int k = j;
+            for (int l = i; l > 0; l--)
+            {
+               if (minCost[l][k] != minCost[l - 1][k])
+               {
+                  nodes.insert(neighbors[l - 1]);
+                  k = max(k - wt[l - 1], 0.0);
+               }
+            }
+
+            redCost = minCost[i][j];
+
+            delete[] wt;
+            delete[] costs;
+            for (i = 0; i <= n; i++)
+               delete[] minCost[i];
+            delete[] minCost;
+
+            return redCost;
+         }
+      }
+   }
+
+   redCost = minCost[n][W];
+
+   delete[] wt;
+   delete[] costs;
+   //delete[] neighbors;
+   for (i = 0; i <= n; i++)
+      delete[] minCost[i];
+   delete[] minCost;
+
    return redCost;
-} */
+}

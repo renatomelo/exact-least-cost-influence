@@ -124,6 +124,12 @@ typedef struct influencing_set{
     //set<Phi> phis; 
 }InfluencingSet;
 
+// structure to represent each pair (d, phis) of the dynamic program for the pricing
+typedef struct pair_of_phis_and_d{
+    double d;
+    vector<Phi> phis;
+}PairOfPhisAndD;
+
 typedef Digraph::NodeMap< vector<InfluencingSet> > DNodeInfSetsMap;
 
 /**
