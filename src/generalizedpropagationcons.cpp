@@ -72,19 +72,7 @@ SCIP_Bool findDirectedCycle(
    return FALSE;
 }
 
-/* bool intersects(set<DNode> &set1, set<DNode> &set2)
-{
-   if (set1.empty() || set2.empty())
-      return false;
 
-   for (DNode v : set1)
-   {
-      if (set2.count(v))
-         return true;
-   }
-
-   return false;
-} */
 
 /** 
  * separates generalized propagation constraints
@@ -121,10 +109,10 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    SCIP_CALL(SCIPcacheRowExtensions(scip, row));
 
    Phi gpcrow;
+   gpcrow.k = k;
    if (!lifting)
    {
       SCIPaddVarToRow(scip, row, x[k], -1.0);
-      gpcrow.k = k;
    }
    /*  cout << "elements in X : ";
    for (DNode v : generalizedSet)
@@ -163,19 +151,8 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
       {
          //save the added constraint to use in the price
          gpcrow.row = row;
-         gpcrows.push_back(gpcrow);
-
-         /* for (DNode v : generalizedSet)
-         {
-            for (unsigned int i = 0; i < infSet[v].size(); i++)
-            {
-               if (!GLCIPBase::intersects(generalizedSet, infSet[v][i].nodes))
-               {
-                  //save the valid influencing-sets
-                  infSet[v][i].phis.insert(gpcrow);
-               }
-            }
-         } */
+         //if (gpcrow.k != INVALID) // save only the rows that have an associated k
+            gpcrows.push_back(gpcrow);
       }
    }
    //SCIP_CALL(SCIPreleaseRow(scip, &row));
@@ -417,14 +394,14 @@ void printFractionalSol(SCIP *scip,
       cout << "x[" << instance.nodeName[v] << "] = " << SCIPgetSolVal(scip, sol, x[v]) << endl;
    } */
 
-   cout << "lambda variables\n";
+   /* cout << "lambda variables\n";
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
          cout << SCIPvarGetName(infSet[v][i].var) << " = " << SCIPgetSolVal(scip, sol, infSet[v][i].var) << endl;
       }
-   }
+   } */
 
    cout << "LHS of the new constraint: \n";
    for (DNodeIt v(instance.g); v != INVALID; ++v)
@@ -859,7 +836,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
    }
 
    //mostrar variaveis lambdas
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   /* for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
@@ -869,7 +846,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
                  << SCIPgetVarSol(scip, infSet[v][i].var) << endl;
          }
       }
-   }
+   } */
 
    //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
 

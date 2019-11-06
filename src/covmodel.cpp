@@ -548,14 +548,14 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
     // add cutting planes
-    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
     SCIP_CONS *cons;
     SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts",
                                    FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
 
     // list to save all the GPC's rows added to de model
     vector<Phi> gpcrows;
