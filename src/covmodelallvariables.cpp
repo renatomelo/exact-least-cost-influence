@@ -1,6 +1,7 @@
 #include "GLCIPBase.h"
 #include "generalizedpropagationcons.h"
 #include <stack>
+#include "heur_mininfluence.h"
 
 vector<InfluencingSet> CovModelAllVariables::powerSet(GLCIPInstance &instance, vector<DNode> neighbors, DNode &v)
 {
@@ -269,25 +270,27 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP");
     //exit(0);
     // add generalized propagation constraints
-    vector<Phi> gpcrows;
+    /* vector<Phi> gpcrows;
     GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet, gpcrows);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
 
     SCIP_CONS *cons;
     SCIP_CALL(gpc->createGenPropagationCons(scip, &cons, "GPC"));
     SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
     // end of GPC
 
     // add cutting planes
-    /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
     SCIP_CONS *cons1;
     SCIP_CALL(cuts.createCycleCuts(scip, &cons1, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons1));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons1)); */
+    SCIP_CALL(SCIPreleaseCons(scip, &cons1));
     //end of cutting planes
+
+    SCIP_CALL( SCIPincludeObjHeur(scip, new HeurMinInfluence(scip, instance), TRUE) );
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));

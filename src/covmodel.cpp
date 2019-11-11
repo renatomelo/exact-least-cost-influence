@@ -500,7 +500,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     {
         DNode u = graph.source(a);
         DNode v = graph.target(a);
-        std::string name = "z_(" + instance.nodeName[u] + "," + instance.nodeName[v]+")";
+        std::string name = "z_(" + instance.nodeName[u] + "," + instance.nodeName[v] + ")";
         ScipVar *var = new ScipBinVar(scip, name, 0);
         z[a] = var->var;
     }

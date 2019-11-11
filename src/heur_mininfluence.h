@@ -3,24 +3,32 @@
 
 #include "GLCIPBase.h"
 
-/** C++ wrapper */
 class HeurMinInfluence : public scip::ObjHeur
 {
-   GLCIPInstance&     instance_;          /**< the underlying graph of the TSP */
+   GLCIPInstance&     instance;          /**< the instance for GLCIP */
    SCIP_SOL*          sol_;               /**< current solution */
-   GRAPHEDGE**        tour_;              /**< tour induced by sol */
 
 public:
 
    /** default constructor */
    HeurMinInfluence(
-      SCIP* scip
+      SCIP* scip,
+      GLCIPInstance&     p_instance
       )
-      : ObjHeur(scip, "2opt", "2-Opt heuristic for TSPs", 'K',-1000000, 1, 0, -1, SCIP_HEURTIMING_AFTERNODE, FALSE),
-      graph_(0),
-      ncalls_(0),
+      : ObjHeur(
+         scip, 
+         "MinInfluence", //name
+         "Minimum influence primal heuristic for GLCIP", //description
+         'K',           //display character of primal heuristic
+         -1000000,      //priority of the primal heuristic
+         1,             //frequency for calling primal heuristic
+         0,             //frequency offset for calling primal heuristic
+         -1,            //maximal depth level to call heuristic at (-1: no limit)
+         SCIP_HEURTIMING_AFTERNODE, //positions in the node solving loop where heuristic should be executed;
+                                    //see definition of SCIP_HEURTIMING for possible values
+         FALSE),        //does the heuristic use a secondary SCIP instance?
+      instance(p_instance),
       sol_(NULL),
-      tour_(NULL)
    {
    }
 
@@ -67,13 +75,13 @@ public:
    virtual SCIP_DECL_HEUREXEC(scip_exec);
 
    /** clone method which will be used to copy a objective plugin */
-   virtual SCIP_DECL_HEURCLONE(ObjCloneable* clone); /*lint !e665*/
+   //virtual SCIP_DECL_HEURCLONE(ObjCloneable* clone); /*lint !e665*/
 
    /** returns whether the objective plugin is copyable */
-   virtual SCIP_DECL_HEURISCLONEABLE(iscloneable)
+   /* virtual SCIP_DECL_HEURISCLONEABLE(iscloneable)
    {
       return true;
-   }
+   } */
 }; /*lint !e1712*/
 
 #endif

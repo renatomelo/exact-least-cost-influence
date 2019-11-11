@@ -420,7 +420,8 @@ void printFractionalSol(SCIP *scip,
       }
       InDegMap<Digraph> inDeg(instance.g);
 
-      cout << instance.nodeName[v] << " degree =  " << inDeg[v] << ", lhs  = " << sum << endl;
+      cout << instance.nodeName[v] << ": degree =  " << inDeg[v] 
+            << ", threshold = " << instance.threshold[v] << ", lhs  = " << sum << endl;
    }
 }
 
