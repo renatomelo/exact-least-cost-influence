@@ -179,7 +179,7 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
         if (infSet[v][0].nodes.size() > 0)
         {
             // give a significative name for the variable
-            name = "infSetVar_" + instance.nodeName[v] + "_empty";
+            name = "HeurLambda_" + instance.nodeName[v] + "_empty";
 
             //add a empty influencing-set var for each vertex
             double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
@@ -209,12 +209,17 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
 
             // give a representative name to the variable
             std::stringstream stream;
+            const char *separator = "";
             for (DNode u : infSet[v][0].nodes)
-                stream << instance.nodeName[u] + ",";
-            name = "infSetVar_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+            {
+                stream << separator << instance.nodeName[u];
+                separator = ",";
+            }
+
+            name = "HeurLambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
         }
         else
-            name = "infSetVar_" + instance.nodeName[v] + "_empty";
+            name = "HeurLambda_" + instance.nodeName[v] + "_empty";
 
         SCIP_VAR *var;
         SCIP_CALL(SCIPcreateVar(scip, &var,
@@ -251,12 +256,12 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
     }
 
     //add influencing-set var for the non-active vertices to guarantee the feasibility
-    for(DNodeIt v(instance.g); v != INVALID; ++v)
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        if(!activated.count(v))
+        if (!activated.count(v))
         {
             std::string name;
-            name = "infSetVar_" + instance.nodeName[v] + "_empty";
+            name = "HeurLambda_" + instance.nodeName[v] + "_empty";
 
             double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
 
@@ -301,7 +306,7 @@ SCIP_RETCODE addInitialFeasibleSol(SCIP *scip,
                                    DNodeInfSetsMap &infSet,
                                    ArcBoolMap &isAble)
 {
-    SCIP_CALL(addHeurInitialSol(scip, instance, arcCons,vertCons, infSet, isAble));
+    SCIP_CALL(addHeurInitialSol(scip, instance, arcCons, vertCons, infSet, isAble));
 
     // add trivial influencing-set variable for every arc not selected in the initial sol
     for (ArcIt a(instance.g); a != INVALID; ++a)
@@ -310,13 +315,13 @@ SCIP_RETCODE addInitialFeasibleSol(SCIP *scip,
         {
             DNode u = instance.g.source(a);
             DNode v = instance.g.target(a);
-            std::string name = "infSet_" + instance.nodeName[u] + "," + instance.nodeName[v];
+            std::string name = "HeurLambda_" + instance.nodeName[u] + "{" + instance.nodeName[v] + "}";
 
             // data structure to save the variables and associated costs
             InfluencingSet initial;
             initial.nodes.insert(u);
             initial.cost = GLCIPBase::costInfluencingSet(instance, v, initial.nodes);
-            
+
             SCIP_VAR *var;
             SCIP_CALL(SCIPcreateVar(scip, &var,
                                     name.c_str(),            // var name
@@ -495,7 +500,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     {
         DNode u = graph.source(a);
         DNode v = graph.target(a);
-        std::string name = "z_" + instance.nodeName[u] + "" + instance.nodeName[v];
+        std::string name = "z_(" + instance.nodeName[u] + "," + instance.nodeName[v]+")";
         ScipVar *var = new ScipBinVar(scip, name, 0);
         z[a] = var->var;
     }
@@ -504,7 +509,8 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     DNodeConsMap vertCons(graph);
     for (DNodeIt v(graph); v != INVALID; ++v)
     {
-        ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip));
+        ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip), "vertex-coverage cons");
+        //ScipConsPrice *cons = new ScipConsPrice(scip, 0, 0, "vertex-coverage cons");
         cons->addVar(x[v], -1);
         vertCons[v] = cons->cons;
         cons->commit();
@@ -514,7 +520,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     ArcConsMap arcCons(graph);
     for (ArcIt a(graph); a != INVALID; ++a)
     {
-        ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip));
+        ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip), "arc-coverage cons");
 
         cons->addVar(z[a], 1);
         arcCons[a] = cons->cons;
@@ -544,6 +550,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     // add all cycles of size up to 4
     addSmallCycleConstraints(scip, instance, x, z);
+    //addAllSmallDirectedCycles(scip, instance, x, z);
 
     //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 

@@ -48,7 +48,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // add threshold constraints
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        ScipCons *cons = new ScipCons(scip, 0.0, SCIPinfinity(scip));
+        ScipCons *cons = new ScipCons(scip, 0.0, SCIPinfinity(scip), "threshold cons");
 
         // \sum_{p \in P_i} (p - h_v) x_{v, p}
         for (unsigned int p = 0; p < instance.incentives[v].size(); p++)
@@ -69,7 +69,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // coupling variables xip and x
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        ScipCons *cons = new ScipCons(scip, 0.0, 0.0);
+        ScipCons *cons = new ScipCons(scip, 0.0, 0.0, "linking cons");
 
         for (unsigned int p = 0; p < instance.incentives[v].size(); p++)
         {

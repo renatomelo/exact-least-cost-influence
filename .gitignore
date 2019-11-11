@@ -4,7 +4,8 @@
 *.pdf
 *.opt
 *.swp
-.viewdigraphtempname
+*.viewdigraphtempname
 *.config
 *.creator
 *.includes
+packages.microsoft.gpg

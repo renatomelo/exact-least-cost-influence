@@ -32,7 +32,7 @@ void GLCIPBase::addCycleConstraints(SCIP *scip,
     // now add the corresponding constraints
     for (unsigned int i = 0; i < nodes.size(); i++)
     {
-        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-cycle cons");
 
         // add arcs in the cycle
         for (auto a : arcs)
@@ -129,12 +129,12 @@ void GLCIPBase::addAllSmallDirectedCycles(
             if (findArc(instance.g, u, v) != INVALID)
             {
                 //adding inequality
-                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
 
                 cons->addVar(z[a], 1);
                 cons->addVar(z[findArc(instance.g, u, v)], 1);
 
-                cons->addVar(x[v], -1);
+                cons->addVar(x[u], -1);
                 cons->commit();
             }
             else
@@ -145,13 +145,14 @@ void GLCIPBase::addAllSmallDirectedCycles(
                     if (findArc(instance.g, w, v) != INVALID)
                     {
                         //adding inequality
-                        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+                        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCycle cons");
 
                         cons->addVar(z[a], 1);
                         cons->addVar(z[b], 1);
                         cons->addVar(z[findArc(instance.g, w, v)], 1);
 
-                        cons->addVar(x[v], -1);
+                        cons->addVar(x[u], -1);
+                        cons->addVar(x[w], -1);
                         cons->commit();
                     }
                     else
@@ -162,14 +163,16 @@ void GLCIPBase::addAllSmallDirectedCycles(
                             if (findArc(instance.g, y, v) != INVALID)
                             {
                                 //adding inequality
-                                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0);
+                                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCycle cons");
 
                                 cons->addVar(z[a], 1);
                                 cons->addVar(z[b], 1);
                                 cons->addVar(z[c], 1);
                                 cons->addVar(z[findArc(instance.g, y, v)], 1);
 
-                                cons->addVar(x[v], -1);
+                                cons->addVar(x[u], -1);
+                                cons->addVar(x[w], -1);
+                                cons->addVar(x[y], -1);
                                 cons->commit();
                             }
                         }
@@ -196,7 +199,7 @@ void GLCIPBase::addLinkingConstraints(SCIP *scip,
 
         //if (back == INVALID)
         {
-            ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
+            ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip), "linking cons");
 
             cons->addVar(x[v], 1);
             cons->addVar(z[a], -1);
@@ -213,7 +216,7 @@ void GLCIPBase::addCoverageConstraints(SCIP *scip,
                                        GLCIPInstance &instance,
                                        DNodeSCIPVarMap &x)
 {
-    ScipCons *covConstraint = new ScipCons(scip, ceil(instance.alpha * instance.n), SCIPinfinity(scip));
+    ScipCons *covConstraint = new ScipCons(scip, ceil(instance.alpha * instance.n), SCIPinfinity(scip), "coverage cons");
 
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {

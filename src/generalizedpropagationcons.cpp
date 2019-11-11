@@ -523,7 +523,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
    //create constraint to force a minimum size of two for set X
    //or size (1 - alpha) * n if the lifting is applied.
-   ScipCons *cons1 = new ScipCons(new_scip, 2.0, SCIPinfinity(new_scip));
+   ScipCons *cons1 = new ScipCons(new_scip, 2.0, SCIPinfinity(new_scip), "size-of-X cons");
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       cons1->addVar(belongsToX[v], 1.0);
@@ -532,7 +532,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    cons1->commit();
 
    //constraint to decide for the node or the lifting on the right-hand side
-   ScipCons *cons2 = new ScipCons(new_scip, 1.0, 1.0);
+   ScipCons *cons2 = new ScipCons(new_scip, 1.0, 1.0, "decide-lifting cons");
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       cons2->addVar(isOnRHS[v], 1.0);
@@ -542,7 +542,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
-      ScipCons *cons = new ScipCons(new_scip, -SCIPinfinity(new_scip), 0.0);
+      ScipCons *cons = new ScipCons(new_scip, -SCIPinfinity(new_scip), 0.0, "node-in-rhs cons");
       cons->addVar(isOnRHS[v], 1.0);
       cons->addVar(belongsToX[v], -1.0);
       cons->commit();
@@ -555,7 +555,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       //go through all the influencing-sets of v
       for (unsigned int i = 0; i < validInfSet[v].size(); i++)
       {
-         ScipCons *cons = new ScipCons(new_scip, 0.0, SCIPinfinity(new_scip));
+         ScipCons *cons = new ScipCons(new_scip, 0.0, SCIPinfinity(new_scip), "valid-inf-sets cons");
          cons->addVar(belongsToX[v], -1.0);
 
          for (DNode u : validInfSet[v][i].nodes)

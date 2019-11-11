@@ -96,8 +96,8 @@ void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip));
-        //ScipCons *cons = new ScipCons(scip, 0, 0);
+        //ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip), "vertex-coverage cons");
+        ScipCons *cons = new ScipCons(scip, 0, 0, "vertex-coverage cons");
 
         // summation of all influencing-set varialbes related to a vertex v
         for (unsigned int i = 0; i < infSet[v].size(); i++)
@@ -119,7 +119,7 @@ void unicInfSetConstraints(SCIP *scip,
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 1);
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 1, "unic-inf-set cons");
         //ScipCons *cons = new ScipCons(scip, 0, 0);
 
         // summation of all influencing-set varialbes related to a vertex v
@@ -141,7 +141,7 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
 {
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
-        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0);
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0, "arc-coverage cons");
         DNode u = instance.g.source(a);
         DNode v = instance.g.target(a);
 
@@ -300,13 +300,12 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
     //std::cout << SCIPgetSolvingTime(scip) << std::endl;
     // Construct solution
-    //CovModel::constructSoltion(scip, instance, solution, z, infSet);
+    CovModel::constructSoltion(scip, instance, solution, z, infSet);
 
-    /* if (CovModel::isFeasible(instance, solution))
+    if (CovModel::isFeasible(instance, solution))
         std::cout << "The solution is feasible" << std::endl;
     else
-        std::cout << "The solution is NOT feasible" << std::endl */
-    ;
+        std::cout << "The solution is NOT feasible" << std::endl;
 
     return SCIP_OKAY;
 }
