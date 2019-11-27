@@ -77,7 +77,6 @@ void showActivatedNodes(GLCIPInstance &instance, set<DNode> actives, DNodeInfSet
 double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &node)
 {
     double minCost = 1e+20;
-    //DNode choosed;
     set<DNode> activeNeigbors;
 
     for (DNodeIt v(instance.g); v != INVALID; ++v)
@@ -86,18 +85,12 @@ double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &n
 
         if (!actives.count(v))
         {
-            //std::cout << instance.nodeName[v] << " is inactive " << std::endl;
             for (InArcIt a(instance.g, v); a != INVALID; ++a)
             {
                 DNode u = instance.g.source(a);
 
-                //std::cout << "arc_" << instance.nodeName[u] << "_" << instance.nodeName[v]
-                //          << " visited now " << std::endl;
-
                 if (actives.count(u))
                 {
-                    //std::cout << "Node " << instance.nodeName[u] << " is an active neigbor of "
-                    //          << instance.nodeName[v] << std::endl;
                     activeNeigbors.insert(u);
                 }
             }
@@ -105,8 +98,6 @@ double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &n
             double cost = GLCIPBase::costInfluencingSet(instance, v, activeNeigbors);
             if (cost < minCost)
             {
-                //std::cout << "Cost of " + instance.nodeName[v]
-                //          << " is smaller than " << minCost << std::endl;
                 minCost = cost;
                 node = v;
 
@@ -116,9 +107,6 @@ double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &n
             }
         }
     }
-
-    //std::cout << "Node " + instance.nodeName[node] + " has the minimum incentive: "
-    //  << minCost << std::endl;
 
     return minCost;
 }
@@ -509,8 +497,8 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     DNodeConsMap vertCons(graph);
     for (DNodeIt v(graph); v != INVALID; ++v)
     {
-        ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip), "vertex-coverage cons");
-        //ScipConsPrice *cons = new ScipConsPrice(scip, 0, 0, "vertex-coverage cons");
+        //ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip), "vertex-coverage cons");
+        ScipConsPrice *cons = new ScipConsPrice(scip, 0, 0, "vertex-coverage cons");
         cons->addVar(x[v], -1);
         vertCons[v] = cons->cons;
         cons->commit();
@@ -520,7 +508,8 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     ArcConsMap arcCons(graph);
     for (ArcIt a(graph); a != INVALID; ++a)
     {
-        ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip), "arc-coverage cons");
+        //ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip), "arc-coverage cons");
+        ScipConsPrice *cons = new ScipConsPrice(scip, 0, 0, "arc-coverage cons");
 
         cons->addVar(z[a], 1);
         arcCons[a] = cons->cons;

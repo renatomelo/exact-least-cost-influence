@@ -3,7 +3,10 @@
 #include <stack>
 #include "heur_mininfluence.h"
 
-vector<InfluencingSet> CovModelAllVariables::powerSet(GLCIPInstance &instance, vector<DNode> neighbors, DNode &v)
+vector<InfluencingSet> CovModelAllVariables::powerSet(
+    GLCIPInstance &instance, 
+    vector<DNode> neighbors, 
+    DNode &v)
 {
     unsigned int pSize = pow(2, neighbors.size());
 
@@ -90,10 +93,11 @@ double CovModelAllVariables::costInfluencingSet(GLCIPInstance &instance, DNode v
 /**
  * at least one influencing set needs to be selected for each active node
  */
-void CovModelAllVariables::addPropagationConstraints(SCIP *scip,
-                                                     GLCIPInstance &instance,
-                                                     DNodeSCIPVarMap &x,
-                                                     DNodeInfSetsMap &infSet)
+void CovModelAllVariables::addPropagationConstraints(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    DNodeSCIPVarMap &x,
+    DNodeInfSetsMap &infSet)
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
@@ -290,7 +294,7 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     SCIP_CALL(SCIPreleaseCons(scip, &cons1));
     //end of cutting planes
 
-    SCIP_CALL( SCIPincludeObjHeur(scip, new HeurMinInfluence(scip, instance), TRUE) );
+    SCIP_CALL( SCIPincludeObjHeur(scip, new HeurMinInfluence(scip, instance, x, z, infSet), TRUE) );
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));

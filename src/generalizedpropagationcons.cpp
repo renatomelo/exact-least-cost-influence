@@ -102,9 +102,9 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    SCIP_ROW *row;
 
    if (lifting)
-      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 1.0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 1.0, SCIPinfinity(scip), FALSE, TRUE, TRUE));
    else
-      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0.0, SCIPinfinity(scip), FALSE, FALSE, TRUE));
+      SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "GPC_separation", 0.0, SCIPinfinity(scip), FALSE, TRUE, TRUE));
 
    SCIP_CALL(SCIPcacheRowExtensions(scip, row));
 
@@ -152,7 +152,7 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
          //save the added constraint to use in the price
          gpcrow.row = row;
          //if (gpcrow.k != INVALID) // save only the rows that have an associated k
-            gpcrows.push_back(gpcrow);
+         gpcrows.push_back(gpcrow);
       }
    }
    //SCIP_CALL(SCIPreleaseRow(scip, &row));
@@ -749,7 +749,8 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
 /** TODO maybe not necessary but verify 
  * separation method of constraint handler for arbitrary primal solution
  *
- *  Separates all constraints of the constraint handler. The method is called outside the LP solution loop (e.g., by
+ *  Separates all constraints of the constraint handler. 
+ *  The method is called outside the LP solution loop (e.g., by
  *  a relaxator or a primal heuristic), which means that there is no valid LP solution.
  *  Instead, the method should produce cuts that separate the given solution.
  *
@@ -866,7 +867,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
          //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
       }
       //cout << "number of pseudo candidates = " << SCIPgetNPseudoBranchCands(scip) << endl;
-      if (SCIPgetNPseudoBranchCands(scip) == 0)
+      /* if (SCIPgetNPseudoBranchCands(scip) == 0)
       {
          // if you just return INFEASIBLE without any branching candidates available,
          // SCIP will have no chance to resolve this infeasibility. Therefore, you
@@ -875,7 +876,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
          cout << "SCIP_CUTOFF\n";
          *result = SCIP_CUTOFF;
          //exit(0);
-      }
+      } */
    }
 
    /*    if (findDirectedCycle(scip, NULL, instance, x, z))
@@ -1087,7 +1088,7 @@ SCIP_RETCODE GeneralizedPropagation::createGenPropagationCons(
    //create constraint
    SCIP_CALL(
        SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, TRUE, TRUE, TRUE,
-                      TRUE, FALSE, FALSE, TRUE, FALSE, FALSE));
+                      TRUE, FALSE, TRUE, FALSE, TRUE, FALSE));
 
    return SCIP_OKAY;
 }
