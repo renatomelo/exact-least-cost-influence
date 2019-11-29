@@ -299,6 +299,18 @@ SCIP_Real sumOfPhis(DNode v, vector<Phi> gpcrows)
    return sum;
 }
 
+SCIP_Real sumOfPhisFromIds(vector<Phi> &gpcrows, vector<int> ids)
+{
+    double sum = 0;
+
+    for (int i : ids)
+    {
+        sum += gpcrows[i].dualVal;
+    }
+
+    return sum;
+}
+
 void getValidPhis(DNode v, vector<Phi> &gpcrows, vector<Phi> &new_gpcrows)
 {
    //cout << "gpcrows.size() = " << gpcrows.size() << endl;
@@ -307,6 +319,18 @@ void getValidPhis(DNode v, vector<Phi> &gpcrows, vector<Phi> &new_gpcrows)
       if (gpcrows[i].generalizedSet.count(v))
       {
          new_gpcrows.push_back(gpcrows[i]);
+      }
+   }
+}
+
+void getValidPhisIds(DNode v, vector<Phi> &gpcrows, vector<int> &new_gpcrows)
+{
+   //cout << "gpcrows.size() = " << gpcrows.size() << endl;
+   for (unsigned int i = 0; i < gpcrows.size(); i++)
+   {
+      if (gpcrows[i].generalizedSet.count(v))
+      {
+         new_gpcrows.push_back(i);
       }
    }
 }
@@ -664,9 +688,8 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet3(
    //cout << "pricing vertex: " << instance.nodeName[v] << endl;
    SCIP_Real redCost;
    nodes.clear();
-   InDegMap<Digraph> inDegrees(instance.g);
-
-   int n = inDegrees[v];               // number of itens to put into the knapsack
+   int n = 0; // number of itens to put into the knapsack
+   for(InArcIt a(instance.g, v); a != INVALID; ++a) n++;
    int W = (int)instance.threshold[v]; // capacity to fill
 
    SCIP_Real **minCost = new SCIP_Real *[n + 1];
@@ -684,9 +707,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet3(
       costs[i] = dualArcValue[a];
       wt[i++] = instance.influence[a];
    }
-
-   //the number of columns in the matrix will be the total influence from neighbors
-   //int W = totalInfluence;
 
    // fill 0th column
    // initial reduced cost no influence from neighbors
@@ -789,16 +809,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet3(
       }
    }
 
-   /* std::cout << "Table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
-   for (i = 0; i <= n; i++)
-   {
-      for (int j = 0; j <= W; j++)
-      {
-         std::cout << minCost[i][j] << "\t";
-      }
-      std::cout << std::endl;
-   } */
-   //cout << "didn't find negative reduced cost\n";
    redCost = minCost[n][W];
 
    delete[] wt;
@@ -928,4 +938,102 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet4(
 
    //if no reduced cost was found return 0
    return redCost;
+}
+
+SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet5(
+    SCIP *scip,
+    const DNode &v,                  /**< vertex to be influenced */
+    const ArcValueMap &dualArcValue, /**< dual solution of arc constraints */
+    const double dualVertValue,      /**< dual solution of vertex constraints */
+    set<DNode> &nodes                /**< list of incoming neighbors */
+    ) const
+{
+    nodes.clear();
+
+    int n = 0; // number of itens to put into the knapsack
+    for(InArcIt a(instance.g, v); a != INVALID; ++a) n++;
+    int W = (int)instance.threshold[v]; // capacity to fill
+
+    //initialize weight of influence vector and costs vector
+    int i = 0;
+    double *wt = new double[n];
+    double *costs = new double[n];
+    vector<DNode> neighbors(n);
+    for (InArcIt a(instance.g, v); a != INVALID; ++a)
+    {
+        neighbors[i] = instance.g.source(a);
+        costs[i] = dualArcValue[a];
+        wt[i++] = instance.influence[a];
+    }
+    unordered_map<pair<double, vector<int>>, double> L1;
+    unordered_map<pair<double, vector<int>>, double> L2;
+
+    // initialize L1
+    vector<int> allPhisIds;
+    getValidPhisIds(v, gpcrows, allPhisIds);
+    double initialValue = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue
+           - sumOfPhisFromIds(gpcrows, allPhisIds);
+
+    // found negative reduced cost
+    if(SCIPisNegative(scip, initialValue)){
+        cout << "found reduced cost" << endl;
+    }
+
+    // create first pair and put into L1
+    pair<double, vector<int>> p;
+    p.first = 0.0;
+    p.second = allPhisIds;
+    L1[p] = initialValue;
+
+    for(int j = 0; j < n; j++)
+    {
+        for(const auto& p: L1){
+            double curr, aux;
+            if(L2.count(p)){
+                aux = L2[p];
+            }
+            else{
+                aux = SCIPinfinity(scip);
+            }
+
+            L2[p] = min(aux, L1[p]);
+
+            // construct difference set
+            vector<int> phiPrimeIds;
+            double diffSum = 0.0;
+            for(auto i: p.second){
+                if(gpcrows[i].generalizedSet.count(neighbors[j])){
+                    diffSum += gpcrows[i].dualVal;
+                }
+                else{
+                    phiPrimeIds.push_back(i);
+                }
+            }
+
+            pair<double, vector<int>> p2;
+            p2.first = p.first + wt[j];
+            p2.second = phiPrimeIds;
+
+            if(L2.count(p2)){
+                aux = L2[p2];
+            }
+            else{
+                aux = SCIPinfinity(scip);
+            }
+
+            L2[p2] = min(aux, L1[p] + diffSum + cost[j] + GLCIPBase::cheapestIncentive(instance, v, p2.first)
+                         - GLCIPBase::cheapestIncentive(instance, v, p.first));
+
+            if(SCIPisNegative(scip, L2[p2])){
+                cout << "found negative reduced cost" << endl;
+            }
+        }
+        L1 = L2;
+        L1.clear();
+    }
+
+    delete[] wt;
+    delete[] costs;
+
+    return redCost;
 }
