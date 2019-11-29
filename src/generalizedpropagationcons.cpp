@@ -590,11 +590,11 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    {
       *result = SCIP_SEPARATED;
 
-      for (DNode j : generalizedSet)
+      /* for (DNode j : generalizedSet)
       {
          cout << instance.nodeName[j] << " ";
       }
-      cout << endl;
+      cout << endl; */
 
       // in case the lifting isn't done find the vertex to be in the RHS
       if (SCIPgetSolVal(new_scip, localSol, liftingRHS) < 0.5)
@@ -734,7 +734,7 @@ SCIP_RETCODE printRows(SCIP *scip)
  */
 SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
 {
-   cout << "(GPC) CONSSEPALP()" << endl;
+   //cout << "(GPC) CONSSEPALP()" << endl;
 
    //implement the fischetti's model for separation
    SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
@@ -837,7 +837,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
       }
    }
 
-   //mostrar variaveis lambdas
+   //show lambda variables
    /* for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
       for (unsigned int i = 0; i < infSet[v].size(); i++)
@@ -875,16 +875,8 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
          // variable bounds (or fixings) contains no feasible solution.
          cout << "SCIP_CUTOFF\n";
          *result = SCIP_CUTOFF;
-         //exit(0);
       } */
    }
-
-   /*    if (findDirectedCycle(scip, NULL, instance, x, z))
-   {
-      //cout << "(DFS) violation: solution has a cycle\n";
-      exactSeparation(scip, conshdlr, NULL, result);
-      *result = SCIP_INFEASIBLE;
-   } */
 
    return SCIP_OKAY;
 }
@@ -971,7 +963,7 @@ SCIP_DECL_CONSCHECK(GeneralizedPropagation::scip_check)
 {
    *result = SCIP_FEASIBLE;
 
-   cout << "CONSCHECK()\n";
+   //cout << "CONSCHECK()\n";
 
    //construct the suport graph
    Digraph new_graph;
@@ -981,7 +973,7 @@ SCIP_DECL_CONSCHECK(GeneralizedPropagation::scip_check)
    if (!dag(new_graph))
    {
       *result = SCIP_INFEASIBLE;
-      cout << "(SUPORT GRAPH) violation: solution has a cycle\n";
+      //cout << "(SUPORT GRAPH) violation: solution has a cycle\n";
    }
 
    /*  ArcValueMap weight(instance.g);
@@ -1063,7 +1055,7 @@ SCIP_DECL_CONSDELVARS(GeneralizedPropagation::scip_delvars)
 
 SCIP_DECL_CONSPRINT(GeneralizedPropagation::scip_print)
 {
-   SCIPinfoMessage(scip, file, "cycle of Graph G with %d nodes and %d edges\n", instance.n, instance.m);
+   SCIPinfoMessage(scip, file, "cycle of graph with %d nodes and %d edges\n", instance.n, instance.m);
 
    return SCIP_OKAY;
 }

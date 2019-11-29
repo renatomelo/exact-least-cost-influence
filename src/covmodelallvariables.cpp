@@ -146,7 +146,8 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
 {
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
-        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0, "arc-coverage cons");
+        //ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0, "arc-coverage cons");
+        ScipCons *cons = new ScipCons(scip, 0, 0, "arc-coverage cons");
         DNode u = instance.g.source(a);
         DNode v = instance.g.target(a);
 
@@ -274,24 +275,24 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP");
     //exit(0);
     // add generalized propagation constraints
-    /* vector<Phi> gpcrows;
+    vector<Phi> gpcrows;
     GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet, gpcrows);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
 
     SCIP_CONS *cons;
     SCIP_CALL(gpc->createGenPropagationCons(scip, &cons, "GPC"));
     SCIP_CALL(SCIPaddCons(scip, cons));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
+    SCIP_CALL(SCIPreleaseCons(scip, &cons));
     // end of GPC
 
     // add cutting planes
-    CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
+    /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
     SCIP_CONS *cons1;
     SCIP_CALL(cuts.createCycleCuts(scip, &cons1, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons1));
-    SCIP_CALL(SCIPreleaseCons(scip, &cons1));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons1)); */
     //end of cutting planes
 
     SCIP_CALL( SCIPincludeObjHeur(scip, new HeurMinInfluence(scip, instance, x, z, infSet), TRUE) );
