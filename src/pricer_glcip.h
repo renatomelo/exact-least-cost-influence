@@ -15,7 +15,7 @@ private:
     DNodeSCIPVarMap &x;     /**< map of vertex variables */
     ArcConsMap &arcCons;    /**< map of arc constraints */
     DNodeConsMap &vertCons; /**< map of partitioning constraints */
-    vector<Phi> &gpcrows;
+    vector<Phi> &gpcRows;
     DNodeInfSetsMap &infSet;
     //ArcBoolMap &isAble;
 
@@ -35,7 +35,7 @@ public:
         DNodeSCIPVarMap &p_vert_var, /**< map of arc variables */
         ArcConsMap &p_arc_con,       /**< map of arc constraints */
         DNodeConsMap &p_vert_con,    /**< map of vertex constraints */
-        vector<Phi> &p_gpcrows,
+        vector<Phi> &p_gpcRows,
         DNodeInfSetsMap &p_inf_set);
     //ArcBoolMap&      p_isAble,
     //ArcIntMap&      p_isOnSolution);
@@ -95,6 +95,21 @@ public:
     vector<DNode> neighbors,
     DNode v) const;
 
+    SCIP_Real findMinCostInfluencingSet5(
+    SCIP *scip,
+    const DNode &v,                  /**< vertex to be influenced */
+    const ArcValueMap &dualArcValue, /**< dual solution of arc constraints */
+    const double dualVertValue,      /**< dual solution of vertex constraints */
+    set<DNode> &nodes                /**< list of incoming neighbors */
+    ) const;
+
+    SCIP_Real findMinCostInfluencingSet6(
+    SCIP *scip,
+    const DNode &v,                  /**< vertex to be influenced */
+    const ArcValueMap &dualArcValue, /**< dual solution of arc constraints */
+    const double dualVertValue,      /**< dual solution of vertex constraints */
+    set<DNode> &nodes                /**< list of incoming neighbors */
+    ) const;
     /* double cheapestIncentive(const DNode &v, double exertedInfluence) const;
    double costInfluencingSet(const DNode &v, const list<DNode> &nodes) const; */
 };
