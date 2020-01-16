@@ -504,13 +504,12 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
     set<DNode> &nodes                /**< list of incoming neighbors */
     ) const
 {
-   //cout << "pricing vertex: " << instance.nodeName[v] << endl;
    SCIP_Real redCost;
    nodes.clear();
-   InDegMap<Digraph> inDegrees(instance.g);
 
-   int n = inDegrees[v]; // number of itens to put into the knapsack
-   //int W = (int)instance.threshold[v]; // capacity to fill
+   int n = 0; // number of itens to put into the knapsack
+   for (InArcIt a(instance.g, v); a != INVALID; ++a)
+      n++;
 
    SCIP_Real **minCost = new SCIP_Real *[n + 1];
    double *wt = new double[n];
@@ -536,7 +535,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
    for (i = 0; i <= n; i++)
    {
       minCost[i] = new SCIP_Real[W + 1];
-      //minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue - sumOfPhis(v, gpcRows);
       minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue;
    }
 
@@ -592,16 +590,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
          // stop whether the reduced cost is negative
          if (SCIPisNegative(scip, minCost[i][col]))
          {
-            /* std::cout << "table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
-            for (int p = 0; p <= i; p++)
-            {
-               for (size_t q = 0; q <= j; q++)
-               {
-                  std::cout << minCost[p][q] << "\t";
-               }
-               std::cout << std::endl;
-            } */
-
             //get the solution
             int k = col;
             for (int l = i; l > 0; l--)
@@ -612,14 +600,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
                   k = max(k - wt[l - 1], 0.0);
                }
             }
-
-            /*  if (sumOfPhis(v, gpcRows) > 0)
-            {
-               for (DNode y : nodes)
-                  cout << instance.nodeName[y] << " ";
-               cout << endl;
-               exit(0);
-            } */
 
             redCost = minCost[i][col];
 
@@ -634,164 +614,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
       }
    }
 
-   /* std::cout << "Table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
-   for (i = 0; i <= n; i++)
-   {
-      for (int j = 0; j <= W; j++)
-      {
-         std::cout << minCost[i][j] << "\t";
-      }
-      std::cout << std::endl;
-   } */
    //cout << "didn't find negative reduced cost\n";
-   redCost = minCost[n][W];
-
-   delete[] wt;
-   delete[] costs;
-   for (i = 0; i <= n; i++)
-      delete[] minCost[i];
-   delete[] minCost;
-
-   return redCost;
-}
-
-SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet3(
-    SCIP *scip,
-    const DNode &v,                  /**< vertex to be influenced */
-    const ArcValueMap &dualArcValue, /**< dual solution of arc constraints */
-    const double dualVertValue,      /**< dual solution of vertex constraints */
-    set<DNode> &nodes                /**< list of incoming neighbors */
-    ) const
-{
-   //cout << "pricing vertex: " << instance.nodeName[v] << endl;
-   SCIP_Real redCost;
-   nodes.clear();
-   int n = 0; // number of itens to put into the knapsack
-   for (InArcIt a(instance.g, v); a != INVALID; ++a)
-      n++;
-   int W = (int)instance.threshold[v]; // capacity to fill
-
-   SCIP_Real **minCost = new SCIP_Real *[n + 1];
-   double *wt = new double[n];
-   double *costs = new double[n];
-
-   //initialize weight of influence vector and costs vector
-   int i = 0;
-   vector<DNode> neighbors(n);
-   for (InArcIt a(instance.g, v); a != INVALID; ++a)
-   {
-      neighbors[i] = instance.g.source(a);
-      costs[i] = dualArcValue[a];
-      wt[i++] = instance.influence[a];
-   }
-
-   // fill 0th column
-   // initial reduced cost no influence from neighbors
-   for (i = 0; i <= n; i++)
-   {
-      minCost[i] = new SCIP_Real[W + 1];
-      minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue - sumOfPhis(v, gpcRows);
-      //minCost[i][0] = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue;
-   }
-
-   // fill 0th row
-   for (i = 1; i <= W; i++)
-      minCost[0][i] = SCIPinfinity(scip);
-
-   //initialization (no influence from neighbors)
-   vector<vector<PairOfPhisAndD>> listOfPairs(n + 1);
-   PairOfPhisAndD firstPair;
-   firstPair.d = 0;
-   getValidPhis(v, gpcRows, firstPair.phis);
-   listOfPairs[0].push_back(firstPair);
-
-   // check the weight of influence from a vertex u over v for each u
-   // and fill the matrix according to the condition
-   for (i = 1; i <= n; i++)
-   {
-      for (int j = 1; j <= W; j++)
-         minCost[i][j] = SCIPinfinity(scip);
-
-      for (unsigned int j = 0; j < listOfPairs[i - 1].size(); j++)
-      //for (int j = 0; j <= W; j++)
-      {
-         //cout << "i = " << i << ", j = " << j << ", n = " << n << ", W = " << W << endl;
-         /* if (j >= (int)listOfPairs[i - 1].size())
-         {
-            minCost[i][j] = SCIPinfinity(scip);
-            continue;
-         } */
-         PairOfPhisAndD currentPair = listOfPairs[i - 1][j];
-
-         minCost[i][currentPair.d] = min(minCost[i][currentPair.d], minCost[i - 1][currentPair.d]);
-
-         //L_j = L_j \cup {(d, PHI)}
-         listOfPairs[i].push_back(currentPair);
-
-         // phi' = {(X,k) \in Phi : i is not in X}
-         PairOfPhisAndD prime;
-         double sum = 0;
-         for (unsigned int l = 0; l < currentPair.phis.size(); l++)
-         {
-            // remember that neighbors[i-1] is the i-th neigbor
-            if (!currentPair.phis[l].generalizedSet.count(neighbors[i - 1]))
-               prime.phis.push_back(currentPair.phis[l]);
-            else
-               //sum all the phis excluding the elements in prime
-               sum += currentPair.phis[l].dualVal;
-         }
-
-         //cout << "size of prime phis = " << prime.phis.size() << endl;
-         //cout << "sum of phis excluding the elements in prime: " << sum << endl;
-
-         // get minimum cost by including or excluding the i-th node
-         int col = max(currentPair.d - wt[i - 1], 0.0); // to avoid negative index
-         minCost[i][currentPair.d] = min(minCost[i][currentPair.d],
-                                         minCost[i - 1][col] + costs[i - 1] + sum +
-                                             GLCIPBase::cheapestIncentive(instance, v, currentPair.d) -
-                                             GLCIPBase::cheapestIncentive(instance, v, col));
-
-         prime.d = currentPair.d;
-         listOfPairs[i].push_back(prime);
-
-         // stop whether the reduced cost is negative
-         if (SCIPisNegative(scip, minCost[i][currentPair.d]))
-         {
-            /* std::cout << "table of dynamic program for vertex " << instance.nodeName[v] << std::endl;
-            for (int p = 0; p <= i; p++)
-            {
-               for (int q = 0; q <= j; q++)
-               {
-                  std::cout << minCost[p][q] << "\t";
-               }
-               std::cout << std::endl;
-            } */
-
-            //get the solution
-            //int k = j;
-            int k = currentPair.d;
-            for (int l = i; l > 0; l--)
-            {
-               if (minCost[l][k] != minCost[l - 1][k])
-               {
-                  nodes.insert(neighbors[l - 1]);
-                  k = max(k - wt[l - 1], 0.0);
-               }
-            }
-
-            redCost = minCost[i][currentPair.d];
-
-            delete[] wt;
-            delete[] costs;
-            for (i = 0; i <= n; i++)
-               delete[] minCost[i];
-            delete[] minCost;
-
-            return redCost;
-         }
-      }
-   }
-
    redCost = minCost[n][W];
 
    delete[] wt;
@@ -923,129 +746,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet4(
    return redCost;
 }
 
-// A hash function used to hash a pair of any kind
-/* struct hash_pair
-{
-   template <class T1, class T2>
-   size_t operator()(const pair<T1, T2> &p) const
-   {
-      auto hash1 = hash<T1>{}(p.first);
-      auto hash2 = hash<T2>{}(p.second);
-      return hash1 ^ hash2;
-   }
-}; */
-
-//method using unordered_map suggested by Ota
-SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet5(
-    SCIP *scip,
-    const DNode &v,                  /**< vertex to be influenced */
-    const ArcValueMap &dualArcValue, /**< dual solution of arc constraints */
-    const double dualVertValue,      /**< dual solution of vertex constraints */
-    set<DNode> &nodes                /**< list of incoming neighbors */
-    ) const
-{
-   nodes.clear();
-   /*double redCost;
-
-   int n = 0; // number of itens to put into the knapsack
-   for (InArcIt a(instance.g, v); a != INVALID; ++a)
-      n++;
-   //int W = (int)instance.threshold[v]; // capacity to fill
-
-   //initialize weight of influence vector and costs vector
-   int i = 0;
-   double *wt = new double[n];
-   double *costs = new double[n];
-   vector<DNode> neighbors(n);
-   for (InArcIt a(instance.g, v); a != INVALID; ++a)
-   {
-      neighbors[i] = instance.g.source(a);
-      costs[i] = dualArcValue[a];
-      wt[i++] = instance.influence[a];
-   }
-
-   unordered_map<pair<double, vector<int>>, double, hash_pair> L1;
-   unordered_map<pair<double, vector<int>>, double, hash_pair> L2;
-
-   // initialize L1
-   vector<int> allPhisIds;
-   getValidPhisIds(v, gpcRows, allPhisIds);
-   double initialValue = GLCIPBase::cheapestIncentive(instance, v, 0) - dualVertValue - sumOfPhisFromIds(gpcRows, allPhisIds);
-
-   // found negative reduced cost
-   if (SCIPisNegative(scip, initialValue))
-   {
-      cout << "found reduced cost" << endl;
-      return initialValue;
-   }
-
-   // create first pair and put into L1
-   pair<double, vector<int>> fp;
-   fp.first = 0.0;
-   fp.second = allPhisIds;
-   L1[fp] = initialValue;
-
-   for (int j = 0; j < n; j++)
-   {
-      for (const auto &p : L1)
-      {
-         double curr, aux;
-         if (L2.count(p.first))
-         {
-            aux = L2[p.first];
-         }
-         else
-         {
-            aux = SCIPinfinity(scip);
-         }
-
-         L2[p.first] = min(aux, L1[p.first]);
-
-         // construct difference set
-         vector<int> phiPrimeIds;
-         double diffSum = 0.0;
-         for (auto it : p.first.second)
-         {
-            if (gpcRows[it].generalizedSet.count(neighbors[j]))
-            {
-               diffSum += gpcRows[it].dualVal;
-            }
-            else
-            {
-               phiPrimeIds.push_back(it);
-            }
-         }
-
-         pair<double, vector<int>> p2;
-         p2.first = p.first.first + wt[j];
-         p2.second = phiPrimeIds;
-
-         if (L2.count(p2))
-         {
-            aux = L2[p2];
-         }
-         else
-         {
-            aux = SCIPinfinity(scip);
-         }
-
-         L2[p2] = min(aux, L1[p.first] + diffSum + costs[j] + GLCIPBase::cheapestIncentive(instance, v, p2.first) - GLCIPBase::cheapestIncentive(instance, v, p.first.first));
-
-         if (SCIPisNegative(scip, L2[p2]))
-         {
-            cout << "found negative reduced cost" << endl;
-         }
-      }
-      L1 = L2;
-      L1.clear();
-   }
-
-   delete[] wt;
-   delete[] costs;
- */
-   return 0;
-}
-
 /**
  * Class to represent the pair (d, Phi) from paper.
  * Objects of this class are used as key in hash table. 
@@ -1085,10 +785,16 @@ public:
    // of collisions.
    bool operator==(const PairDAndPhi &p) const
    {
-      return d == p.d && 
-                     idsOfPhis.size() == p.idsOfPhis.size() && 
-                     sum == p.sum && 
-                     nodes.size() == p.nodes.size();
+      bool equalNodeList = TRUE;
+      if (nodes.size() != p.nodes.size())
+         equalNodeList = FALSE;
+      else
+         equalNodeList = nodes == p.nodes;
+
+      return d == p.d &&
+             idsOfPhis.size() == p.idsOfPhis.size() &&
+             sum == p.sum &&
+             equalNodeList;
    }
 };
 
@@ -1114,7 +820,7 @@ void printList(unordered_map<PairDAndPhi, double, HashFunction> pairs, vector<Ph
       PairDAndPhi _pair = it.first;
       double reduced_cost = it.second;
 
-      /* cout << "(" << _pair.d << ", "
+      cout << "(" << _pair.d << ", "
            << "[";
       string separator = "";
       for (size_t l = 0; l < _pair.idsOfPhis.size(); l++)
@@ -1122,13 +828,30 @@ void printList(unordered_map<PairDAndPhi, double, HashFunction> pairs, vector<Ph
          cout << separator << gpcRows[_pair.idsOfPhis[l]].dualVal;
          separator = ", ";
       }
-      cout << "]) = " << reduced_cost << "; "; */
-      cout << reduced_cost << " ";
+      cout << "]) = " << reduced_cost << "; ";
+      //cout << reduced_cost << " ";
    }
    cout << endl;
 }
 
-//trying to use memoization
+void printPairDandPhi(PairDAndPhi p, const GLCIPInstance &instance, vector<Phi> &gpcRows)
+{
+   cout << "list of nodes in the pair: ";
+   for (DNode u : p.nodes)
+      cout << instance.nodeName[u] << " "; 
+   cout << endl;
+
+   cout << "d = " << p.d << endl;
+
+   cout << "dual values of Phis: ";
+   for (int idx : p.idsOfPhis)
+      cout << gpcRows[idx].dualVal << " ";
+   cout << endl;
+
+   cout << "sum of phis = " << p.sum << endl;
+}
+
+//method using memoization with unordered_map 
 SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
     SCIP *scip,
     const DNode &v,                  /**< vertex to be influenced */
@@ -1187,13 +910,21 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
          //printf("current pair: (%d, %ld)\n", currentPair.d, currentPair.idsOfPhis.size());
 
          if (currentList.count(currentPair))
+         {
             redCost = currentList[currentPair];
+            /* cout << "\ncurrentPair is already into the currentList" << endl;
+            cout << "verifying the equality" << endl;
+            unordered_map<PairDAndPhi, double, HashFunction>::iterator it;
+            it = currentList.find(currentPair);
+            printPairDandPhi(it->first, instance, gpcRows);
+            cout << endl; */
+         }
          else
             redCost = SCIPinfinity(scip);
 
          //cout << "redCost = " << redCost << endl;
          //cout << "prevList[currentPair] = " << prevList[currentPair] << endl;
-         
+
          // no influence from neighbors[j]
          currentList[currentPair] = min(redCost, prevList[currentPair]);
 
@@ -1217,30 +948,27 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
          nextPair.addNode(neighbors[j]);
 
          if (currentList.count(nextPair))
+         {
             redCost = currentList[nextPair];
+            /* cout << "\nnextPair is already into the currentList" << endl;
+            cout << "verifying the equality" << endl;
+            unordered_map<PairDAndPhi, double, HashFunction>::iterator it;
+            it = currentList.find(currentPair);
+            printPairDandPhi(it->first, instance, gpcRows);
+            cout << endl; */
+         }
          else
             redCost = SCIPinfinity(scip);
-
-         //cout << "redCost (again) = " << currentList[nextPair] << endl;
 
          double nextInfCost = GLCIPBase::cheapestIncentive(instance, v, nextPair.d);
          double currInfCost = GLCIPBase::cheapestIncentive(instance, v, currentPair.d);
          currentList[nextPair] = min(redCost, prevList[currentPair] + sum + costs[j] + nextInfCost - currInfCost);
-         /* if (currentList[nextPair] < redCost)
-         {
-            cout << "list of nodes: ";
-            for(DNode u : nextPair.nodes)
-               cout << instance.nodeName[u] << " ";
-            cout << endl;
-         } */
 
-         printList(currentList, gpcRows);
+         //printList(currentList, gpcRows);
 
          if (SCIPisNegative(scip, currentList[nextPair]))
          {
             cout << "found negative reduced cost" << endl;
-            //cout << "current list: " << endl;
-            //printList(currentList, gpcRows);
             for (DNode u : nextPair.nodes)
                nodes.insert(u);
             return currentList[nextPair];
