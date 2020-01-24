@@ -295,7 +295,7 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     SCIP_CALL(SCIPreleaseCons(scip, &cons1)); */
     //end of cutting planes
 
-    SCIP_CALL( SCIPincludeObjHeur(scip, new HeurMinInfluence(scip, instance, x, z, infSet), TRUE) );
+    //SCIP_CALL( SCIPincludeObjHeur(scip, new HeurMinInfluence(scip, instance, x, z, infSet), TRUE) );
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));

@@ -3,9 +3,6 @@
 
 #include "GLCIPBase.h"
 
-typedef Digraph::ArcMap<SCIP_CONS *> ArcConsMap;
-typedef Digraph::NodeMap<SCIP_CONS *> DNodeConsMap;
-
 class ObjPricerGLCIP : public ObjPricer
 {
 private:

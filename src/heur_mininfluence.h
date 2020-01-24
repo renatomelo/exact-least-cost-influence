@@ -9,7 +9,10 @@ class HeurMinInfluence : public scip::ObjHeur
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
     DNodeInfSetsMap &infSet;
-    SCIP_SOL *sol; /**< current solution */
+    ArcConsMap &arcCons;    /**< map of arc constraints */
+    DNodeConsMap &vertCons; /**< map of partitioning constraints */
+    vector<Phi> &gpcRows;
+    SCIP_SOL *sol;          /**< current solution */
 
 public:
     /** default constructor */
@@ -18,7 +21,10 @@ public:
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
         ArcSCIPVarMap &p_z,
-        DNodeInfSetsMap &p_infset)
+        DNodeInfSetsMap &p_infset,
+        ArcConsMap &p_arcCons,    /**< map of arc constraints */
+        DNodeConsMap &p_vertCons, /**< map of partitioning constraints */
+        vector<Phi> &p_gpcRows)
         : ObjHeur(
               scip,
               "MinInfluence",               //name
@@ -35,6 +41,9 @@ public:
           x(p_x),
           z(p_z),
           infSet(p_infset),
+          arcCons(p_arcCons),
+          vertCons(p_vertCons),
+          gpcRows(p_gpcRows),
           sol(NULL)
     {
     }

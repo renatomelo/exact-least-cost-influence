@@ -1,4 +1,85 @@
 #include "heur_mininfluence.h"
+#include "pricer_glcip.h"
+
+/** add influencing-set variable to problem */
+SCIP_RETCODE addInfluencingSetVar(
+    SCIP *scip,
+    const GLCIPInstance &instance,
+    const DNode &v,
+    const set<DNode> &nodes,
+    DNodeInfSetsMap &infSet,
+    ArcConsMap &arcCons,    /**< map of arc constraints */
+    DNodeConsMap &vertCons, /**< map of partitioning constraints */
+    vector<Phi> &gpcRows)
+{
+   std::string name;
+   if (nodes.size() > 0)
+   {
+      std::stringstream stream;
+      const char *separator = "";
+      for (DNode u : nodes)
+      {
+         stream << separator << instance.nodeName[u];
+         separator = ",";
+      }
+
+      name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+   }
+   else
+      name = "Lambda_" + instance.nodeName[v] + "_empty";
+
+   double cost = GLCIPBase::costInfluencingSet(instance, v, nodes);
+   SCIP_VAR *var;
+   SCIP_CALL(SCIPcreateVar(scip, &var,
+                           name.c_str(),            // var name
+                           0.0,                     // lower bound
+                           SCIPinfinity(scip),      // upper bound
+                           cost,                    // coeficient in the objective function
+                           SCIP_VARTYPE_CONTINUOUS, // continuous variable
+                           FALSE,                   // initial variable
+                           FALSE,                   // removable variable
+                           NULL, NULL, NULL, NULL, NULL));
+   // add new variable to the list of variables to price into LP
+   SCIP_CALL(SCIPaddVar(scip, var));
+
+   SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
+
+   // data structure to save the variables and associated nodes
+   InfluencingSet in;
+   in.var = var;
+   in.cost = cost;
+
+   if (nodes.size() != 0)
+   {
+      for (DNode u : nodes)
+      {
+         Arc a = findArc(instance.g, u, v);
+         assert(a != INVALID);
+         SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+         in.nodes.insert(u);
+      }
+   }
+
+   //update the GPC rows by adding the new var on each constraint in which the set X contains v
+   for (unsigned int i = 0; i < gpcRows.size(); i++)
+   {
+      if (gpcRows[i].generalizedSet.count(v))
+      {
+         if (!GLCIPBase::intersects(gpcRows[i].generalizedSet, in.nodes))
+         {
+            SCIPaddVarToRow(scip, gpcRows[i].row, in.var, 1.0);
+         }
+      }
+   }
+
+   // save the variable
+   infSet[v].push_back(in);
+
+   //std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
+
+   SCIP_CALL(SCIPreleaseVar(scip, &var));
+   return SCIP_OKAY;
+}
 
 /**
  * The node with minimal incentive to activate it is chosen
@@ -91,9 +172,9 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
    {
       //fix the variable Lambda_v_empty for the chosen node to start the propagation
       SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[node][idx].var, 1.0));
+      //cout << "\nsetting var: " << SCIPvarGetName(infSet[node][idx].var) << endl;
       SCIP_CALL(SCIPsetSolVal(scip, newsol, x[node], 1.0));
       actives.insert(node);
-      //cout << "vertex " << instance.nodeName[node] << " chosen to start the propagation\n";
    }
 
    while (actives.size() < instance.alpha * instance.n)
@@ -105,7 +186,7 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
 
       assert(v != INVALID);
       SCIP_CALL(SCIPsetSolVal(scip, newsol, x[v], 1.0));
-      
+
       double sum = 0;
       // save v's influencing-set and activate it
       for (InArcIt a(instance.g, v); a != INVALID; ++a)
@@ -114,16 +195,15 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
          if (actives.count(u) && SCIPisPositive(scip, SCIPgetSolVal(scip, sol, z[a])))
          {
             sum += instance.influence[a];
-           
+
             nodes.insert(u);
             SCIP_CALL(SCIPsetSolVal(scip, newsol, z[a], 1.0));
 
-            // if the minCost was achieved we don't need to increase the influencing-set more
+            // if the minCost was achieved we don't need to increase the influencing-set
             if (minCost >= GLCIPBase::costInfluencingSet(instance, v, nodes))
                break;
          }
       }
-      //cost = minCost;
 
       double slack = (sum + minCost) - instance.threshold[v];
 
@@ -135,7 +215,7 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
 
          if (instance.influence[a] < slack)
          {
-            //cout << "set isn't minimal, removing vertex " << instance.nodeName[*u] << endl;
+            //set isn't minimal, removing vertex
             u = nodes.erase(u);
             slack += instance.influence[a];
             SCIP_CALL(SCIPsetSolVal(scip, newsol, z[a], 0.0));
@@ -151,18 +231,27 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
          if (nodes == infSet[v][i].nodes)
          {
             SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[v][i].var, 1.0));
+            //cout << "setting var: " << SCIPvarGetName(infSet[v][i].var) << endl;
             varFound = TRUE;
             break;
          }
       }
 
-      //in this case nodes is not minimal
+      //isn't the variable in the model?
       if (!varFound)
       {
-         cout << "var not found\n";
+         //cout << "var not found\n";
+         //create a new var and add it to the model
+         addInfluencingSetVar(scip, instance, v, nodes, infSet, arcCons, vertCons, gpcRows);
+
+         //the new variable was added in the back of the list infSet[v], then its position is infSet[v].size()-1
+         int position = infSet[v].size() - 1;
+         SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[v][position].var, 1.0));
+         //cout << "setting var: " << SCIPvarGetName(infSet[v][position].var) << endl;
       }
 
       actives.insert(v);
+      //cout << "activating " << instance.nodeName[v] << endl;
    }
 
    return SCIP_OKAY;
@@ -227,8 +316,6 @@ SCIP_DECL_HEUREXEC(HeurMinInfluence::scip_exec)
    SCIP_Bool success = FALSE;
 
    SCIP_SOL *newsol = SCIPgetBestSol(scip);
-   /* SCIP_Bool *visited;
-   SCIP_Bool success; */
 
    assert(result != NULL);
    /* since the timing is SCIP_HEURTIMING_AFTERLPNODE, the current node should have an LP */
@@ -243,58 +330,45 @@ SCIP_DECL_HEUREXEC(HeurMinInfluence::scip_exec)
    /* copy the current LP solution to the working solution */
    SCIP_CALL(SCIPlinkLPSol(scip, sol));
 
-   /* for (ArcIt a(instance.g); a != INVALID; ++a)
-   {
-      cout << SCIPgetSolVal(scip, sol, z[a]) << endl;
-   } */
-   /* cout << "SOL\n";
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      for (unsigned int i = 0; i < infSet[v].size(); i++)
-      {
-         if (SCIPgetSolVal(scip, sol, infSet[v][i].var) > 0)
-         {
-            cout << SCIPvarGetName(infSet[v][i].var) << " = "
-                 << SCIPgetSolVal(scip, sol, infSet[v][i].var) << endl;
-         }
-      }
-   } */
-   // TODO verify which case the heuristic can fail, maybe the size of active set
-   *result = SCIP_DIDNOTFIND;
-
    /* allocate local memory */
    SCIP_CALL(SCIPcreateSol(scip, &newsol, heur));
 
    greedyConstruction(scip, newsol);
 
-   /* cout << "NEW SOL\n";
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      for (unsigned int i = 0; i < infSet[v].size(); i++)
-      {
-         if (SCIPgetSolVal(scip, newsol, infSet[v][i].var) > 0)
-         {
-            cout << SCIPvarGetName(infSet[v][i].var) << " = "
-                 << SCIPgetSolVal(scip, newsol, infSet[v][i].var) << endl;
-         }
-      }
-   }
-
-   for (ArcIt a(instance.g); a != INVALID; ++a)
-   {
-      if (SCIPgetSolVal(scip, newsol, z[a]) > 0)
-         cout << SCIPvarGetName(z[a]) << " = " << SCIPgetSolVal(scip, newsol, z[a]) << endl;
-   } */
-
    // due to construction we already know, that the solution will be feasible
    SCIP_CALL(SCIPtrySol(scip, newsol, TRUE, TRUE, FALSE, FALSE, FALSE, &success));
    if (success)
    {
-      cout << "solution sussesful!\n";
+      //cout << "heur solution feasible !\n";
       *result = SCIP_FOUNDSOL;
    }
-   //else
-   //   cout << "failed!\n";
+   else
+   {  // the solution total cost is worst than already existent solutions
+      *result = SCIP_DIDNOTFIND;
+      /* cout << "NEW SOL\n";
+      double totalCost = 0;
+      for (DNodeIt v(instance.g); v != INVALID; ++v)
+      {
+         for (unsigned int i = 0; i < infSet[v].size(); i++)
+         {
+            if (SCIPgetSolVal(scip, newsol, infSet[v][i].var) > 0)
+            {
+               cout << SCIPvarGetName(infSet[v][i].var) << " = "
+                    << SCIPgetSolVal(scip, newsol, infSet[v][i].var) << endl;
+               totalCost += infSet[v][i].cost;
+            }
+         }
+      }
+
+      for (ArcIt a(instance.g); a != INVALID; ++a)
+      {
+         if (SCIPgetSolVal(scip, newsol, z[a]) > 0)
+            cout << SCIPvarGetName(z[a]) << " = " << SCIPgetSolVal(scip, newsol, z[a]) << endl;
+      } */
+
+      // get the cost of this solution
+      //cout << "solution total cost: " << totalCost << endl;
+   }
 
    /* free all local memory */
    SCIP_CALL(SCIPfreeSol(scip, &newsol));

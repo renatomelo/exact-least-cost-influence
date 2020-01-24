@@ -5,6 +5,7 @@
 #include "event_glcip.h"
 #include "consarcmarker.h"
 #include "generalizedpropagationcons.h"
+#include "heur_mininfluence.h"
 
 using namespace arcmarker;
 
@@ -112,12 +113,12 @@ double getMinIncentiveNode(GLCIPInstance &instance, set<DNode> actives, DNode &n
 }
 
 /** 
-* Greedy construction heuristic to obtain feasible solutions to warm-start column 
-* generation with an initial set of influensing-set variables:
-* 
-* At each iteration we activate a not yet active node by paying the minimum available 
-* incentive to reach its hurdle, taking into account the current influence coming 
-* from already active neighbors.
+ * Greedy construction heuristic to obtain feasible solutions to warm-start column 
+ * generation with an initial set of influensing-set variables:
+ * 
+ * At each iteration we activate a not yet active node by paying the minimum available 
+ * incentive to reach its hurdle, taking into account the current influence coming 
+ * from already active neighbors.
 */
 set<DNode> greedyConstruction(GLCIPInstance &instance, DNodeInfSetsMap &infSet)
 {
@@ -303,7 +304,7 @@ SCIP_RETCODE addInitialFeasibleSol(SCIP *scip,
         {
             DNode u = instance.g.source(a);
             DNode v = instance.g.target(a);
-            std::string name = "HeurLambda_" + instance.nodeName[u] + "{" + instance.nodeName[v] + "}";
+            std::string name = "HeurLambda_" + instance.nodeName[v] + "_{" + instance.nodeName[u] + "}";
 
             // data structure to save the variables and associated costs
             InfluencingSet initial;
@@ -554,9 +555,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
 
     // list to save all the GPC's rows added to de model
-    vector<Phi> gpcrows;
+    vector<Phi> gpcRows;
     // add generalized propagation constraints
-    GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet, gpcrows);
+    GeneralizedPropagation *gpc = new GeneralizedPropagation(scip, instance, x, z, infSet, gpcRows);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, gpc, TRUE));
 
     SCIP_CONS *cons1;
@@ -575,7 +576,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                                                 x,
                                                 arcCons,
                                                 vertCons,
-                                                gpcrows,
+                                                gpcRows,
                                                 infSet);
 
     SCIP_CALL(SCIPincludeObjPricer(scip, pricer, TRUE));
@@ -596,6 +597,19 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     /* static const char *EVENTHDLR_NAME = "GLCIP_eventhdlr";
     ObjEventhdlrGLCIP *event = new ObjEventhdlrGLCIP(scip, EVENTHDLR_NAME, instance);
     SCIP_CALL(SCIPincludeObjEventhdlr(scip, event, TRUE)); */
+
+    HeurMinInfluence *primalHeur = new HeurMinInfluence(
+                                     scip,
+                                     instance,
+                                     x,
+                                     z,
+                                     infSet,
+                                     arcCons,
+                                     vertCons,
+                                     gpcRows);
+    SCIP_CALL(SCIPincludeObjHeur(scip,
+                                 primalHeur,
+                                 TRUE));
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));

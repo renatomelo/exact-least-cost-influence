@@ -30,6 +30,9 @@ typedef Digraph::NodeMap<SCIP_VAR*> DNodeSCIPVarMap;
 typedef Digraph::ArcMap<SCIP_VAR*> ArcSCIPVarMap;
 typedef Digraph::NodeMap<vector<SCIP_VAR*>> DNodeSCIPVarsMap;
 
+typedef Digraph::ArcMap<SCIP_CONS *> ArcConsMap;
+typedef Digraph::NodeMap<SCIP_CONS *> DNodeConsMap;
+
 /**
  * Class base containing the declaration methods that are common for all the implemented models
  * for the problems and algorithms related to the GLCIP problem 

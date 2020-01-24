@@ -3,6 +3,9 @@
  */
 #include "generalizedpropagationcons.h"
 #include <stack>
+#include "/opt/gurobi810/linux64/include/gurobi_c++.h"
+#include <sstream> //remove later
+#include "lpi/lpi.h"
 
 typedef lemon::Dijkstra<Digraph, ArcValueMap> SptSolver;
 
@@ -71,8 +74,6 @@ SCIP_Bool findDirectedCycle(
    }
    return FALSE;
 }
-
-
 
 /** 
  * separates generalized propagation constraints
@@ -420,11 +421,26 @@ void printFractionalSol(SCIP *scip,
       }
       InDegMap<Digraph> inDeg(instance.g);
 
-      cout << instance.nodeName[v] << ": degree =  " << inDeg[v] 
-            << ", threshold = " << instance.threshold[v] << ", lhs  = " << sum << endl;
+      cout << instance.nodeName[v] << ": degree =  " << inDeg[v]
+           << ", threshold = " << instance.threshold[v] << ", lhs  = " << sum << endl;
    }
 }
 
+SCIP_RETCODE exactSeparationGrbModel(
+    SCIP *scip,
+    SCIP_CONSHDLR *conshdlr, //the constraint handler itself
+    SCIP_SOL *sol,           //primal solution that should be separated
+    SCIP_RESULT *result)     //pointer to store the result of the separation call
+{
+   /* SCIP_LPI* lpi;
+   SCIP_MESSAGEHDLR* msghdlr;
+   SCIPlpiCreate(&lpi, msghdlr, "SeparationProblem", SCIP_OBJSEN_MINIMIZE); */
+
+   GRBEnv *env = 0;
+
+
+   return SCIP_OKAY;
+}
 /**
  * Integer linear program to find the maximally violated inequality 
  */
@@ -432,12 +448,13 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
     SCIP *scip,
     SCIP_CONSHDLR *conshdlr, //the constraint handler itself
     SCIP_SOL *sol,           //primal solution that should be separated
-    SCIP_RESULT *result      //pointer to store the result of the separation call
-)
+    SCIP_RESULT *result)     //pointer to store the result of the separation call
 {
    assert(result != NULL);
    *result = SCIP_DIDNOTFIND;
 
+   exactSeparationGrbModel(scip, conshdlr, sol, result);
+   exit(0);
    //show fractional solution
    //printFractionalSol(scip, instance, sol, x, z, infSet);
 
@@ -823,19 +840,7 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
 
    //construct the suport graph
    Digraph new_graph;
-
-   //getSuportGraph(scip, instance, NULL, z, new_graph);
-   DNodeDNodeMap nodeRef(new_graph);
-   ArcArcMap arcRef(new_graph);
-   digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
-
-   for (ArcIt a(new_graph); a != INVALID; ++a)
-   {
-      if (SCIPisEQ(scip, SCIPgetVarSol(scip, z[arcRef[a]]), 0))
-      {
-         new_graph.erase(a);
-      }
-   }
+   getSuportGraph(scip, instance, NULL, z, new_graph);
 
    //show lambda variables
    /* for (DNodeIt v(instance.g); v != INVALID; ++v)
@@ -849,8 +854,6 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
          }
       }
    } */
-
-   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
 
    // if a cycle is found, the solution must be infeasible
    if (!dag(new_graph))
@@ -918,7 +921,6 @@ SCIP_DECL_CONSENFOPS(GeneralizedPropagation::scip_enfops)
 
    //cout << "Construct the suport graph" << endl;
    Digraph new_graph;
-
    getSuportGraph(scip, instance, NULL, z, new_graph);
 
    // if a cycle is found, the solution must be infeasible
@@ -927,13 +929,6 @@ SCIP_DECL_CONSENFOPS(GeneralizedPropagation::scip_enfops)
       *result = SCIP_INFEASIBLE;
       //cout << "(COPIED GRAPH) isn't acyclic\n";
    }
-
-   /*  if (findDirectedCycle(scip, NULL, instance, x, z))
-   {
-      //cout << "(DFS) violation: solution has a cycle\n";
-      exactSeparation(scip, conshdlr, NULL, result);
-      *result = SCIP_INFEASIBLE;
-   } */
 
    return SCIP_OKAY;
 }
