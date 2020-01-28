@@ -82,6 +82,13 @@ public:
         SCIP_RESULT *result      //pointer to store the result of the separation call
                                  //        set<DNode> generalizedSet // set of vertices to be separated
     );
+
+    SCIP_RETCODE exactSeparationGrbModel(
+        SCIP *scip,
+        SCIP_CONSHDLR *conshdlr, //the constraint handler itself
+        SCIP_SOL *sol,           //primal solution that should be separated
+        SCIP_RESULT *result);    //pointer to store the result of the separation call
+
     SCIP_RETCODE exactSeparation(
         SCIP *scip,
         SCIP_CONSHDLR *conshdlr, //the constraint handler itself

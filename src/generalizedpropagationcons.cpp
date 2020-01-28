@@ -426,18 +426,185 @@ void printFractionalSol(SCIP *scip,
    }
 }
 
-SCIP_RETCODE exactSeparationGrbModel(
+//local type definitions to use only in the gurobi's model
+typedef struct influencing_set_grb
+{
+   set<DNode> nodes;
+   GRBVar var;
+   double cost;
+} GRBInfluencingSet;
+
+//maps of gurobi variables
+typedef Digraph::NodeMap<GRBVar> DNodeGRBVarMap;
+typedef Digraph::NodeMap<vector<GRBInfluencingSet>> GRBInfSetsMap;
+
+SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
     SCIP *scip,
     SCIP_CONSHDLR *conshdlr, //the constraint handler itself
     SCIP_SOL *sol,           //primal solution that should be separated
-    SCIP_RESULT *result)     //pointer to store the result of the separation call
+    SCIP_RESULT *result     //pointer to store the result of the separation call
+                             /*     set<DNode> &generalizedSet, // set to store the set X of the violated GPCs
+    DNode &k,                // the right hand side vertex
+    SCIP_Bool *isLiftedUp    //indicate if the lifting is done */
+)
 {
-   /* SCIP_LPI* lpi;
-   SCIP_MESSAGEHDLR* msghdlr;
-   SCIPlpiCreate(&lpi, msghdlr, "SeparationProblem", SCIP_OBJSEN_MINIMIZE); */
+   assert(result != NULL);
+   *result = SCIP_DIDNOTFIND;
 
    GRBEnv *env = 0;
+   DNodeGRBVarMap belongsToX(instance.g); //indicates membership of nodes to set X
+   DNodeGRBVarMap isOnRHS(instance.g);    //equal to one node if i is on the RHS of GPC
+   GRBInfSetsMap validInfSet(instance.g); //equal to one iff node i \in X and U has no
+                                          //intersection with X
 
+   //decides whether the lifting to one on the right-hand side is applied or not
+   GRBVar lifting;
+
+   //model
+   env = new GRBEnv();
+   
+   GRBModel model = GRBModel(*env);
+   model.set(GRB_StringAttr_ModelName, "exact separation of GPC");
+
+   // create lifting variable
+   lifting = model.addVar(0.0, 1.0, -1.0, GRB_BINARY, "lifting_rhs");
+
+   //create "belong to X" variables
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      belongsToX[v] = model.addVar(0, 1, 0, GRB_BINARY, "v_" + instance.nodeName[v]);
+   }
+
+   //create "is on the right-hand side" variables
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      //get solution value of var x[v]
+      double value = SCIPgetSolVal(scip, sol, x[v]);
+      isOnRHS[v] = model.addVar(0, 1, -value, GRB_BINARY, "y_" + instance.nodeName[v]);
+   }
+
+   //create "valid influencing-set" variables
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      //go through all the influencing-sets of v
+      for (size_t i = 0; i < infSet[v].size(); i++)
+      {
+         //get the value of infSet[v][i] variable
+         double value = SCIPgetSolVal(scip, sol, infSet[v][i].var);
+
+         //it is sufficient to consider infSet variables greater than zero
+         if (SCIPisEQ(scip, value, 0.0))
+            continue;
+
+         //give a significative name
+         std::stringstream stream;
+         for (DNode u : infSet[v][i].nodes)
+         {
+            stream << instance.nodeName[u] + ",";
+         }
+         string name;
+         if (infSet[v][i].nodes.empty())
+            name = "u_" + instance.nodeName[v] + "_empty";
+         else
+            name = "u_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+
+         GRBInfluencingSet ini;
+         ini.cost = value;
+         for (DNode u : infSet[v][i].nodes)
+         {
+            ini.nodes.insert(u);
+         }
+         ini.var = model.addVar(0, 1, value, GRB_BINARY, name);
+
+         validInfSet[v].push_back(ini);
+      }
+   }
+
+   //the objective is to minimize the LSH of GPCs constraints
+   model.set(GRB_IntAttr_ModelSense, GRB_MINIMIZE);
+
+   //constraint to force a minimum size of two for set X
+   //or size (1 - alpha) * n if the lifting is applied.
+   GRBLinExpr lhs = 0;
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      lhs += belongsToX[v];
+   }
+   lhs += (-floor((1 - instance.alpha) * instance.n) - 2) * lifting;
+   model.addConstr(lhs >= 2, "size-of-X cons");
+
+   //constraint to decide for the node or the lifting on the right-hand side
+   GRBLinExpr lhs2 = 0;
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+      lhs2 += isOnRHS[v];
+   lhs2 += lifting;
+   model.addConstr(lhs2 == 1, "decide-lifting cons");
+
+   // node in the right hand side constraint
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      GRBLinExpr lhs3 = 0;
+      lhs3 += (isOnRHS[v] - belongsToX[v]);
+      //lhs3 -= belongsToX[v];
+      model.addConstr(lhs3 <= 0, "node-in-rhs cons");
+   }
+
+   //constraint to ensure that all variables corresponding to relevant
+   //minimal influencing sets are set to one
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      //go through all the influencing-sets of v
+      for (size_t i = 0; i < validInfSet[v].size(); i++)
+      {
+         GRBLinExpr lhs4 = 0;
+         lhs4 -= belongsToX[v];
+         for (DNode u : validInfSet[v][i].nodes)
+            lhs4 += belongsToX[u];
+
+         lhs4 += validInfSet[v][i].var;
+         model.addConstr(lhs4 >= 0, "valid-inf-sets cons");
+      }
+   }
+
+   model.set(GRB_IntParam_OutputFlag, 0);
+   model.optimize();
+
+   //getting the vertices that belgong to X
+   double objVal = model.get(GRB_DoubleAttr_ObjVal);
+   if (SCIPisNegative(scip, objVal))
+   {
+      *result = SCIP_SEPARATED;
+
+      set<DNode> generalizedSet;
+      for (DNodeIt v(instance.g); v != INVALID; ++v)
+      {
+         if (belongsToX[v].get(GRB_DoubleAttr_X) > 0.5)
+         {
+            generalizedSet.insert(v);
+            //cout << instance.nodeName[v] << " ";
+         }
+      }
+      //cout << endl;
+
+      // in case the lifting isn't done find the vertex to be in the RHS
+      if (lifting.get(GRB_DoubleAttr_X) < .5)
+      {
+         for (DNodeIt v(instance.g); v != INVALID; ++v)
+            if (isOnRHS[v].get(GRB_DoubleAttr_X) > .5)
+               addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, v, FALSE);
+      }
+      else
+      {
+         addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, INVALID, TRUE);
+      }
+
+      // node has become infeasible
+      if (*result == SCIP_CUTOFF)
+      {
+         cout << "node has become infeasible\n";
+         return SCIP_OKAY;
+      }
+   }
 
    return SCIP_OKAY;
 }
@@ -453,8 +620,6 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
    assert(result != NULL);
    *result = SCIP_DIDNOTFIND;
 
-   exactSeparationGrbModel(scip, conshdlr, sol, result);
-   exit(0);
    //show fractional solution
    //printFractionalSol(scip, instance, sol, x, z, infSet);
 
@@ -588,30 +753,23 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
    SCIP_CALL(SCIPsolve(new_scip));
 
-   //get the vertices that belgong to X
-   SCIP_SOL *localSol = SCIPgetBestSol(new_scip);
-
-   set<DNode> generalizedSet;
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      double value = SCIPgetSolVal(new_scip, localSol, belongsToX[v]);
-      if (value > 0.5)
-      {
-         generalizedSet.insert(v);
-      }
-   }
-   //cout << "lifting the RHS = " << SCIPgetSolVal(new_scip, localSol, liftingRHS) << "\n";
-
    //check if solution value is negative (and hence a violated constraint was found)
    if (SCIPisNegative(new_scip, SCIPgetPrimalbound(new_scip)))
    {
       *result = SCIP_SEPARATED;
 
-      /* for (DNode j : generalizedSet)
+      //get the vertices that belgong to X
+      SCIP_SOL *localSol = SCIPgetBestSol(new_scip);
+
+      set<DNode> generalizedSet;
+      for (DNodeIt v(instance.g); v != INVALID; ++v)
       {
-         cout << instance.nodeName[j] << " ";
+         double value = SCIPgetSolVal(new_scip, localSol, belongsToX[v]);
+         if (value > 0.5)
+         {
+            generalizedSet.insert(v);
+         }
       }
-      cout << endl; */
 
       // in case the lifting isn't done find the vertex to be in the RHS
       if (SCIPgetSolVal(new_scip, localSol, liftingRHS) < 0.5)
@@ -754,11 +912,10 @@ SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
    //cout << "(GPC) CONSSEPALP()" << endl;
 
    //implement the fischetti's model for separation
-   SCIP_CALL(exactSeparation(scip, conshdlr, NULL, result));
+   SCIP_CALL(exactSeparationGrbModel(scip, conshdlr, NULL, result));
    //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
 
    //printRows(scip);
-
    //cout << "--------END OF SEPARATION---------\n";
    return SCIP_OKAY;
 }
@@ -776,7 +933,7 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
 {
    cout << "CONSSEPASOL()" << endl;
    // heuristic separation method for an primal solution
-   SCIP_CALL(exactSeparation(scip, conshdlr, sol, result));
+   SCIP_CALL(exactSeparationGrbModel(scip, conshdlr, sol, result));
 
    return SCIP_OKAY;
 }
@@ -1072,6 +1229,9 @@ SCIP_RETCODE GeneralizedPropagation::createGenPropagationCons(
       return SCIP_PLUGINNOTFOUND;
    }
 
+   SCIP_LPI *lpi;
+   SCIPlpiGetSolverPointer(lpi);
+   
    //create constraint
    SCIP_CALL(
        SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, TRUE, TRUE, TRUE,

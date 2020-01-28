@@ -122,9 +122,6 @@ typedef struct influencing_set{
     set<DNode> nodes;
     SCIP_VAR* var;
     double cost;
-
-    //set of all GPCs inequalities which the generalized-set X has no intersection with influencing-set nodes
-    //set<Phi> phis; 
 }InfluencingSet;
 
 // structure to represent each pair (d, phis) of the dynamic program for the pricing
