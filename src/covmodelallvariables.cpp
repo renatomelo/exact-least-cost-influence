@@ -15,20 +15,20 @@ vector<InfluencingSet> CovModelAllVariables::powerSet(
     // run from 000...0 to 111...1
     for (unsigned int i = 0; i < pSize; i++)
     {
-        InfluencingSet subset;
+        InfluencingSet subset(instance, v);
 
         for (unsigned int j = 0; j < neighbors.size(); j++)
         {
             if (i & (1 << j))
             {
-                subset.nodes.insert(neighbors[j]);
+                subset.addNode(neighbors[j]);
             }
         }
         //add to the list only if is minimal
-        double minCost = costInfluencingSet(instance, v, subset.nodes);
+        double minCost = costInfluencingSet(instance, v, subset.getNodes());
         //cout << "minCost = " << minCost << endl;
         int sum = 0;
-        for (DNode u : subset.nodes)
+        for (DNode u : subset.getNodes())
         {
             Arc a = findArc(instance.g, u, v);
             assert(a != INVALID);
@@ -39,7 +39,7 @@ vector<InfluencingSet> CovModelAllVariables::powerSet(
         //cout << "slack = " << slack << endl;
 
         bool isMinimal = TRUE;
-        for (DNode u : subset.nodes)
+        for (DNode u : subset.getNodes())
         {
             Arc a = findArc(instance.g, u, v);
             assert(a != INVALID);
@@ -107,7 +107,7 @@ void CovModelAllVariables::addPropagationConstraints(
         // summation of all influencing-set varialbes related to a vertex v
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
-            cons->addVar(infSet[v][i].var, 1);
+            cons->addVar(infSet[v][i].getVar(), 1);
         }
         cons->addVar(x[v], -1);
         cons->commit();
@@ -130,7 +130,7 @@ void unicInfSetConstraints(SCIP *scip,
         // summation of all influencing-set varialbes related to a vertex v
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
-            cons->addVar(infSet[v][i].var, 1);
+            cons->addVar(infSet[v][i].getVar(), 1);
         }
         cons->commit();
     }
@@ -155,9 +155,9 @@ void CovModelAllVariables::addChosenArcsConstraints(SCIP *scip,
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
             // add variable if u belongs to the influencing set of v
-            if (infSet[v][i].nodes.count(u))
+            if (infSet[v][i].getNodes().count(u))
             {
-                cons->addVar(infSet[v][i].var, 1);
+                cons->addVar(infSet[v][i].getVar(), 1);
             }
             // trying to force the model hold when using inequality
             /* if (infSet[v][i].nodes.size() == 0)
@@ -226,28 +226,31 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
-            double cost = costInfluencingSet(instance, v, infSet[v][i].nodes);
+            /* double cost = costInfluencingSet(instance, v, infSet[v][i].getNodes());
 
             string name;
-            if (infSet[v][i].nodes.empty())
+            if (infSet[v][i].getNodes().empty())
                 name = "Lambda_" + instance.nodeName[v] + "_empty";
             else
             {
                 std::stringstream stream;
 
                 const char *separator = "";
-                for (DNode u : infSet[v][i].nodes)
+                for (DNode u : infSet[v][i].getNodes())
                 {
                     stream << separator << instance.nodeName[u];
                     separator = ",";
                 }
 
                 name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
-            }
+            } */
 
-            ScipVar *var = new ScipContVar(scip, name, 0, SCIPinfinity(scip), cost);
-            infSet[v][i].var = var->var;
-            infSet[v][i].cost = cost;
+            infSet[v][i].setCost(costInfluencingSet(instance, v, infSet[v][i].getNodes()));
+
+            ScipVar *var = new ScipContVar(scip, infSet[v][i].getName(), 0, SCIPinfinity(scip), infSet[v][i].getCost());
+            /* infSet[v][i].var = var->var;
+            infSet[v][i].cost = cost; */
+            infSet[v][i].setVar(var->var);
         }
     }
 

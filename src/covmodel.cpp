@@ -20,15 +20,17 @@ SCIP_RETCODE incentivesForAll(SCIP *scip,
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
+        InfluencingSet ifs(instance,v);
+        ifs.setCost(GLCIPBase::cheapestIncentive(instance, v, 0));
+        ifs.setName("HeurLambda_" + instance.nodeName[v] + "_empty");
 
         SCIP_VAR *var;
-        std::string name = "infSetVar_" + instance.nodeName[v] + "_empty";
+        //std::string name = "HeurLambda_" + instance.nodeName[v] + "_empty";
         SCIP_CALL(SCIPcreateVar(scip, &var,
-                                name.c_str(),            // var name
+                                ifs.getName().c_str(),            // var name
                                 0,                       // lower bound
                                 SCIPinfinity(scip),      // upper bound
-                                cost,                    // coeficient in the objective function
+                                ifs.getCost(),           // coeficient in the objective function
                                 SCIP_VARTYPE_CONTINUOUS, // continuous variable
                                 FALSE,                   // initial variable
                                 FALSE,                   // removable variable
@@ -40,10 +42,11 @@ SCIP_RETCODE incentivesForAll(SCIP *scip,
         SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
 
         // data structure to save the variables and associated costs
-        InfluencingSet initial;
+        /* InfluencingSet initial;
         initial.var = var;
-        initial.cost = cost;
-        infSet[v].push_back(initial);
+        initial.cost = cost; */
+        ifs.setVar(var);
+        infSet[v].push_back(ifs);
 
         /*  std::cout << "Adding variable (trivial)"
                   << "infSetVar_" + instance.nodeName[v] + "empty" << std::endl; */
@@ -61,7 +64,7 @@ void showActivatedNodes(GLCIPInstance &instance, set<DNode> actives, DNodeInfSet
         std::cout << instance.nodeName[v] + ": ";
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
-            for (DNode u : infSet[v][i].nodes)
+            for (DNode u : infSet[v][i].getNodes())
             {
                 std::cout << " " + instance.nodeName[u];
             }
@@ -128,16 +131,16 @@ set<DNode> greedyConstruction(GLCIPInstance &instance, DNodeInfSetsMap &infSet)
         DNode v;
         double minCost = getMinIncentiveNode(instance, actives, v);
         // save v's influencing-set and activate it
-        InfluencingSet ifs;
+        InfluencingSet ifs(instance, v);
         for (InArcIt a(instance.g, v); a != INVALID; ++a)
         {
             DNode u = instance.g.source(a);
             if (actives.count(u))
             {
-                ifs.nodes.insert(u);
+                ifs.addNode(u);
             }
         }
-        ifs.cost = minCost; //GLCIPBase::costInfluencingSet(instance, v, ifs.nodes);
+        ifs.setCost(minCost); //GLCIPBase::costInfluencingSet(instance, v, ifs.nodes);
         infSet[v].push_back(ifs);
         actives.insert(v);
 
@@ -165,19 +168,22 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
     for (DNode v : activated)
     {
         std::string name;
-        if (infSet[v][0].nodes.size() > 0)
+        if (infSet[v][0].getNodes().size() > 0)
         {
+            InfluencingSet ifs(instance, v);
             // give a significative name for the variable
             name = "HeurLambda_" + instance.nodeName[v] + "_empty";
+            ifs.setName(name);
+            ifs.setCost(GLCIPBase::cheapestIncentive(instance, v, 0));
 
             //add a empty influencing-set var for each vertex
-            double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
+            //double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
             SCIP_VAR *var;
             SCIP_CALL(SCIPcreateVar(scip, &var,
                                     name.c_str(),            // var name
                                     0,                       // lower bound
                                     SCIPinfinity(scip),      // upper bound
-                                    cost,                    // coeficient in the objective function
+                                    ifs.getCost(),                    // coeficient in the objective function
                                     SCIP_VARTYPE_CONTINUOUS, // continuous variable
                                     FALSE,                   // initial variable
                                     FALSE,                   // removable variable
@@ -189,17 +195,18 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
 
             // data structure to save the variables and associated costs
-            InfluencingSet initial;
+            /* InfluencingSet initial;
             initial.var = var;
-            initial.cost = cost;
-            infSet[v].push_back(initial);
+            initial.cost = cost; */
+            ifs.setVar(var);
+            infSet[v].push_back(ifs);
 
             SCIP_CALL(SCIPreleaseVar(scip, &var));
 
             // give a representative name to the variable
             std::stringstream stream;
             const char *separator = "";
-            for (DNode u : infSet[v][0].nodes)
+            for (DNode u : infSet[v][0].getNodes())
             {
                 stream << separator << instance.nodeName[u];
                 separator = ",";
@@ -210,12 +217,14 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
         else
             name = "HeurLambda_" + instance.nodeName[v] + "_empty";
 
+        infSet[v][0].setName(name);
+
         SCIP_VAR *var;
         SCIP_CALL(SCIPcreateVar(scip, &var,
                                 name.c_str(),            // var name
                                 0,                       // lower bound
                                 SCIPinfinity(scip),      // upper bound
-                                infSet[v][0].cost,       // coeficient in the objective function
+                                infSet[v][0].getCost(),       // coeficient in the objective function
                                 SCIP_VARTYPE_CONTINUOUS, // continuous variable
                                 FALSE,                   // initial variable
                                 FALSE,                   // removable variable
@@ -228,7 +237,7 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
 
         // until this moment, each vertex has exactly one assossiated influencing-set
         // add the vars associated with each arc constraint
-        for (DNode u : infSet[v][0].nodes)
+        for (DNode u : infSet[v][0].getNodes())
         {
             //std::cout << instance.nodeName[u] << " ";
             Arc a = findArc(instance.g, u, v);
@@ -238,7 +247,7 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             //cout << " arc is able flag changed to " << isAble[a] << endl;
         }
 
-        infSet[v][0].var = var;
+        infSet[v][0].setVar(var);
 
         //std::cout << "Adding variable (heur) " << name << std::endl;
         SCIP_CALL(SCIPreleaseVar(scip, &var));
@@ -271,10 +280,11 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
 
             // data structure to save the variables and associated costs
-            InfluencingSet initial;
-            initial.var = var;
-            initial.cost = cost;
-            infSet[v].push_back(initial);
+            InfluencingSet ifs(instance, v);
+
+            ifs.setVar(var);
+            ifs.setCost(cost);
+            infSet[v].push_back(ifs);
 
             SCIP_CALL(SCIPreleaseVar(scip, &var));
         }
@@ -304,19 +314,20 @@ SCIP_RETCODE addInitialFeasibleSol(SCIP *scip,
         {
             DNode u = instance.g.source(a);
             DNode v = instance.g.target(a);
-            std::string name = "HeurLambda_" + instance.nodeName[v] + "_{" + instance.nodeName[u] + "}";
+            string name = "HeurLambda_" + instance.nodeName[v] + "_{" + instance.nodeName[u] + "}";
 
             // data structure to save the variables and associated costs
-            InfluencingSet initial;
-            initial.nodes.insert(u);
-            initial.cost = GLCIPBase::costInfluencingSet(instance, v, initial.nodes);
+            InfluencingSet ifs(instance, v);
+            ifs.addNode(u);
+            ifs.setCost(GLCIPBase::costInfluencingSet(instance, v, ifs.getNodes()));
+            ifs.setName(name);
 
             SCIP_VAR *var;
             SCIP_CALL(SCIPcreateVar(scip, &var,
                                     name.c_str(),            // var name
                                     0,                       // lower bound
                                     SCIPinfinity(scip),      // upper bound
-                                    initial.cost,            // coeficient in the objective function
+                                    ifs.getCost(),            // coeficient in the objective function
                                     SCIP_VARTYPE_CONTINUOUS, // continuous variable
                                     FALSE,                   // initial variable
                                     FALSE,                   // removable variable
@@ -325,8 +336,8 @@ SCIP_RETCODE addInitialFeasibleSol(SCIP *scip,
             SCIP_CALL(SCIPaddVar(scip, var));
             SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
 
-            initial.var = var;
-            infSet[v].push_back(initial);
+            ifs.setVar(var);
+            infSet[v].push_back(ifs);
             //std::cout << "Adding trivial influencing set variable" << name << std::endl;
             SCIP_CALL(SCIPreleaseVar(scip, &var));
         }
@@ -419,12 +430,12 @@ void CovModel::constructSoltion(SCIP *scip,
         // get the value of influencing-set variables
         for (unsigned int i = 0; i < infSet[v].size(); i++)
         {
-            double solVal = SCIPgetSolVal(scip, sol, infSet[v][i].var);
+            double solVal = SCIPgetSolVal(scip, sol, infSet[v][i].getVar());
             // use it to find the amount of incentive paid
             if (solVal > 0.1)
             {
-                solution.incentives[v] = infSet[v][i].cost;
-                std::cout << SCIPvarGetName(infSet[v][i].var) << " \t\t= " << solVal << std::endl;
+                solution.incentives[v] = infSet[v][i].getCost();
+                std::cout << SCIPvarGetName(infSet[v][i].getVar()) << " \t\t= " << solVal << std::endl;
             }
         }
     }

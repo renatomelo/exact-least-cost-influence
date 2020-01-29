@@ -125,9 +125,9 @@ SCIP_RETCODE GeneralizedPropagation::addGeneralizedPropCons(
    {
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
-         if (!GLCIPBase::intersects(generalizedSet, infSet[v][i].nodes))
+         if (!GLCIPBase::intersects(generalizedSet, infSet[v][i].getNodes()))
          {
-            SCIPaddVarToRow(scip, row, infSet[v][i].var, 1.0);
+            SCIPaddVarToRow(scip, row, infSet[v][i].getVar(), 1.0);
          }
       }
       gpcrow.generalizedSet.insert(v);
@@ -176,9 +176,9 @@ SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
          //get the empty influensin-set var
-         if (infSet[v][i].nodes.empty())
+         if (infSet[v][i].getNodes().empty())
          {
-            double value = SCIPgetSolVal(scip, sol, infSet[v][i].var);
+            double value = SCIPgetSolVal(scip, sol, infSet[v][i].getVar());
             // x[v] > 0
             if ((SCIPgetSolVal(scip, sol, x[v]) > SCIPepsilon(scip)) && SCIPisLT(scip, value, SCIPgetSolVal(scip, sol, x[v])))
             {
@@ -219,9 +219,9 @@ SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
          double sum = 0;
          for (unsigned int p = 0; p < infSet[j].size(); p++)
          {
-            if (!GLCIPBase::intersects(generalizedSet, infSet[j][p].nodes))
+            if (!GLCIPBase::intersects(generalizedSet, infSet[j][p].getNodes()))
             {
-               sum += SCIPgetSolVal(scip, sol, infSet[j][p].var);
+               sum += SCIPgetSolVal(scip, sol, infSet[j][p].getVar());
             }
          }
 
@@ -245,9 +245,9 @@ SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
          {
             for (unsigned int p = 0; p < infSet[j].size(); p++)
             {
-               if (!GLCIPBase::intersects(generalizedSet, infSet[j][p].nodes))
+               if (!GLCIPBase::intersects(generalizedSet, infSet[j][p].getNodes()))
                {
-                  sum += SCIPgetSolVal(scip, sol, infSet[j][p].var);
+                  sum += SCIPgetSolVal(scip, sol, infSet[j][p].getVar());
                }
             }
          }
@@ -347,9 +347,9 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                {
                   for (unsigned int p = 0; p < infSet[j].size(); p++)
                   {
-                     if (!GLCIPBase::intersects(cycle, infSet[j][p].nodes))
+                     if (!GLCIPBase::intersects(cycle, infSet[j][p].getNodes()))
                      {
-                        sum += SCIPgetSolVal(scip, sol, infSet[j][p].var);
+                        sum += SCIPgetSolVal(scip, sol, infSet[j][p].getVar());
                      }
                   }
                }
@@ -409,9 +409,9 @@ void printFractionalSol(SCIP *scip,
          DNode u = instance.g.source(a);
          for (unsigned int i = 0; i < infSet[v].size(); i++)
          {
-            if (infSet[v][i].nodes.count(u))
+            if (infSet[v][i].getNodes().count(u))
             {
-               sum += SCIPgetSolVal(scip, sol, infSet[v][i].var);
+               sum += SCIPgetSolVal(scip, sol, infSet[v][i].getVar());
             }
          }
       }
@@ -423,12 +423,78 @@ void printFractionalSol(SCIP *scip,
 }
 
 //local type definitions to use only in the gurobi's model
-typedef struct influencing_set_grb
+class GRBInfluencingSet
 {
+private:
+   GLCIPInstance &instance;
+   DNode v;
    set<DNode> nodes;
    GRBVar var;
    double cost;
-} GRBInfluencingSet;
+   string name;
+
+public:
+   GRBInfluencingSet(
+      GLCIPInstance &_instance, 
+      DNode _v, 
+      set<DNode> _nodes) : instance(_instance), v(_v), nodes(_nodes){};
+   ~GRBInfluencingSet(){};
+
+   void addNode(DNode u)
+   {
+      nodes.insert(u);
+   }
+
+   set<DNode> getNodes()
+   {
+      return nodes;
+   }
+
+   /**
+    * give a significative name to the associated var using the (previously) given nodes
+    */
+   void giveName()
+   {
+      stringstream stream;
+      for (DNode u : nodes)
+      {
+         stream << instance.nodeName[u] + ",";
+      }
+      if (nodes.empty())
+         name = "u_" + instance.nodeName[v] + "_empty";
+      else
+         name = "u_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+   }
+
+   string getName()
+   {
+      if (name.empty())
+      {
+         giveName();
+      }
+      return name;
+   }
+
+   void setCost(double c)
+   {
+      cost = c;
+   }
+
+   double getCost()
+   {
+      return cost;
+   }
+
+   void setVar(GRBVar variable)
+   {
+      var = variable;
+   }
+
+   const GRBVar &getVar()
+   {
+      return var;
+   }
+};
 
 //maps of gurobi variables
 typedef Digraph::NodeMap<GRBVar> DNodeGRBVarMap;
@@ -483,31 +549,14 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
          for (size_t i = 0; i < infSet[v].size(); i++)
          {
             //it is sufficient to consider infSet variables greater than zero
-            if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, infSet[v][i].var), 0.0))
+            if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, infSet[v][i].getVar()), 0.0))
                continue;
 
-            //give a significative name
-            std::stringstream stream;
-            for (DNode u : infSet[v][i].nodes)
-            {
-               stream << instance.nodeName[u] + ",";
-            }
-            string name;
-            if (infSet[v][i].nodes.empty())
-               name = "u_" + instance.nodeName[v] + "_empty";
-            else
-               name = "u_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+            GRBInfluencingSet ifs(instance, v, infSet[v][i].getNodes());
+            ifs.setCost( SCIPgetSolVal(scip, sol, infSet[v][i].getVar()) );
+            ifs.setVar(model.addVar(0, 1, ifs.getCost(), GRB_BINARY, ifs.getName()));
 
-            GRBInfluencingSet ini;
-            ini.cost = SCIPgetSolVal(scip, sol, infSet[v][i].var);
-            
-            for (DNode u : infSet[v][i].nodes)
-            {
-               ini.nodes.insert(u);
-            }
-            ini.var = model.addVar(0, 1, ini.cost, GRB_BINARY, name);
-
-            validInfSet[v].push_back(ini);
+            validInfSet[v].push_back(ifs);
          }
       }
 
@@ -548,10 +597,10 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
          {
             GRBLinExpr lhs4;
             lhs4 -= belongsToX[v];
-            for (DNode u : validInfSet[v][i].nodes)
+            for (DNode u : validInfSet[v][i].getNodes())
                lhs4 += belongsToX[u];
 
-            lhs4 += validInfSet[v][i].var;
+            lhs4 += validInfSet[v][i].getVar();
             model.addConstr(lhs4, GRB_GREATER_EQUAL, 0, "valid-inf-sets cons");
          }
       }
@@ -659,7 +708,6 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       isOnRHS[v] = var->var;
    }
 
-   int sum = 0;
    //create "valid influencing-set" variables
    for (DNodeIt v(instance.g); v != INVALID; ++v)
    {
@@ -667,7 +715,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
          //get the value of infSet[v][i] variable
-         double value = SCIPgetSolVal(scip, sol, infSet[v][i].var);
+         double value = SCIPgetSolVal(scip, sol, infSet[v][i].getVar());
 
          //it is sufficient to consider infSet variables greater than zero
          if (SCIPisEQ(new_scip, value, 0.0))
@@ -675,32 +723,32 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
 
          //give a significative name
          std::stringstream stream;
-         for (DNode u : infSet[v][i].nodes)
+         for (DNode u : infSet[v][i].getNodes())
          {
             stream << instance.nodeName[u] + ",";
          }
          string name;
-         if (infSet[v][i].nodes.empty())
+         if (infSet[v][i].getNodes().empty())
             name = "u_" + instance.nodeName[v] + "_empty";
          else
             name = "u_" + instance.nodeName[v] + "_{" + stream.str() + "}";
 
-         ScipVar *var = new ScipBinVar(new_scip, name, value);
-
-         InfluencingSet ini;
-         ini.cost = value;
+         InfluencingSet ifs(instance, v, infSet[v][i].getNodes());
+         /* ini.cost = value;
          for (DNode u : infSet[v][i].nodes)
          {
             ini.nodes.insert(u);
-         }
-         ini.var = var->var;
+         } */
+         ifs.setCost(value);
+         ifs.setName(name);
 
-         validInfSet[v].push_back(ini);
+         ScipVar *var = new ScipBinVar(new_scip, ifs.getName(), ifs.getCost());
+         
+         ifs.setVar(var->var);
+
+         validInfSet[v].push_back(ifs);
       }
-      sum += validInfSet[v].size();
    }
-
-   //cout << "number of 'valid inf set' variables = " <<  sum << endl;
 
    //create constraint to force a minimum size of two for set X
    //or size (1 - alpha) * n if the lifting is applied.
@@ -739,12 +787,12 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
          ScipCons *cons = new ScipCons(new_scip, 0.0, SCIPinfinity(new_scip), "valid-inf-sets cons");
          cons->addVar(belongsToX[v], -1.0);
 
-         for (DNode u : validInfSet[v][i].nodes)
+         for (DNode u : validInfSet[v][i].getNodes())
          {
             cons->addVar(belongsToX[u], 1.0);
          }
 
-         cons->addVar(validInfSet[v][i].var, 1.0);
+         cons->addVar(validInfSet[v][i].getVar(), 1.0);
          cons->commit();
       }
    }

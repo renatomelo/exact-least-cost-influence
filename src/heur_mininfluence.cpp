@@ -4,15 +4,15 @@
 /** add influencing-set variable to problem */
 SCIP_RETCODE addInfluencingSetVar(
     SCIP *scip,
-    const GLCIPInstance &instance,
-    const DNode &v,
-    const set<DNode> &nodes,
+    GLCIPInstance &instance,
+    DNode &v,
+    set<DNode> &nodes,
     DNodeInfSetsMap &infSet,
     ArcConsMap &arcCons,    /**< map of arc constraints */
     DNodeConsMap &vertCons, /**< map of partitioning constraints */
     vector<Phi> &gpcRows)
 {
-   std::string name;
+   /* std::string name;
    if (nodes.size() > 0)
    {
       std::stringstream stream;
@@ -26,15 +26,19 @@ SCIP_RETCODE addInfluencingSetVar(
       name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
    }
    else
-      name = "Lambda_" + instance.nodeName[v] + "_empty";
+      name = "Lambda_" + instance.nodeName[v] + "_empty"; */
 
-   double cost = GLCIPBase::costInfluencingSet(instance, v, nodes);
+   // data structure to save the variables and associated nodes
+   InfluencingSet ifs(instance, v, nodes);
+   ifs.setCost(GLCIPBase::costInfluencingSet(instance, v, nodes));
+
+   //double cost = GLCIPBase::costInfluencingSet(instance, v, nodes);
    SCIP_VAR *var;
    SCIP_CALL(SCIPcreateVar(scip, &var,
-                           name.c_str(),            // var name
+                           ifs.getName().c_str(),            // var name
                            0.0,                     // lower bound
                            SCIPinfinity(scip),      // upper bound
-                           cost,                    // coeficient in the objective function
+                           ifs.getCost(),                    // coeficient in the objective function
                            SCIP_VARTYPE_CONTINUOUS, // continuous variable
                            FALSE,                   // initial variable
                            FALSE,                   // removable variable
@@ -44,10 +48,10 @@ SCIP_RETCODE addInfluencingSetVar(
 
    SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
 
-   // data structure to save the variables and associated nodes
-   InfluencingSet in;
+   ifs.setVar(var);
+   /* InfluencingSet in;
    in.var = var;
-   in.cost = cost;
+   in.cost = cost; */
 
    if (nodes.size() != 0)
    {
@@ -56,7 +60,7 @@ SCIP_RETCODE addInfluencingSetVar(
          Arc a = findArc(instance.g, u, v);
          assert(a != INVALID);
          SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
-         in.nodes.insert(u);
+         //in.nodes.insert(u);
       }
    }
 
@@ -65,15 +69,15 @@ SCIP_RETCODE addInfluencingSetVar(
    {
       if (gpcRows[i].generalizedSet.count(v))
       {
-         if (!GLCIPBase::intersects(gpcRows[i].generalizedSet, in.nodes))
+         if (!GLCIPBase::intersects(gpcRows[i].generalizedSet, ifs.getNodes()))
          {
-            SCIPaddVarToRow(scip, gpcRows[i].row, in.var, 1.0);
+            SCIPaddVarToRow(scip, gpcRows[i].row, ifs.getVar(), 1.0);
          }
       }
    }
 
    // save the variable
-   infSet[v].push_back(in);
+   infSet[v].push_back(ifs);
 
    //std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
 
@@ -153,12 +157,12 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
    {
       for (size_t i = 0; i < infSet[v].size(); i++)
       {
-         if (infSet[v][i].nodes.empty() && SCIPisPositive(scip, SCIPgetSolVal(scip, sol, infSet[v][i].var)))
+         if (infSet[v][i].getNodes().empty() && SCIPisPositive(scip, SCIPgetSolVal(scip, sol, infSet[v][i].getVar())))
          {
             //choose the minimum cost
-            if (infSet[v][i].cost < minC)
+            if (infSet[v][i].getCost() < minC)
             {
-               minC = infSet[v][i].cost;
+               minC = infSet[v][i].getCost();
                node = v;
                idx = i;
             }
@@ -171,7 +175,7 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
    if (idx != -1)
    {
       //fix the variable Lambda_v_empty for the chosen node to start the propagation
-      SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[node][idx].var, 1.0));
+      SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[node][idx].getVar(), 1.0));
       //cout << "\nsetting var: " << SCIPvarGetName(infSet[node][idx].var) << endl;
       SCIP_CALL(SCIPsetSolVal(scip, newsol, x[node], 1.0));
       actives.insert(node);
@@ -228,9 +232,9 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
       bool varFound = FALSE;
       for (unsigned int i = 0; i < infSet[v].size(); i++)
       {
-         if (nodes == infSet[v][i].nodes)
+         if (nodes == infSet[v][i].getNodes())
          {
-            SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[v][i].var, 1.0));
+            SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[v][i].getVar(), 1.0));
             //cout << "setting var: " << SCIPvarGetName(infSet[v][i].var) << endl;
             varFound = TRUE;
             break;
@@ -246,7 +250,7 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
 
          //the new variable was added in the back of the list infSet[v], then its position is infSet[v].size()-1
          int position = infSet[v].size() - 1;
-         SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[v][position].var, 1.0));
+         SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[v][position].getVar(), 1.0));
       }
 
       actives.insert(v);
