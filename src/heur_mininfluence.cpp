@@ -240,18 +240,16 @@ SCIP_RETCODE HeurMinInfluence::greedyConstruction(
       //isn't the variable in the model?
       if (!varFound)
       {
-         //cout << "var not found\n";
+         //var not found";
          //create a new var and add it to the model
          addInfluencingSetVar(scip, instance, v, nodes, infSet, arcCons, vertCons, gpcRows);
 
          //the new variable was added in the back of the list infSet[v], then its position is infSet[v].size()-1
          int position = infSet[v].size() - 1;
          SCIP_CALL(SCIPsetSolVal(scip, newsol, infSet[v][position].var, 1.0));
-         //cout << "setting var: " << SCIPvarGetName(infSet[v][position].var) << endl;
       }
 
       actives.insert(v);
-      //cout << "activating " << instance.nodeName[v] << endl;
    }
 
    return SCIP_OKAY;
@@ -266,7 +264,7 @@ SCIP_DECL_HEURFREE(HeurMinInfluence::scip_free)
 /** initialization method of primal heuristic (called after problem was transformed) */
 SCIP_DECL_HEURINIT(HeurMinInfluence::scip_init)
 {
-   cout << "SCIP_DECL_HEURINIT\n";
+   //cout << "SCIP_DECL_HEURINIT\n";
 
    /* create heuristic data */
    SCIP_CALL(SCIPcreateSol(scip, &sol, heur));
@@ -276,7 +274,7 @@ SCIP_DECL_HEURINIT(HeurMinInfluence::scip_init)
 /** deinitialization method of primal heuristic (called before transformed problem is freed) */
 SCIP_DECL_HEUREXIT(HeurMinInfluence::scip_exit)
 {
-   cout << "SCIP_DECL_HEUREXIT\n";
+   //cout << "SCIP_DECL_HEUREXIT\n";
 
    /* free everything which was created in scip_init */
    SCIP_CALL(SCIPfreeSol(scip, &sol));
@@ -292,7 +290,7 @@ SCIP_DECL_HEUREXIT(HeurMinInfluence::scip_exit)
  */
 SCIP_DECL_HEURINITSOL(HeurMinInfluence::scip_initsol)
 {
-   cout << "SCIP_DECL_HEURINITSOL\n";
+   //cout << "SCIP_DECL_HEURINITSOL\n";
    return SCIP_OKAY;
 }
 

@@ -5,6 +5,7 @@
 #define __GENERALIZEDPROPAGATION_H__
 
 #include "GLCIPBase.h"
+#include "/opt/gurobi810/linux64/include/gurobi_c++.h"
 
 class GeneralizedPropagation : public ObjConshdlr
 {
@@ -14,6 +15,7 @@ private:
     ArcSCIPVarMap &z;
     DNodeInfSetsMap &infSet;
     vector<Phi> &gpcrows;
+    GRBEnv *env;
     //unsigned long int nGeneratedCons = 0;
 
 public:
@@ -45,9 +47,10 @@ public:
                                   infSet(p_infSet),
                                   gpcrows(p_gpcrows)
     {
+        env = new GRBEnv();
     }
 
-    virtual ~GeneralizedPropagation() {}
+    virtual ~GeneralizedPropagation() { delete env;}
 
     virtual SCIP_DECL_CONSDELETE(scip_delete);
     virtual SCIP_DECL_CONSTRANS(scip_trans);
@@ -87,7 +90,8 @@ public:
         SCIP *scip,
         SCIP_CONSHDLR *conshdlr, //the constraint handler itself
         SCIP_SOL *sol,           //primal solution that should be separated
-        SCIP_RESULT *result);    //pointer to store the result of the separation call
+        SCIP_RESULT *result     //pointer to store the result of the separation call
+        );   
 
     SCIP_RETCODE exactSeparation(
         SCIP *scip,
