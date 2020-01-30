@@ -6,7 +6,7 @@
 class ObjPricerGLCIP : public ObjPricer
 {
 private:
-    GLCIPInstance instance; /**< problem data*/
+    GLCIPInstance &instance; /**< problem data*/
 
     ArcSCIPVarMap &z;       /**< map of arc variables */
     DNodeSCIPVarMap &x;     /**< map of vertex variables */

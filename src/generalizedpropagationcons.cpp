@@ -257,7 +257,7 @@ SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
          {
             *result = SCIP_SEPARATED;
 
-            cout << "adding violated inequality\n";
+            //cout << "adding violated inequality\n";
             addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, k, FALSE);
 
             // node has become infeasible
@@ -369,6 +369,7 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                      return SCIP_OKAY;
                   }
                }
+               //else cout << "the cycle found doesn't violate GPC inequalities\n";
             }
          }
       }
@@ -508,9 +509,6 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
     SCIP_CONSHDLR *conshdlr, //the constraint handler itself
     SCIP_SOL *sol,           //primal solution that should be separated
     SCIP_RESULT *result      //pointer to store the result of the separation call
-                             /*     set<DNode> &generalizedSet, // set to store the set X of the violated GPCs
-    DNode &k,                // the right hand side vertex
-    SCIP_Bool *isLiftedUp    //indicate if the lifting is done */
 )
 {
    assert(result != NULL);
@@ -956,6 +954,7 @@ SCIP_RETCODE printRows(SCIP *scip)
 SCIP_DECL_CONSSEPALP(GeneralizedPropagation::scip_sepalp)
 {
    //cout << "(GPC) CONSSEPALP()" << endl;
+
    //implement the fischetti's model for separation
    SCIP_CALL(exactSeparationGrbModel(scip, conshdlr, NULL, result));
    //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));

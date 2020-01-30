@@ -205,7 +205,7 @@ SCIP_DECL_PRICERFARKAS(ObjPricerGLCIP::scip_farkas)
 /** add influencing-set variable to problem */
 SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, const set<DNode> &nodes) const
 {
-   std::string name;
+   /* std::string name;
    if (nodes.size() > 0)
    {
       std::stringstream stream;
@@ -219,15 +219,18 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
       name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
    }
    else
-      name = "Lambda_" + instance.nodeName[v] + "_empty";
+      name = "Lambda_" + instance.nodeName[v] + "_empty"; */
 
-   double cost = GLCIPBase::costInfluencingSet(instance, v, nodes);
+   // data structure to save the variables and associated nodes
+   InfluencingSet ifs(instance, v, nodes);
+   ifs.setCost(GLCIPBase::costInfluencingSet(instance, v, nodes));
+
    SCIP_VAR *var;
    SCIP_CALL(SCIPcreateVar(scip, &var,
-                           name.c_str(),            // var name
+                           ifs.getName().c_str(),   // var name
                            0.0,                     // lower bound
                            SCIPinfinity(scip),      // upper bound
-                           cost,                    // coeficient in the objective function
+                           ifs.getCost(),                    // coeficient in the objective function
                            SCIP_VARTYPE_CONTINUOUS, // continuous variable
                            FALSE,                   // initial variable
                            FALSE,                   // removable variable
@@ -236,11 +239,6 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    SCIP_CALL(SCIPaddPricedVar(scip, var, 1.0));
 
    SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
-
-   // data structure to save the variables and associated nodes
-   InfluencingSet in;
-   in.var = var;
-   in.cost = cost;
 
    /* std::cout << "adding variable for vertex: " << instance.nodeName[v] << " "
              << name << ", cost = " << cost << std::endl; */
@@ -252,22 +250,21 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
          Arc a = findArc(instance.g, u, v);
          assert(a != INVALID);
          SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
-         in.nodes.insert(u);
+         //in.nodes.insert(u);
          //isAble[a] = TRUE;
       }
    }
+
+   ifs.setVar(var);
 
    //update the GPC rows by adding the new var on each constraint in which the set X contains v
    for (unsigned int i = 0; i < gpcRows.size(); i++)
    {
       if (gpcRows[i].generalizedSet.count(v))
       {
-         //cout << "updating the " << i + 1 << "-th GPC row: ";
-         //SCIPprintRow(scip, gpcRows[i].row, NULL);
-
-         if (!GLCIPBase::intersects(gpcRows[i].generalizedSet, in.nodes))
+         if (!GLCIPBase::intersects(gpcRows[i].generalizedSet, ifs.getNodes()))
          {
-            SCIPaddVarToRow(scip, gpcRows[i].row, in.var, 1.0);
+            SCIPaddVarToRow(scip, gpcRows[i].row, ifs.getVar(), 1.0);
             //cout << " adding " << SCIPvarGetName(in.var) << " to the " << i + 1 << "-th GPC row\n";
          }
          /*  cout << "updated " << i + 1 << "-th GPC row\n";
@@ -276,7 +273,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
    }
 
    // save the variable
-   infSet[v].push_back(in);
+   infSet[v].push_back(ifs);
 
    //std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
 

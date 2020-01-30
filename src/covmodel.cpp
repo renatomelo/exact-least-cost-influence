@@ -170,14 +170,13 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
         std::string name;
         if (infSet[v][0].getNodes().size() > 0)
         {
+            // data structure to save the variables and associated costs
             InfluencingSet ifs(instance, v);
-            // give a significative name for the variable
             name = "HeurLambda_" + instance.nodeName[v] + "_empty";
             ifs.setName(name);
             ifs.setCost(GLCIPBase::cheapestIncentive(instance, v, 0));
 
             //add a empty influencing-set var for each vertex
-            //double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
             SCIP_VAR *var;
             SCIP_CALL(SCIPcreateVar(scip, &var,
                                     name.c_str(),            // var name
@@ -194,10 +193,6 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             // add to each vertex constraint
             SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1));
 
-            // data structure to save the variables and associated costs
-            /* InfluencingSet initial;
-            initial.var = var;
-            initial.cost = cost; */
             ifs.setVar(var);
             infSet[v].push_back(ifs);
 
@@ -281,7 +276,6 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
 
             // data structure to save the variables and associated costs
             InfluencingSet ifs(instance, v);
-
             ifs.setVar(var);
             ifs.setCost(cost);
             infSet[v].push_back(ifs);
@@ -527,7 +521,6 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         arcCons[a] = cons->cons;
         cons->commit();
     }
-    //Pricing to generate the propagation constraints and the chosen arcs constraints
 
     // start with a initial solution obtained heuristically
     //incentivesForAll(scip, instance, vertCons, infSet); // construct an initial solution
@@ -550,8 +543,8 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     addCoverageConstraints(scip, instance, x);
 
     // add all cycles of size up to 4
-    addSmallCycleConstraints(scip, instance, x, z);
-    //addAllSmallDirectedCycles(scip, instance, x, z);
+    //addSmallCycleConstraints(scip, instance, x, z);
+    addAllSmallDirectedCycles(scip, instance, x, z);
 
     //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
@@ -578,7 +571,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // end of GPC
 
     // include pricer
-    //ArcIntMap isOnSolution(graph);
+    //Pricing to generate the propagation constraints and the chosen arcs constraints
     static const char *PRICER_NAME = "GLCIP_pricer";
     ObjPricerGLCIP *pricer = new ObjPricerGLCIP(scip,
                                                 PRICER_NAME,

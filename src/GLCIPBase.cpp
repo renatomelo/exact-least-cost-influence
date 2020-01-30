@@ -112,6 +112,31 @@ void GLCIPBase::addSmallCycleConstraints(SCIP *scip,
     }
 }
 
+void addCycleCons(
+    SCIP *scip,
+    DNodeSCIPVarMap &x,
+    ArcSCIPVarMap &z,
+    vector<Arc> arcs,
+    vector<DNode> nodes)
+{
+    for (size_t k = 0; k < nodes.size(); k++)
+    {
+        //adding inequality
+        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
+        for (Arc a : arcs)
+            cons->addVar(z[a], 1);
+
+        for (size_t i = 0; i < nodes.size(); i++)
+        {
+            if (i != k)
+                cons->addVar(x[nodes[i]], -1);
+        }
+        cons->commit();
+        /* SCIPprintCons(scip, cons->cons, NULL);
+        printf("\n"); */
+    }
+}
+
 /**
  * add cycle removal constraints for cycles of size up to 4
  */
@@ -125,55 +150,40 @@ void GLCIPBase::addAllSmallDirectedCycles(
     {
         for (OutArcIt a(instance.g, v); a != INVALID; ++a)
         {
+            //cycles of length two
             DNode u = instance.g.target(a);
             if (findArc(instance.g, u, v) != INVALID)
             {
-                //adding inequality
-                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
+                vector<DNode> nodes{u, v};
+                vector<Arc> arcs{a, findArc(instance.g, u, v)};
 
-                cons->addVar(z[a], 1);
-                cons->addVar(z[findArc(instance.g, u, v)], 1);
-
-                cons->addVar(x[u], -1);
-                cons->commit();
+                addCycleCons(scip, x, z, arcs, nodes);
             }
             else
             {
                 for (OutArcIt b(instance.g, u); b != INVALID; ++b)
                 {
+                    //cycles of length three
                     DNode w = instance.g.target(b);
                     if (findArc(instance.g, w, v) != INVALID)
                     {
-                        //adding inequality
-                        ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCycle cons");
+                        vector<DNode> nodes{v, u, w};
+                        vector<Arc> arcs{a, b, findArc(instance.g, w, v)};
 
-                        cons->addVar(z[a], 1);
-                        cons->addVar(z[b], 1);
-                        cons->addVar(z[findArc(instance.g, w, v)], 1);
-
-                        cons->addVar(x[u], -1);
-                        cons->addVar(x[w], -1);
-                        cons->commit();
+                        addCycleCons(scip, x, z, arcs, nodes);
                     }
                     else
                     {
                         for (OutArcIt c(instance.g, w); c != INVALID; ++c)
                         {
+                            //cycles of length four
                             DNode y = instance.g.target(c);
                             if (findArc(instance.g, y, v) != INVALID)
                             {
-                                //adding inequality
-                                ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCycle cons");
+                                vector<DNode> nodes{v, u, w, y};
+                                vector<Arc> arcs{a, b, c, findArc(instance.g, y, v)};
 
-                                cons->addVar(z[a], 1);
-                                cons->addVar(z[b], 1);
-                                cons->addVar(z[c], 1);
-                                cons->addVar(z[findArc(instance.g, y, v)], 1);
-
-                                cons->addVar(x[u], -1);
-                                cons->addVar(x[w], -1);
-                                cons->addVar(x[y], -1);
-                                cons->commit();
+                                addCycleCons(scip, x, z, arcs, nodes);
                             }
                         }
                     }
@@ -194,10 +204,10 @@ void GLCIPBase::addLinkingConstraints(SCIP *scip,
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
         DNode v = instance.g.source(a);
-        //DNode w = instance.g.target(a);
-        //Arc back = findArc(instance.g, w, v);
+        DNode w = instance.g.target(a);
+        Arc back = findArc(instance.g, w, v);
 
-        //if (back == INVALID)
+        if (back == INVALID)
         {
             ScipCons *cons = new ScipCons(scip, 0, SCIPinfinity(scip), "linking cons");
 
@@ -277,14 +287,14 @@ double GLCIPBase::costInfluencingSet(const GLCIPInstance &instance,
 
 bool GLCIPBase::intersects(set<DNode> set1, set<DNode> set2)
 {
-   if (set1.empty() || set2.empty())
-      return false;
+    if (set1.empty() || set2.empty())
+        return false;
 
-   for (DNode v : set1)
-   {
-      if (set2.count(v))
-         return true;
-   }
+    for (DNode v : set1)
+    {
+        if (set2.count(v))
+            return true;
+    }
 
-   return false;
+    return false;
 }
