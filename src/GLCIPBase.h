@@ -82,6 +82,12 @@ public:
         DNodeSCIPVarMap &x,
         ArcSCIPVarMap &z);
 
+    static void addAllSmallDirectedCycles2(
+        SCIP *scip,
+        GLCIPInstance &instance,
+        DNodeSCIPVarMap &x,
+        ArcSCIPVarMap &z);
+
     static double cheapestIncentive(
         const GLCIPInstance &instance,
         const DNode &v,
@@ -128,7 +134,7 @@ private:
     string name;
 
 public:
-    InfluencingSet( GLCIPInstance &_instance,DNode _v) : instance(_instance), v(_v){};
+    InfluencingSet(GLCIPInstance &_instance, DNode _v) : instance(_instance), v(_v){};
     InfluencingSet(
         GLCIPInstance &_instance,
         DNode _v,
@@ -150,15 +156,20 @@ public:
     */
     void giveName()
     {
-        stringstream stream;
-        for (DNode u : nodes)
+        if (nodes.size() > 0)
         {
-            stream << instance.nodeName[u] + ",";
-        }
-        if (nodes.empty())
-            name = "Lambda_" + instance.nodeName[v] + "_empty";
-        else
+            std::stringstream stream;
+            const char *separator = "";
+            for (DNode u : nodes)
+            {
+                stream << separator << instance.nodeName[u];
+                separator = ",";
+            }
+
             name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+        }
+        else
+            name = "Lambda_" + instance.nodeName[v] + "_empty";
     }
 
     void setName(string newname)
@@ -184,7 +195,7 @@ public:
         return cost;
     }
 
-    void setVar(SCIP_VAR* variable)
+    void setVar(SCIP_VAR *variable)
     {
         var = variable;
     }

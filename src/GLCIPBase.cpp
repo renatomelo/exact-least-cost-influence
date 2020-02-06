@@ -114,13 +114,16 @@ void GLCIPBase::addSmallCycleConstraints(SCIP *scip,
 
 void addCycleCons(
     SCIP *scip,
+    GLCIPInstance &instance,
     DNodeSCIPVarMap &x,
     ArcSCIPVarMap &z,
     vector<Arc> arcs,
     vector<DNode> nodes)
 {
+    cout << "cyle: ";
     for (size_t k = 0; k < nodes.size(); k++)
     {
+        cout << instance.nodeName[nodes[k]] << " ";
         //adding inequality
         ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
         for (Arc a : arcs)
@@ -135,6 +138,7 @@ void addCycleCons(
         /* SCIPprintCons(scip, cons->cons, NULL);
         printf("\n"); */
     }
+    cout << endl;
 }
 
 /**
@@ -148,6 +152,7 @@ void GLCIPBase::addAllSmallDirectedCycles(
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
+        cout << instance.nodeName[v] << "::";
         for (OutArcIt a(instance.g, v); a != INVALID; ++a)
         {
             //cycles of length two
@@ -157,7 +162,7 @@ void GLCIPBase::addAllSmallDirectedCycles(
                 vector<DNode> nodes{u, v};
                 vector<Arc> arcs{a, findArc(instance.g, u, v)};
 
-                addCycleCons(scip, x, z, arcs, nodes);
+                addCycleCons(scip, instance, x, z, arcs, nodes);
             }
             else
             {
@@ -170,7 +175,7 @@ void GLCIPBase::addAllSmallDirectedCycles(
                         vector<DNode> nodes{v, u, w};
                         vector<Arc> arcs{a, b, findArc(instance.g, w, v)};
 
-                        addCycleCons(scip, x, z, arcs, nodes);
+                        addCycleCons(scip, instance, x, z, arcs, nodes);
                     }
                     else
                     {
@@ -183,7 +188,7 @@ void GLCIPBase::addAllSmallDirectedCycles(
                                 vector<DNode> nodes{v, u, w, y};
                                 vector<Arc> arcs{a, b, c, findArc(instance.g, y, v)};
 
-                                addCycleCons(scip, x, z, arcs, nodes);
+                                addCycleCons(scip, instance, x, z, arcs, nodes);
                             }
                         }
                     }
@@ -193,6 +198,83 @@ void GLCIPBase::addAllSmallDirectedCycles(
     }
 }
 
+void GLCIPBase::addAllSmallDirectedCycles2(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    DNodeSCIPVarMap &x,
+    ArcSCIPVarMap &z)
+{
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        cout << "cycles from " << instance.nodeName[v] << ": ";
+        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            DNode u = instance.g.target(a);
+            for (OutArcIt b(instance.g, u); b != INVALID; ++b)
+            {
+                //cycles of length two
+                DNode w = instance.g.target(b);
+                if (w == v)
+                {
+                    cout << instance.nodeName[v] << " " << instance.nodeName[u] << ", ";
+                    //adding inequality
+                    ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
+                    cons->addVar(z[a], 1);
+                    cons->addVar(z[b], 1);
+
+                    cons->addVar(x[u], -1);
+                    cons->commit();
+                }
+                else
+                {
+                    for (OutArcIt c(instance.g, w); c != INVALID; ++c)
+                    {
+                        //cycles of length three
+                        DNode y = instance.g.target(c);
+                        if (y == v)
+                        {
+                            cout << instance.nodeName[v] << " " << instance.nodeName[u] << " " << instance.nodeName[w] << ", ";
+                            //adding inequality
+                            ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
+                            cons->addVar(z[a], 1);
+                            cons->addVar(z[b], 1);
+                            cons->addVar(z[c], 1);
+
+                            cons->addVar(x[u], -1);
+                            cons->addVar(x[w], -1);
+                            cons->commit();
+                        }
+                        else if (y != u)
+                        {
+                            for (OutArcIt d(instance.g, y); d != INVALID; ++d)
+                            {
+                                //cycles of length four
+                                DNode p = instance.g.target(d);
+                                if (p == v)
+                                {
+                                    cout << instance.nodeName[v] << " " << instance.nodeName[u] << " "
+                                         << instance.nodeName[w] << " " << instance.nodeName[y] << ", ";
+                                    //adding inequality
+                                    ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
+                                    cons->addVar(z[a], 1);
+                                    cons->addVar(z[b], 1);
+                                    cons->addVar(z[c], 1);
+                                    cons->addVar(z[d], 1);
+
+                                    cons->addVar(x[u], -1);
+                                    cons->addVar(x[w], -1);
+                                    cons->addVar(x[y], -1);
+                                    cons->commit();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        cout << endl;
+    }
+}
 /**
  * add arc-influence constraints - a vertex v needs to be active to send influence to w
  */

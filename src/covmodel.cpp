@@ -476,7 +476,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetBoolParam(scip, "visual/realtime", FALSE));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
 
     DNodeSCIPVarMap x(graph);      // active-vertex variables
     ArcSCIPVarMap z(graph);        // arc-influence variables
@@ -544,9 +544,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     // add all cycles of size up to 4
     //addSmallCycleConstraints(scip, instance, x, z);
-    addAllSmallDirectedCycles(scip, instance, x, z);
+    addAllSmallDirectedCycles2(scip, instance, x, z);
 
-    //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
+    SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
     // add cutting planes
     /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);

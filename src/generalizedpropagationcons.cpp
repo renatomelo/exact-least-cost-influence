@@ -273,6 +273,9 @@ SCIP_RETCODE GeneralizedPropagation::greedSetExtensionHeur(
    return SCIP_OKAY;
 }
 
+/**
+ * Heuristic separation: find the smallest cycles and add to the model the violated cyles
+ */
 SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
     SCIP *scip,
     SCIP_CONSHDLR *conshdlr, //the constraint handler itself
@@ -353,10 +356,20 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                      }
                   }
                }
-               //cout << "sum = " << sum << ", value of x[k] = " << SCIPgetSolVal(scip, sol, x[k]) << endl;
 
                if (SCIPisLT(scip, sum, SCIPgetSolVal(scip, sol, x[k])))
                {
+                  if (cycle.size() <= 4)
+                  {
+                     cout << "cycle found: ";
+                     for (DNode node : cycle)
+                     {
+                        cout << instance.nodeName[node] << " ";
+                     }
+                     cout << endl;
+
+                     cout << "sum = " << sum << ", value of x[k] = " << SCIPgetSolVal(scip, sol, x[k]) << endl;
+                  }
                   *result = SCIP_SEPARATED;
 
                   //cout << "adding violated inequality\n";
@@ -436,9 +449,9 @@ private:
 
 public:
    GRBInfluencingSet(
-      GLCIPInstance &_instance, 
-      DNode _v, 
-      set<DNode> _nodes) : instance(_instance), v(_v), nodes(_nodes){};
+       GLCIPInstance &_instance,
+       DNode _v,
+       set<DNode> _nodes) : instance(_instance), v(_v), nodes(_nodes){};
    ~GRBInfluencingSet(){};
 
    void addNode(DNode u)
@@ -551,7 +564,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
                continue;
 
             GRBInfluencingSet ifs(instance, v, infSet[v][i].getNodes());
-            ifs.setCost( SCIPgetSolVal(scip, sol, infSet[v][i].getVar()) );
+            ifs.setCost(SCIPgetSolVal(scip, sol, infSet[v][i].getVar()));
             ifs.setVar(model.addVar(0, 1, ifs.getCost(), GRB_BINARY, ifs.getName()));
 
             validInfSet[v].push_back(ifs);
@@ -613,13 +626,16 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
          *result = SCIP_SEPARATED;
 
          set<DNode> generalizedSet;
+         //cout << "X found: ";
          for (DNodeIt v(instance.g); v != INVALID; ++v)
          {
             if (belongsToX[v].get(GRB_DoubleAttr_X) > 0.5)
             {
                generalizedSet.insert(v);
+               //cout << instance.nodeName[v] << " ";
             }
          }
+         //cout << endl;
 
          // in case the lifting isn't done find the vertex to be in the RHS
          if (lifting.get(GRB_DoubleAttr_X) < .5)
@@ -741,7 +757,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparation(
          ifs.setName(name);
 
          ScipVar *var = new ScipBinVar(new_scip, ifs.getName(), ifs.getCost());
-         
+
          ifs.setVar(var->var);
 
          validInfSet[v].push_back(ifs);
@@ -1063,7 +1079,8 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
       *result = SCIP_INFEASIBLE;
       //cout << "(SUPORT GRAPH) solution has a cycle\n";
 
-      SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
+      //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
+      SCIP_CALL(exactSeparationGrbModel(scip, conshdlr, NULL, result));
 
       if (*result == SCIP_DIDNOTFIND)
       {

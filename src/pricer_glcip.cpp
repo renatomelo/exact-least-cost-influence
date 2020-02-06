@@ -230,7 +230,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
                            ifs.getName().c_str(),   // var name
                            0.0,                     // lower bound
                            SCIPinfinity(scip),      // upper bound
-                           ifs.getCost(),                    // coeficient in the objective function
+                           ifs.getCost(),           // coeficient in the objective function
                            SCIP_VARTYPE_CONTINUOUS, // continuous variable
                            FALSE,                   // initial variable
                            FALSE,                   // removable variable
@@ -589,6 +589,35 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
    return redCost;
 }
 
+SCIP_Bool isMinimal(GLCIPInstance& instance, DNode v, set<DNode> nodes)
+{
+   double minCost = GLCIPBase::costInfluencingSet(instance, v, nodes);
+
+   int sum = 0;
+   for (DNode u : nodes)
+   {
+      Arc a = findArc(instance.g, u, v);
+      assert(a != INVALID);
+
+      sum += instance.influence[a];
+   }
+   double slack = (sum + minCost) - instance.threshold[v];
+
+   //is minimal?
+   //bool isMinimal = TRUE;
+   for (DNode u : nodes)
+   {
+      Arc a = findArc(instance.g, u, v);
+      assert(a != INVALID);
+
+      if (instance.influence[a] <= slack)
+         //isMinimal = FALSE;
+         return FALSE;
+   }
+
+   return TRUE;
+}
+
 vector<set<DNode>> ObjPricerGLCIP::powerSet(
     vector<DNode> neighbors,
     DNode v) const
@@ -610,31 +639,8 @@ vector<set<DNode>> ObjPricerGLCIP::powerSet(
          }
       }
 
-      double minCost = GLCIPBase::costInfluencingSet(instance, v, subset);
-
-      int sum = 0;
-      for (DNode u : subset)
-      {
-         Arc a = findArc(instance.g, u, v);
-         assert(a != INVALID);
-
-         sum += instance.influence[a];
-      }
-      double slack = (sum + minCost) - instance.threshold[v];
-      //cout << "slack = " << slack << endl;
-
-      bool isMinimal = TRUE;
-      for (DNode u : subset)
-      {
-         Arc a = findArc(instance.g, u, v);
-         assert(a != INVALID);
-
-         if (instance.influence[a] < slack)
-            isMinimal = FALSE;
-      }
-
       //add to the list only if is minimal
-      if (isMinimal)
+      if (isMinimal(instance, v, subset))
          pSet.push_back(subset);
    }
 
@@ -644,7 +650,7 @@ vector<set<DNode>> ObjPricerGLCIP::powerSet(
 /**
  * brute force algorithm for the pricing subproblem
  */
- SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet4(
+SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet4(
     SCIP *scip,
     const DNode &v,        /**< vertex to be influenced */
     const ArcValueMap &pi, /**< dual solution of arc constraints */
@@ -801,7 +807,6 @@ vector<set<DNode>> ObjPricerGLCIP::powerSet(
    //if no reduced cost was found return 0
    return redCost;
 }
-
 
 /**
  * Class to represent the pair (d, Phi) from paper.
@@ -969,8 +974,8 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
          if (currentList.count(currentPair))
          {
             redCost = currentList[currentPair];
-            /* cout << "\ncurrentPair is already into the currentList" << endl;
-            cout << "verifying the equality" << endl;
+            cout << "\ncurrentPair is already into the currentList" << endl;
+            /*cout << "verifying the equality" << endl;
             unordered_map<PairDAndPhi, double, HashFunction>::iterator it;
             it = currentList.find(currentPair);
             printPairDandPhi(it->first, instance, gpcRows);
@@ -982,7 +987,17 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
          // no influence from neighbors[j]
          currentList[currentPair] = min(redCost, prevList[currentPair]);
 
-         //cout << "currentList[currentPair] = " << currentList[currentPair] << endl;
+         //before adding a new vertex to the current influencing-set, lets verify
+         // whether the new influencing-set is minimal
+         set<DNode> tmp = currentPair.nodes;
+         tmp.insert(neighbors[j]);
+
+         //add to the list only if is minimal
+         if (!isMinimal(instance, v, tmp))
+         {
+            //cout << "isn't minimal\n";
+            continue;
+         }
 
          // relevant sets after adding neighbors[j]
          vector<int> phiPrimeIds;
@@ -995,8 +1010,6 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
                phiPrimeIds.push_back(it);
          }
 
-         //cout << "size of phiPrime list = " << phiPrimeIds.size() << endl;
-
          PairDAndPhi nextPair(currentPair.d + wt[j], phiPrimeIds, sumOfPhisFromIds(gpcRows, phiPrimeIds));
          nextPair.copyNodes(currentPair.nodes);
          nextPair.addNode(neighbors[j]);
@@ -1004,8 +1017,8 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
          if (currentList.count(nextPair))
          {
             redCost = currentList[nextPair];
-            /* cout << "\nnextPair is already into the currentList" << endl;
-            cout << "verifying the equality" << endl;
+            cout << "\nnextPair is already into the currentList" << endl;
+            /*cout << "verifying the equality" << endl;
             unordered_map<PairDAndPhi, double, HashFunction>::iterator it;
             it = currentList.find(currentPair);
             printPairDandPhi(it->first, instance, gpcRows);

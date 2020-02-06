@@ -49,9 +49,6 @@ SCIP_RETCODE addInfluencingSetVar(
    SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
 
    ifs.setVar(var);
-   /* InfluencingSet in;
-   in.var = var;
-   in.cost = cost; */
 
    if (nodes.size() != 0)
    {
