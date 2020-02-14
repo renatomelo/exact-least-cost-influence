@@ -273,7 +273,7 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     //addAllSmallDirectedCycles(scip, instance, x, z);
     addSmallCycleConstraints(scip, instance, x, z);
 
-    SCIP_CALL(SCIPwriteOrigProblem(scip, "glcip_original.lp", "lp", FALSE));
+    //SCIP_CALL(SCIPwriteOrigProblem(scip, "glcip_original.lp", "lp", FALSE));
 
     //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP");
     //exit(0);

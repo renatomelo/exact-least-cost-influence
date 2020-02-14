@@ -629,6 +629,15 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // Construct solution
     constructSoltion(scip, instance, solution, z, infSet);
 
+/*     for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        for(size_t i = 0; i < infSet[v].size(); i++)
+        {
+            cout << SCIPvarGetName(infSet[v][i].getVar()) << " = " 
+                 << SCIPgetSolVal(scip, NULL, infSet[v][i].getVar()) << endl;
+        }
+    } */
+
     if (isFeasible(instance, solution))
         std::cout << "The solution is feasible" << std::endl;
     else

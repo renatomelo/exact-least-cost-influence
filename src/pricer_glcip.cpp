@@ -63,8 +63,7 @@ SCIP_DECL_PRICERINIT(ObjPricerGLCIP::scip_init)
  */
 SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
 {
-   /* std::cout << "\n---------------------------- PRICING CALLED ----------------------------"
-             << std::endl; */
+   //std::cout << "PRICING() " << std::endl;
    DNodeValueMap dualVertValues(instance.g);
    ArcValueMap dualArcValues(instance.g);
 
@@ -129,7 +128,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
    {
       /* compute the minimum cost influencing set w.r.t. dual values */
       set<DNode> nodes;
-      SCIP_Real reduced_cost = findMinCostInfluencingSet6(scip, v, dualArcValues, dualVertValues[v], nodes);
+      SCIP_Real reduced_cost = findMinCostInfluencingSet4(scip, v, dualArcValues, dualVertValues[v], nodes);
 
       /* add influencing set variable */
       if (SCIPisNegative(scip, reduced_cost))
@@ -205,22 +204,6 @@ SCIP_DECL_PRICERFARKAS(ObjPricerGLCIP::scip_farkas)
 /** add influencing-set variable to problem */
 SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, const set<DNode> &nodes) const
 {
-   /* std::string name;
-   if (nodes.size() > 0)
-   {
-      std::stringstream stream;
-      const char *separator = "";
-      for (DNode u : nodes)
-      {
-         stream << separator << instance.nodeName[u];
-         separator = ",";
-      }
-
-      name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
-   }
-   else
-      name = "Lambda_" + instance.nodeName[v] + "_empty"; */
-
    // data structure to save the variables and associated nodes
    InfluencingSet ifs(instance, v, nodes);
    ifs.setCost(GLCIPBase::costInfluencingSet(instance, v, nodes));
@@ -250,32 +233,30 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
          Arc a = findArc(instance.g, u, v);
          assert(a != INVALID);
          SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
-         //in.nodes.insert(u);
-         //isAble[a] = TRUE;
       }
    }
 
    ifs.setVar(var);
 
+   //std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
+
    //update the GPC rows by adding the new var on each constraint in which the set X contains v
-   for (unsigned int i = 0; i < gpcRows.size(); i++)
+   for (size_t i = 0; i < gpcRows.size(); i++)
    {
       if (gpcRows[i].generalizedSet.count(v))
       {
          if (!GLCIPBase::intersects(gpcRows[i].generalizedSet, ifs.getNodes()))
          {
             SCIPaddVarToRow(scip, gpcRows[i].row, ifs.getVar(), 1.0);
-            //cout << " adding " << SCIPvarGetName(in.var) << " to the " << i + 1 << "-th GPC row\n";
+            //cout << " adding " << SCIPvarGetName(ifs.getVar()) << " to the " << i + 1 << "-th GPC row\n";
          }
-         /*  cout << "updated " << i + 1 << "-th GPC row\n";
+         /* cout << "updated " << i + 1 << "-th GPC row\n";
          SCIPprintRow(scip, gpcRows[i].row, NULL); */
       }
    }
 
    // save the variable
    infSet[v].push_back(ifs);
-
-   //std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
 
    SCIP_CALL(SCIPreleaseVar(scip, &var));
    return SCIP_OKAY;
@@ -589,7 +570,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet2(
    return redCost;
 }
 
-SCIP_Bool isMinimal(GLCIPInstance& instance, DNode v, set<DNode> nodes)
+SCIP_Bool isMinimal(GLCIPInstance &instance, DNode v, set<DNode> nodes)
 {
    double minCost = GLCIPBase::costInfluencingSet(instance, v, nodes);
 
@@ -923,7 +904,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
     ) const
 {
    nodes.clear();
-   double redCost;
+   double redCost = 0;
 
    int n = 0; // number of itens to put into the knapsack
    for (InArcIt a(instance.g, v); a != INVALID; ++a)
@@ -993,11 +974,11 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
          tmp.insert(neighbors[j]);
 
          //add to the list only if is minimal
-         if (!isMinimal(instance, v, tmp))
+         /* if (!isMinimal(instance, v, tmp))
          {
             //cout << "isn't minimal\n";
             continue;
-         }
+         } */
 
          // relevant sets after adding neighbors[j]
          vector<int> phiPrimeIds;

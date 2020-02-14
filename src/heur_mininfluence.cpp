@@ -12,7 +12,11 @@ SCIP_RETCODE addInfluencingSetVar(
     DNodeConsMap &vertCons, /**< map of partitioning constraints */
     vector<Phi> &gpcRows)
 {
-   /* std::string name;
+   // data structure to save the variables and associated nodes
+   InfluencingSet ifs(instance, v, nodes);
+   ifs.setCost(GLCIPBase::costInfluencingSet(instance, v, nodes));
+
+   string name;
    if (nodes.size() > 0)
    {
       std::stringstream stream;
@@ -23,22 +27,18 @@ SCIP_RETCODE addInfluencingSetVar(
          separator = ",";
       }
 
-      name = "Lambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
+      name = "PrLambda_" + instance.nodeName[v] + "_{" + stream.str() + "}";
    }
    else
-      name = "Lambda_" + instance.nodeName[v] + "_empty"; */
-
-   // data structure to save the variables and associated nodes
-   InfluencingSet ifs(instance, v, nodes);
-   ifs.setCost(GLCIPBase::costInfluencingSet(instance, v, nodes));
-
+      name = "PrLambda_" + instance.nodeName[v] + "_empty";
+   ifs.setName(name);
    //double cost = GLCIPBase::costInfluencingSet(instance, v, nodes);
    SCIP_VAR *var;
    SCIP_CALL(SCIPcreateVar(scip, &var,
-                           ifs.getName().c_str(),            // var name
+                           ifs.getName().c_str(),   // var name
                            0.0,                     // lower bound
                            SCIPinfinity(scip),      // upper bound
-                           ifs.getCost(),                    // coeficient in the objective function
+                           ifs.getCost(),           // coeficient in the objective function
                            SCIP_VARTYPE_CONTINUOUS, // continuous variable
                            FALSE,                   // initial variable
                            FALSE,                   // removable variable
@@ -342,8 +342,9 @@ SCIP_DECL_HEUREXEC(HeurMinInfluence::scip_exec)
       *result = SCIP_FOUNDSOL;
    }
    else
-   {  // the solution total cost is worst than already existent solutions
+   { // the solution total cost is worst than already existent solutions
       *result = SCIP_DIDNOTFIND;
+      //cout << "heur solution not found !\n";
       /* cout << "NEW SOL\n";
       double totalCost = 0;
       for (DNodeIt v(instance.g); v != INVALID; ++v)
@@ -371,6 +372,7 @@ SCIP_DECL_HEUREXEC(HeurMinInfluence::scip_exec)
 
    /* free all local memory */
    SCIP_CALL(SCIPfreeSol(scip, &newsol));
+   //cout << "free all local memory \n";
 
    return SCIP_OKAY;
 }

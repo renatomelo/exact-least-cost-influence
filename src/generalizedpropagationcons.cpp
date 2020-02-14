@@ -629,7 +629,7 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
          //cout << "X found: ";
          for (DNodeIt v(instance.g); v != INVALID; ++v)
          {
-            if (belongsToX[v].get(GRB_DoubleAttr_X) > 0.5)
+            if (SCIPisPositive(scip, belongsToX[v].get(GRB_DoubleAttr_X)) )
             {
                generalizedSet.insert(v);
                //cout << instance.nodeName[v] << " ";
@@ -638,10 +638,10 @@ SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
          //cout << endl;
 
          // in case the lifting isn't done find the vertex to be in the RHS
-         if (lifting.get(GRB_DoubleAttr_X) < .5)
+         if (SCIPisEQ(scip, lifting.get(GRB_DoubleAttr_X), 0.0))
          {
             for (DNodeIt v(instance.g); v != INVALID; ++v)
-               if (isOnRHS[v].get(GRB_DoubleAttr_X) > .5)
+               if (SCIPisPositive(scip, isOnRHS[v].get(GRB_DoubleAttr_X)))
                   addGeneralizedPropCons(scip, conshdlr, sol, result, generalizedSet, v, FALSE);
          }
          else
@@ -1054,24 +1054,22 @@ void getSuportGraph(
 SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
 {
    *result = SCIP_FEASIBLE;
-   cout << "CONSENFOLP()" << endl;
+   //cout << "CONSENFOLP()" << endl;
 
    //construct the suport graph
    Digraph new_graph;
-   getSuportGraph(scip, instance, NULL, z, new_graph);
+   //getSuportGraph(scip, instance, NULL, z, new_graph);
+   DNodeDNodeMap nodeRef(new_graph);
+   ArcArcMap arcRef(new_graph);
+   digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
 
-   //show lambda variables
-   /* for (DNodeIt v(instance.g); v != INVALID; ++v)
+   for (ArcIt a(new_graph); a != INVALID; ++a)
    {
-      for (unsigned int i = 0; i < infSet[v].size(); i++)
+      if (SCIPisEQ(scip, SCIPgetVarSol(scip, z[arcRef[a]]), 0))
       {
-         if (SCIPisPositive(scip, SCIPgetVarSol(scip, infSet[v][i].var)))
-         {
-            cout << SCIPvarGetName(infSet[v][i].var) << "\t = "
-                 << SCIPgetVarSol(scip, infSet[v][i].var) << endl;
-         }
+         new_graph.erase(a);
       }
-   } */
+   }
 
    // if a cycle is found, the solution must be infeasible
    if (!dag(new_graph))
@@ -1085,6 +1083,26 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
       if (*result == SCIP_DIDNOTFIND)
       {
          cout << "SCIP_DIDNOTFIND\n";
+         //show lambda variables
+         /* for (DNodeIt v(instance.g); v != INVALID; ++v)
+         {
+            for (unsigned int i = 0; i < infSet[v].size(); i++)
+            {
+               if (SCIPisPositive(scip, SCIPgetVarSol(scip, infSet[v][i].getVar())))
+               {
+                  cout << SCIPvarGetName(infSet[v][i].getVar()) << "\t = "
+                       << SCIPgetVarSol(scip, infSet[v][i].getVar()) << endl;
+               }
+            }
+         } */
+
+         /* for(ArcIt a(instance.g); a != INVALID; ++a)
+         {
+            cout << SCIPvarGetName(z[a]) << "\t = " << SCIPgetVarSol(scip, z[a]) << endl;
+         } */
+
+         GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
+         exit(0);
          *result = SCIP_INFEASIBLE;
          //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
       }

@@ -51,7 +51,7 @@ public:
     /** destructor */
     virtual ~HeurMinInfluence()
     {
-    } /*lint !e1540*/
+    } 
 
     /** destructor of primal heuristic to free user data (called when SCIP is exiting) */
     virtual SCIP_DECL_HEURFREE(scip_free);

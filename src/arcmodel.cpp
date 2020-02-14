@@ -1,4 +1,5 @@
 #include "GLCIPBase.h"
+#include "heur_dualbound.h"
 
 bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
@@ -98,6 +99,9 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
+
+    //include combinatorial relaxation
+    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

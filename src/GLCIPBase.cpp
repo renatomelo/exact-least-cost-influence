@@ -206,7 +206,7 @@ void GLCIPBase::addAllSmallDirectedCycles2(
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        cout << "cycles from " << instance.nodeName[v] << ": ";
+        //cout << "cycles from " << instance.nodeName[v] << ": ";
         for (OutArcIt a(instance.g, v); a != INVALID; ++a)
         {
             DNode u = instance.g.target(a);
@@ -216,7 +216,7 @@ void GLCIPBase::addAllSmallDirectedCycles2(
                 DNode w = instance.g.target(b);
                 if (w == v)
                 {
-                    cout << instance.nodeName[v] << " " << instance.nodeName[u] << ", ";
+                    //cout << instance.nodeName[v] << " " << instance.nodeName[u] << ", ";
                     //adding inequality
                     ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
                     cons->addVar(z[a], 1);
@@ -233,7 +233,8 @@ void GLCIPBase::addAllSmallDirectedCycles2(
                         DNode y = instance.g.target(c);
                         if (y == v)
                         {
-                            cout << instance.nodeName[v] << " " << instance.nodeName[u] << " " << instance.nodeName[w] << ", ";
+                            /* cout << instance.nodeName[v] << " " << instance.nodeName[u] 
+                                 << " " << instance.nodeName[w] << ", "; */
                             //adding inequality
                             ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
                             cons->addVar(z[a], 1);
@@ -252,8 +253,8 @@ void GLCIPBase::addAllSmallDirectedCycles2(
                                 DNode p = instance.g.target(d);
                                 if (p == v)
                                 {
-                                    cout << instance.nodeName[v] << " " << instance.nodeName[u] << " "
-                                         << instance.nodeName[w] << " " << instance.nodeName[y] << ", ";
+                                    /* cout << instance.nodeName[v] << " " << instance.nodeName[u] << " "
+                                         << instance.nodeName[w] << " " << instance.nodeName[y] << ", "; */
                                     //adding inequality
                                     ScipCons *cons = new ScipCons(scip, -SCIPinfinity(scip), 0.0, "small-dirCicle cons");
                                     cons->addVar(z[a], 1);
@@ -272,7 +273,7 @@ void GLCIPBase::addAllSmallDirectedCycles2(
                 }
             }
         }
-        cout << endl;
+        //cout << endl;
     }
 }
 /**
