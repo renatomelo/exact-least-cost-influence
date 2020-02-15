@@ -30,26 +30,74 @@ SCIP_DECL_RELAXEXITSOL(HeurDualBound::scip_exitsol)
     return SCIP_OKAY;
 }
 
+/* void getSuportGraph(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    SCIP_SOL *sol,
+    ArcSCIPVarMap &z,
+    Digraph &new_graph)
+{
+    DNodeDNodeMap nodeRef(new_graph);
+    ArcArcMap arcRef(new_graph);
+    digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
+
+    for (ArcIt a(new_graph); a != INVALID; ++a)
+    {
+        if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, z[arcRef[a]]), 0))
+        {
+            new_graph.erase(a);
+        }
+    }
+
+    GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
+} */
+
+double getLowerBound(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    DNodeSCIPVarMap &x,
+    ArcSCIPVarMap &z)
+{
+    double minCost = -SCIPinfinity(scip);
+    //get the support graph of the current feasible solution
+    Digraph graph;
+    GLCIPBase::getSuportGraph(scip, instance, NULL, z, graph);
+
+    if(stronglyConnected(graph))
+    {
+        cout << "support graph is strongly connected\n";
+        return 2.0;
+    }
+    else
+    {
+        cout << "support graph isn't strongly connected: ";
+        cout << countStronglyConnectedComponents(graph) << " components\n";
+        Digraph::NodeMap<int> components(graph);
+        stronglyConnectedComponents(graph, components);
+/*         for (DNodeIt v(graph); v != INVALID; ++v)
+        {
+            cout << instance.nodeName[v] << " is in component " << components[v] << endl;
+        } */
+
+        Digraph condensed;
+        for (int i = 0; i < countStronglyConnectedComponents(graph); i++)
+        {
+            DNode v = condensed.addNode();
+            cout << "creating condensed node: " << condensed.id(v) << endl;
+        }
+        
+    }
+    
+    //exit(0);
+    return minCost;
+}
+
 SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 {
     cout << "RELAXEXEC()" << endl;
 
-    SCIP_CONS **conss;
-    int nconss;
     SCIP_Real relaxval;
     SCIP_Bool valid;
-
-    conss = SCIPgetConss(scip);
-    nconss = SCIPgetNConss(scip);
-
-    for (int c = 0; c < nconss; ++c)
-    {
-        const char *conshdlrname;
-
-        conshdlrname = SCIPconshdlrGetName(SCIPconsGetHdlr(conss[c]));
-
-        cout << conshdlrname << endl;
-    }
 
     *result = SCIP_DIDNOTRUN;
     *lowerbound = -SCIPinfinity(scip);
@@ -57,40 +105,23 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
     //call the heuristic here
     relaxval = getLowerBound(scip, instance, x, z);
 
-    printf("relaxation bound = %e \n", relaxval);
-
-    //if( SCIPgetStatus(relaxscip) == SCIP_STATUS_OPTIMAL )
+    //store relaxation solution in original SCIP if it improves the best relaxation solution thus far
+    if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
     {
-        /* store relaxation solution in original SCIP if it improves the best relaxation solution thus far */
-        if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
-        {
-            cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
-            SCIP_CALL(SCIPclearRelaxSolVals(scip));
+        cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
+        SCIP_CALL(SCIPclearRelaxSolVals(scip));
 
-            //it is necessary to set the new solution? I think so
-            for (i = 0; i < SCIPgetNVars(scip); ++i)
-            {
-                SCIP_VAR *relaxvar;
-                SCIP_Real solval;
+        //it is necessary to set the new solution? I think so
 
-                relaxvar = SCIPhashmapGetImage(varmap, SCIPgetVars(scip)[i]);
-                assert(relaxvar != NULL);
+        //TODO: if we found a strongly connected component add a cuting plane
 
-                solval = SCIPgetSolVal(relaxscip, SCIPgetBestSol(relaxscip), relaxvar);
-
-                SCIP_CALL(SCIPsetRelaxSolVal(scip, SCIPgetVars(scip)[i], solval));
-            }
-
-            //TODO: if we found a strongly connected component add a cuting plane
-
-            /* mark relaxation solution to be valid and inform SCIP that the relaxation included all LP rows */
-            SCIP_CALL(SCIPmarkRelaxSolValid(scip, TRUE));
-        }
-
-        SCIPdebugMsg(scip, "LP lower bound = %g\n", relaxval);
-        *lowerbound = relaxval;
-        *result = SCIP_SUCCESS;
+        //mark relaxation solution to be valid and inform SCIP that the relaxation included all LP rows
+        SCIP_CALL(SCIPmarkRelaxSolValid(scip, TRUE));
     }
+
+    printf("Heuristic lower bound = %g\n", relaxval);
+    *lowerbound = relaxval;
+    *result = SCIP_SUCCESS;
 
     return SCIP_OKAY;
 }

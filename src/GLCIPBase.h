@@ -99,7 +99,13 @@ public:
         const set<DNode> &nodes);
 
     static bool intersects(set<DNode> set1, set<DNode> set2);
-    //     static void addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+
+    static void getSuportGraph(
+        SCIP *scip,
+        GLCIPInstance &instance,
+        SCIP_SOL *sol,
+        ArcSCIPVarMap &z,
+        Digraph &new_graph);
 };
 
 /**

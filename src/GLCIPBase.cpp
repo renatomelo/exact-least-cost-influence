@@ -381,3 +381,25 @@ bool GLCIPBase::intersects(set<DNode> set1, set<DNode> set2)
 
     return false;
 }
+
+void GLCIPBase::getSuportGraph(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    SCIP_SOL *sol,
+    ArcSCIPVarMap &z,
+    Digraph &new_graph)
+{
+   DNodeDNodeMap nodeRef(new_graph);
+   ArcArcMap arcRef(new_graph);
+   digraphCopy(instance.g, new_graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
+
+   for (ArcIt a(new_graph); a != INVALID; ++a)
+   {
+      if (SCIPisEQ(scip, SCIPgetSolVal(scip, sol, z[arcRef[a]]), 0))
+      {
+         new_graph.erase(a);
+      }
+   }
+
+   //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
+}

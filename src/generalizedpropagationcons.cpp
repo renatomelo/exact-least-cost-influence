@@ -999,7 +999,7 @@ SCIP_DECL_CONSSEPASOL(GeneralizedPropagation::scip_sepasol)
    return SCIP_OKAY;
 }
 
-void getSuportGraph(
+/* void getSuportGraph(
     SCIP *scip,
     GLCIPInstance &instance,
     SCIP_SOL *sol,
@@ -1019,7 +1019,7 @@ void getSuportGraph(
    }
 
    //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
-}
+} */
 
 /** constraint enforcing method of constraint handler for LP solutions
  *
@@ -1158,7 +1158,7 @@ SCIP_DECL_CONSENFOPS(GeneralizedPropagation::scip_enfops)
 
    //cout << "Construct the suport graph" << endl;
    Digraph new_graph;
-   getSuportGraph(scip, instance, NULL, z, new_graph);
+   GLCIPBase::getSuportGraph(scip, instance, NULL, z, new_graph);
 
    // if a cycle is found, the solution must be infeasible
    if (!dag(new_graph))
@@ -1199,7 +1199,7 @@ SCIP_DECL_CONSCHECK(GeneralizedPropagation::scip_check)
 
    //construct the suport graph
    Digraph new_graph;
-   getSuportGraph(scip, instance, sol, z, new_graph);
+   GLCIPBase::getSuportGraph(scip, instance, sol, z, new_graph);
 
    // if a cycle is found, the solution must be infeasible
    if (!dag(new_graph))
