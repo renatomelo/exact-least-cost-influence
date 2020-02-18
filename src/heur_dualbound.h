@@ -8,6 +8,7 @@ class HeurDualBound : public scip::ObjRelax
     GLCIPInstance &instance; /**< the instance for GLCIP */
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
+    DNodeSCIPVarsMap &xip;
     SCIP_SOL *sol_; /**< current solution */
 
 public:
@@ -16,7 +17,8 @@ public:
         SCIP *scip,
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
-        ArcSCIPVarMap &p_z) : ObjRelax(scip,
+        ArcSCIPVarMap &p_z,
+        DNodeSCIPVarsMap &p_xip) : ObjRelax(scip,
                                        "heuristic-dual-bound",
                                        "Heuristic dual bound for GLCIP",
                                        -1.0, //priority of the relaxator (negative: after LP, non-negative: before LP)
@@ -25,6 +27,7 @@ public:
                               instance(p_instance),
                               x(p_x),
                               z(p_z),
+                              xip(p_xip),
                               sol_(NULL)
     {
     }

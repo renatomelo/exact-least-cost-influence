@@ -101,7 +101,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
 
     //include combinatorial relaxation
-    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z, xip), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
@@ -118,9 +118,9 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         return 0;
     }
 
-    std::cout << SCIPgetSolvingTime(scip) << std::endl;
+    //std::cout << SCIPgetSolvingTime(scip) << std::endl;
 
-    /* //founded optimal solution, now we need to construct the solution
+    //founded optimal solution, now we need to construct the solution
     else{ 
         // get measures
         SCIP_SOL* sol = SCIPgetBestSol(scip);
@@ -151,7 +151,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                 solution.influence[a] = false;
             }
         }
-    } */
+    }
 
     return SCIP_OKAY;
 }
