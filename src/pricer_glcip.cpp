@@ -101,6 +101,10 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
       for (ArcIt a(instance.g); a != INVALID; ++a)
       {
          dualArcValues[a] = SCIPgetDualsolLinear(scip, arcCons[a]);
+         /* if(SCIPisNegative(scip, dualArcValues[a]))
+         {
+            cout << "verttex dual variable: " << dualArcValues[a] << endl;
+         } */
          /* DNode u = instance.g.source(a); // just to print
          DNode v = instance.g.target(a);
          std::cout << "arc_" << instance.nodeName[u] << "_" << instance.nodeName[v] << ": ";
@@ -112,6 +116,10 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
       {
          dualVertValues[v] = SCIPgetDualsolLinear(scip, vertCons[v]);
          //std::cout << instance.nodeName[v] << ": " << dualVertValues[v] << std::endl;
+         if(SCIPisNegative(scip, dualVertValues[v]))
+         {
+            //cout << "arc dual variable: " << dualVertValues[v] << endl;
+         }
       }
 
       for (unsigned int i = 0; i < gpcRows.size(); i++)
@@ -119,6 +127,10 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
          gpcRows[i].dualVal = SCIProwGetDualsol(gpcRows[i].row);
          /* cout << "SCIProwGetDualsol(gpcRows[i].row) = "
               << SCIProwGetDualsol(gpcRows[i].row) << endl; */
+         if(SCIPisNegative(scip, gpcRows[i].dualVal))
+         {
+            cout << "GPC dual variable: " << gpcRows[i].dualVal << endl;
+         }
       }
    }
 

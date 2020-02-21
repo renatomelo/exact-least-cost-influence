@@ -121,18 +121,21 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //std::cout << SCIPgetSolvingTime(scip) << std::endl;
 
     //founded optimal solution, now we need to construct the solution
-    else{ 
+    /* else
+    {
         // get measures
-        SCIP_SOL* sol = SCIPgetBestSol(scip);
+        SCIP_SOL *sol = SCIPgetBestSol(scip);
 
-        for(DNodeIt v(instance.g); v != INVALID; ++v){
+        for (DNodeIt v(instance.g); v != INVALID; ++v)
+        {
             solution.incentives[v] = 0.0;
-            for(unsigned int p = 0; p < instance.incentives[v].size(); p++){
+            for (unsigned int p = 0; p < instance.incentives[v].size(); p++)
+            {
                 double aux = SCIPgetSolVal(scip, sol, xip[v][p]);
 
-                if(aux > 0.1){
-                    cout << "xip[" << instance.nodeName[v] << "," << 
-                    instance.incentives[v][p] << "] = " << aux << endl;
+                if (aux > 0.1)
+                {
+                    cout << "xip[" << instance.nodeName[v] << "," << instance.incentives[v][p] << "] = " << aux << endl;
                     solution.incentives[v] = instance.incentives[v][p];
                     //cout << "node incentive " << solution.incentives[v] << endl;
                 }
@@ -140,18 +143,21 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         }
         cout << endl;
 
-        for(ArcIt a(instance.g); a != INVALID; ++a){
+        for (ArcIt a(instance.g); a != INVALID; ++a)
+        {
             double aux = SCIPgetSolVal(scip, sol, z[a]);
 
-            if(aux > 0.1){
+            if (aux > 0.1)
+            {
                 cout << "z[" << instance.nodeName[instance.g.source(a)] << "," << instance.nodeName[instance.g.target(a)] << "] = " << aux << endl;
                 solution.influence[a] = true;
             }
-            else{
+            else
+            {
                 solution.influence[a] = false;
             }
         }
-    }
+    } */
 
     return SCIP_OKAY;
 }
