@@ -140,7 +140,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
    {
       /* compute the minimum cost influencing set w.r.t. dual values */
       set<DNode> nodes;
-      SCIP_Real reduced_cost = findMinCostInfluencingSet4(scip, v, dualArcValues, dualVertValues[v], nodes);
+      SCIP_Real reduced_cost = findMinCostInfluencingSet6(scip, v, dualArcValues, dualVertValues[v], nodes);
 
       /* add influencing set variable */
       if (SCIPisNegative(scip, reduced_cost))
@@ -244,13 +244,13 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
          //std::cout << instance.nodeName[u] << " ";
          Arc a = findArc(instance.g, u, v);
          assert(a != INVALID);
-         SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+         SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, 1.0));
       }
    }
 
    ifs.setVar(var);
 
-   //std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
+   std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
 
    //update the GPC rows by adding the new var on each constraint in which the set X contains v
    for (size_t i = 0; i < gpcRows.size(); i++)
@@ -785,7 +785,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet4(
          }
       }
 
-      redCost = GLCIPBase::cheapestIncentive(instance, v, sum) - mi + sumOfArcDuals - sumOfGPCduals;
+      redCost = GLCIPBase::cheapestIncentive(instance, v, sum) - mi - sumOfArcDuals - sumOfGPCduals;
 
       if (SCIPisNegative(scip, redCost))
       {
@@ -1022,7 +1022,7 @@ SCIP_Real ObjPricerGLCIP::findMinCostInfluencingSet6(
 
          double nextInfCost = GLCIPBase::cheapestIncentive(instance, v, nextPair.d);
          double currInfCost = GLCIPBase::cheapestIncentive(instance, v, currentPair.d);
-         currentList[nextPair] = min(redCost, prevList[currentPair] + sum + costs[j] + nextInfCost - currInfCost);
+         currentList[nextPair] = min(redCost, prevList[currentPair] + sum - costs[j] + nextInfCost - currInfCost);
 
          //printList(currentList, gpcRows);
 

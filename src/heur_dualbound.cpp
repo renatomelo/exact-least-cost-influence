@@ -160,19 +160,19 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
     //SCIP_Bool *cutoff = 0;
     //cout << "SCIPconstructLP(scip, cutoff) = " << SCIPconstructLP(scip, cutoff) << endl;
-    cout << "SCIPgetDualbound(scip) = " << SCIPgetDualbound(scip) << endl;
+    /* cout << "SCIPgetDualbound(scip) = " << SCIPgetDualbound(scip) << endl;
     cout << "SCIPgetRelaxSolObj(scip) = " << SCIPgetRelaxSolObj(scip) << endl;
     cout << "SCIPgetFocusNode(scip) = " << SCIPnodeGetNumber(SCIPgetFocusNode(scip)) << endl;
     cout << "SCIPgetNodeDualbound() = " << SCIPgetNodeDualbound(scip, SCIPgetFocusNode(scip)) << endl;
     cout << "SCIPgetDualboundRoot(scip) = " << SCIPgetDualboundRoot(scip) << endl;
-    cout << "*lowerbound = " << *lowerbound << endl;
+    cout << "*lowerbound = " << *lowerbound << endl; */
 
     SCIP_Real relaxval;
 
     *result = SCIP_DIDNOTRUN;
     *lowerbound = -SCIPinfinity(scip);
 
-    /* double minCost = SCIPinfinity(scip);
+    double minCost = SCIPinfinity(scip);
 
     //get the support graph of the current feasible solution
     Digraph graph;
@@ -495,7 +495,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
             cout << "relaxed solution didn't improve the corrent relaxation\n";
 
         // test fucntions here
-    } */
+    }
 
     return SCIP_OKAY;
 }

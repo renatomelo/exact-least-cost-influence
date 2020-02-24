@@ -237,7 +237,7 @@ SCIP_RETCODE addHeurInitialSol(SCIP *scip,
             //std::cout << instance.nodeName[u] << " ";
             Arc a = findArc(instance.g, u, v);
             assert(a != INVALID);
-            SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+            SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, 1.0));
             isAble[a] = TRUE;
             //cout << " arc is able flag changed to " << isAble[a] << endl;
         }
@@ -328,11 +328,12 @@ SCIP_RETCODE addInitialFeasibleSol(SCIP *scip,
                                     NULL, NULL, NULL, NULL, NULL));
             // add new variable to the list of variables to price into LP
             SCIP_CALL(SCIPaddVar(scip, var));
-            SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+            SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, 1.0));
+            SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
 
             ifs.setVar(var);
             infSet[v].push_back(ifs);
-            //std::cout << "Adding trivial influencing set variable" << name << std::endl;
+            //std::cout << "Adding trivial influencing set variable " << name << std::endl;
             SCIP_CALL(SCIPreleaseVar(scip, &var));
         }
     }
@@ -517,7 +518,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         //ScipConsPrice *cons = new ScipConsPrice(scip, 0, SCIPinfinity(scip), "arc-coverage cons");
         ScipConsPrice *cons = new ScipConsPrice(scip, 0, 0, "arc-coverage cons");
 
-        cons->addVar(z[a], 1);
+        cons->addVar(z[a], -1);
         arcCons[a] = cons->cons;
         cons->commit();
     }
@@ -535,7 +536,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //add initial heuristic solution
     //SCIP_CALL(addHeurInitialSol(scip, instance, arcCons, vertCons, infSet, isAble));
     SCIP_CALL(addInitialFeasibleSol(scip, instance, arcCons, vertCons, infSet, isAble));
-
+    cout << "Initial feasible solution done\n";
     // add linking constraints
     addLinkingConstraints(scip, instance, x, z);
 
@@ -546,7 +547,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //addSmallCycleConstraints(scip, instance, x, z);
     addAllSmallDirectedCycles2(scip, instance, x, z);
 
-    SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
+    //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
     // add cutting planes
     /* CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);

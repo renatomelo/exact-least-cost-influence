@@ -56,7 +56,7 @@ SCIP_RETCODE addInfluencingSetVar(
       {
          Arc a = findArc(instance.g, u, v);
          assert(a != INVALID);
-         SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, -1.0));
+         SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, 1.0));
          //in.nodes.insert(u);
       }
    }
