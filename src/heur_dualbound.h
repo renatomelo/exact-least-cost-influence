@@ -22,7 +22,7 @@ public:
                                        "heuristic-dual-bound",
                                        "Heuristic dual bound for GLCIP",
                                        -1.0, //priority of the relaxator (negative: after LP, non-negative: before LP)
-                                       5,    //frequency for calling relaxator
+                                       0,    //frequency for calling relaxator
                                        0),   //Does the relaxator contain all cuts in the LP?
                               instance(p_instance),
                               x(p_x),

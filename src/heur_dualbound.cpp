@@ -190,7 +190,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
         }
     }
 
-    //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
+    GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Support Graph", nodeRef);
 
     if (stronglyConnected(graph))
     {
@@ -235,7 +235,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
             SCIP_CALL(SCIPsetRelaxSolVal(scip, x[node], 1.0));
             SCIP_CALL(SCIPsetRelaxSolVal(scip, xip[node][index], 1.0));
 
-            for (DNodeIt v(instance.g); v != INVALID; ++v)
+            /* for (DNodeIt v(instance.g); v != INVALID; ++v)
                 if (v != node)
                     SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], SCIPgetVarSol(scip, x[v])));
 
@@ -244,8 +244,140 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                 //arcs pointing to the seed node are not selected
                 if (instance.g.target(a) != node)
                     SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], SCIPgetVarSol(scip, z[a])));
-            }
+            } */
             // propagate in the graph using only the incentives selected in lowerBound()
+
+            // start wiht empty solution
+            Digraph::NodeMap<set<DNode>> influencers(instance.g);
+            set<DNode> actives;
+            list<DNode> seeds;
+            list<DNode> waitingList;
+
+            // initialize set with seed nodes
+            seeds.push_back(node);
+            actives.insert(node);
+
+            // while the seed set is not empty try to activate non active vertices
+            while (seeds.size() > 0)
+            {
+                DNode u = seeds.front();
+                seeds.pop_front();
+                //actives.insert(u);
+
+                cout << "u: " << instance.nodeName[u] << endl;
+
+                size_t prevSize = actives.size();
+
+                for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+                {
+                    DNode v = instance.g.target(a);
+                    if (!actives.count(v) && SCIPisPositive(scip, SCIPgetVarSol(scip, z[a])))
+                    {
+                        influencers[v].insert(u);
+                        SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], 1.0));
+
+                        double exerterdInfluence = 0;
+                        for (DNode w : influencers[v])
+                        {
+                            Arc e = findArc(instance.g, w, v);
+                            assert(e != INVALID);
+
+                            exerterdInfluence += instance.influence[e];
+                        }
+
+                        if (exerterdInfluence >= instance.threshold[v])
+                        {
+                            cout << instance.nodeName[v] << " is inserted in seed set " << endl;
+                            seeds.push_back(v);
+                            actives.insert(v);
+
+                            SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], 1.0));
+                        }
+                    }
+                }
+
+                if (seeds.empty() && actives.size() == prevSize && actives.size() < instance.n * instance.alpha)
+                {
+                    cout << "no vertex activated in this iteration. Forcing some nodes to be active\n";
+                    for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+                    {
+                        DNode v = instance.g.target(a);
+                        if (!actives.count(v) && SCIPisPositive(scip, SCIPgetVarSol(scip, z[a])))
+                        {
+                            for (InArcIt b(instance.g, v); b != INVALID; ++b)
+                            {
+                                DNode y = instance.g.source(b);
+                                if (y != u && !actives.count(v) && SCIPisPositive(scip, SCIPgetVarSol(scip, z[b])))
+                                {
+                                    influencers[v].insert(y);
+                                    SCIP_CALL(SCIPsetRelaxSolVal(scip, z[b], 1.0));
+
+                                    actives.insert(y);
+                                    SCIP_CALL(SCIPsetRelaxSolVal(scip, x[y], 1.0));
+
+                                    waitingList.push_back(y);
+
+                                    double exerterdInfluence = 0;
+                                    for (DNode w : influencers[v])
+                                    {
+                                        Arc e = findArc(instance.g, w, v);
+                                        assert(e != INVALID);
+
+                                        exerterdInfluence += instance.influence[e];
+                                    }
+
+                                    if (exerterdInfluence >= instance.threshold[v])
+                                    {
+                                        cout << instance.nodeName[v] << " is inserted in seed set *" << endl;
+                                        seeds.push_back(v);
+                                        actives.insert(v);
+                                        SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], 1.0));
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    cout << "size of waiting list = " << waitingList.size() << endl;
+                }
+            }
+
+            while (!waitingList.empty())
+            {
+                DNode v = waitingList.front();
+                waitingList.pop_front();
+
+                double exerterdInfluence = 0;
+                for (InArcIt a(instance.g, v); a != INVALID; ++a)
+                {
+                    if (SCIPisPositive(scip, SCIPgetVarSol(scip, z[a])))
+                    {
+                        DNode u = instance.g.source(a);
+
+                        influencers[v].insert(u);
+                        SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], 1.0));
+                        cout << instance.nodeName[u] << " is influencer of waiting node " << instance.nodeName[v] << endl;
+
+                        exerterdInfluence += instance.influence[a];
+
+                        if (exerterdInfluence >= instance.threshold[v])
+                        {
+                            cout << "threshold of waiting node achieved" << endl;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (actives.size() < instance.alpha * instance.n)
+                cout << "not all vertices were activated\n";
+            /* cout << "active nodes: ";
+            for (DNode v : actives)
+            {
+                cout << " " << instance.nodeName[v];
+            }
+            cout << endl; */
 
             //TODO: if we found a strongly connected component add a cuting plane
 
