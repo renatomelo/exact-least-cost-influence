@@ -69,24 +69,24 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
 
    if (isFarkas)
    {
-      std::cout << "Dual farkas arc solution at node: " << SCIPgetFocusDepth(scip) << endl;
+      //std::cout << "Dual farkas arc solution at node: " << SCIPgetFocusDepth(scip) << endl;
       /* compute the dual farkas of the variable associated wiht each arc coverage constraints */
       for (ArcIt a(instance.g); a != INVALID; ++a)
       {
-         DNode u = instance.g.source(a);
-         DNode v = instance.g.target(a);
-         std::cout << "arc_" << instance.nodeName[u] << "_" << instance.nodeName[v] << ": ";
+         //DNode u = instance.g.source(a);
+         //DNode v = instance.g.target(a);
+         //std::cout << "arc_" << instance.nodeName[u] << "_" << instance.nodeName[v] << ": ";
 
          dualArcValues[a] = SCIPgetDualfarkasLinear(scip, arcCons[a]);
 
-         std::cout << dualArcValues[a] << std::endl;
+         //std::cout << dualArcValues[a] << std::endl;
       }
-      std::cout << "vertex dual farkas soluton: " << endl;
+      //std::cout << "vertex dual farkas soluton: " << endl;
       /* compute the dual farkas of the variable associated wiht each vertex coverage constraints */
       for (DNodeIt v(instance.g); v != INVALID; ++v)
       {
          dualVertValues[v] = SCIPgetDualfarkasLinear(scip, vertCons[v]);
-         std::cout << instance.nodeName[v] << ": " << dualVertValues[v] << std::endl;
+         //std::cout << instance.nodeName[v] << ": " << dualVertValues[v] << std::endl;
       }
 
       for (unsigned int i = 0; i < gpcRows.size(); i++)
@@ -127,10 +127,6 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
          gpcRows[i].dualVal = SCIProwGetDualsol(gpcRows[i].row);
          /* cout << "SCIProwGetDualsol(gpcRows[i].row) = "
               << SCIProwGetDualsol(gpcRows[i].row) << endl; */
-         if(SCIPisNegative(scip, gpcRows[i].dualVal))
-         {
-            cout << "GPC dual variable: " << gpcRows[i].dualVal << endl;
-         }
       }
    }
 
@@ -140,7 +136,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
    {
       /* compute the minimum cost influencing set w.r.t. dual values */
       set<DNode> nodes;
-      SCIP_Real reduced_cost = findMinCostInfluencingSet6(scip, v, dualArcValues, dualVertValues[v], nodes);
+      SCIP_Real reduced_cost = findMinCostInfluencingSet4(scip, v, dualArcValues, dualVertValues[v], nodes);
 
       /* add influencing set variable */
       if (SCIPisNegative(scip, reduced_cost))
@@ -201,11 +197,11 @@ SCIP_DECL_PRICERREDCOST(ObjPricerGLCIP::scip_redcost)
  */
 SCIP_DECL_PRICERFARKAS(ObjPricerGLCIP::scip_farkas)
 {
-   std::cout << "---------------------------- CALL SCIP FARKAS ----------------------------\n";
+   std::cout << "PRICERFARKAS()\n";
 
    //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
    /* call pricing routine */
-   //SCIP_CALL(pricing(scip, TRUE));
+   SCIP_CALL(pricing(scip, TRUE));
 
    //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed2.lp", "lp", FALSE));
    //exit(0);
@@ -250,7 +246,7 @@ SCIP_RETCODE ObjPricerGLCIP::addInfluencingSetVar(SCIP *scip, const DNode &v, co
 
    ifs.setVar(var);
 
-   std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
+   //std::cout << "adding var: " << SCIPvarGetName(var) << std::endl;
 
    //update the GPC rows by adding the new var on each constraint in which the set X contains v
    for (size_t i = 0; i < gpcRows.size(); i++)

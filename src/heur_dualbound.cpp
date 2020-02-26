@@ -8,8 +8,8 @@ HeurDualBound::HeurDualBound(
     DNodeSCIPVarsMap &p_xip) : ObjRelax(scip,
                                         "heuristic-dual-bound",
                                         "Heuristic dual bound for GLCIP",
-                                        -1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
-                                        10,      //frequency for calling relaxator
+                                        -1.0,  //priority of the relaxator (negative: after LP, non-negative: before LP)
+                                        10,    //frequency for calling relaxator
                                         TRUE), //Does the relaxator contain all cuts in the LP?
                                instance(p_instance),
                                x(p_x),
@@ -51,7 +51,7 @@ SCIP_DECL_RELAXEXITSOL(HeurDualBound::scip_exitsol)
 
 SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 {
-    cout << "RELAXEXEC()" << endl;
+    //cout << "RELAXEXEC()" << endl;
 
     //SCIP_Bool *cutoff = 0;
     //cout << "SCIPconstructLP(scip, cutoff) = " << SCIPconstructLP(scip, cutoff) << endl;
@@ -89,27 +89,31 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
     if (stronglyConnected(graph))
     {
-        cout << "support graph is strongly connected\n";
+        //cout << "support graph is strongly connected\n";
         //find minimum threshold vertex
         DNode node = INVALID;
-        for (DNodeIt v(graph); v != INVALID; ++v)
+        for (DNodeIt v(instance.g); v != INVALID; ++v)
         {
-            double cost = GLCIPBase::cheapestIncentive(instance, nodeRef[v], 0);
-            if (cost < minCost)
+            //double cost = GLCIPBase::cheapestIncentive(instance, v, 0);
+            //cout << "threshold of " << instance.nodeName[v] << ": " << instance.threshold[v] << endl;
+            //cout << "cost of " << instance.nodeName[v] << ": " << cost << endl;
+            double thr = instance.threshold[v];
+            if (thr < minCost)
             {
-                minCost = cost;
-                node = nodeRef[v];
+                minCost = thr;
+                node = v;
 
                 // stop if thr(v) = 1 because there is no smaller threshold
-                if (instance.threshold[nodeRef[v]] == 1)
+                if (instance.threshold[v] == 1)
                     break;
             }
         }
 
         relaxval = minCost;
+        //relaxval = instance.threshold[node];
 
         //cout << "selected node: " << instance.nodeName[node] << endl;
-        int index = 0;
+        /* int index = 0;
         for (size_t i = 0; i < instance.incentives[node].size(); i++)
         {
             if (instance.incentives[node][i] >= instance.threshold[node])
@@ -118,28 +122,29 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                 index = i;
                 break;
             }
-        }
+        } */
 
         //store relaxation solution in original SCIP if it improves the best relaxation solution thus far
-        if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
+        /* if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
         {
-            cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
+            //cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
             SCIP_CALL(SCIPclearRelaxSolVals(scip));
 
             //it is necessary to set the new solution? I think so
-            SCIP_CALL(SCIPsetRelaxSolVal(scip, x[node], 1.0));
-            SCIP_CALL(SCIPsetRelaxSolVal(scip, xip[node][index], 1.0));
+            //SCIP_CALL(SCIPsetRelaxSolVal(scip, x[node], 1.0));
+            //SCIP_CALL(SCIPsetRelaxSolVal(scip, xip[node][index], 1.0));
 
             for (DNodeIt v(instance.g); v != INVALID; ++v)
-                if (v != node)
-                    SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], SCIPgetVarSol(scip, x[v])));
+                //if (v != node)
+                SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], SCIPgetVarSol(scip, x[v])));
 
             for (ArcIt a(instance.g); a != INVALID; ++a)
             {
                 //arcs pointing to the seed node are not selected
-                if (instance.g.target(a) != node)
+                //if (instance.g.target(a) != node)
                     SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], SCIPgetVarSol(scip, z[a])));
-            }
+            } */
+
             // propagate in the graph using only the incentives selected in lowerBound()
 
             // start wiht empty solution
@@ -277,17 +282,17 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
             //TODO: if we found a strongly connected component add a cuting plane
 
             //mark relaxation solution to be valid and inform SCIP that the relaxation included all LP rows
-            SCIP_CALL(SCIPmarkRelaxSolValid(scip, TRUE));
-        }
-        printf("Heuristic lower bound = %g\n", relaxval);
+            /* SCIP_CALL(SCIPmarkRelaxSolValid(scip, TRUE));
+        } */
+        //printf("Heuristic lower bound = %g\n", relaxval);
         *lowerbound = relaxval;
         *result = SCIP_SUCCESS;
     }
     else
     {
         int nComponents = countStronglyConnectedComponents(graph);
-        cout << "support graph isn't strongly connected: ";
-        cout << nComponents << " components\n";
+        //cout << "support graph isn't strongly connected: ";
+        //cout << nComponents << " components\n";
 
         Digraph condensed;
         for (int i = 0; i < nComponents; i++)
@@ -390,7 +395,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                 assert(node != INVALID);
 
                 //cout << "seed node: " << instance.nodeName[node] << endl;
-                int index = 0;
+                /* int index = 0;
                 for (size_t i = 0; i < instance.incentives[node].size(); i++)
                 {
                     if (instance.incentives[node][i] >= instance.threshold[node])
@@ -401,7 +406,8 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                     }
                 }
 
-                cost += instance.incentives[node][index];
+                cost += instance.incentives[node][index]; */
+                cost += thr[condensed.id(v)];
 
                 seeds.push_back(v);
                 originalSeeds.push_back(node);
@@ -437,7 +443,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
             }
             total += incentives[i];
         }
-        
+
         //cout << "total incentives = " << total << endl;
         //cout << "size of actives = " << actives.size() << endl;
 
@@ -504,15 +510,15 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
         relaxval = total;
 
         //store relaxation solution in original SCIP if it improves the best relaxation solution thus far
-        if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
+        /* if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
         {
-            cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
+            //cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
             SCIP_CALL(SCIPclearRelaxSolVals(scip));
 
             //it is necessary to set the new solution? I think so
             for (DNode u : originalSeeds)
             {
-                SCIP_CALL(SCIPsetRelaxSolVal(scip, x[u], 1.0));
+                //SCIP_CALL(SCIPsetRelaxSolVal(scip, x[u], 1.0));
 
                 int index = 0;
                 for (size_t i = 0; i < instance.incentives[u].size(); i++)
@@ -528,13 +534,13 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                 SCIP_CALL(SCIPsetRelaxSolVal(scip, xip[u][index], 1.0));
 
                 for (DNodeIt v(instance.g); v != INVALID; ++v)
-                    if (v != u)
+                    //if (v != u)
                         SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], SCIPgetVarSol(scip, x[v])));
 
                 for (ArcIt a(instance.g); a != INVALID; ++a)
                 {
                     //arcs pointing to the seed node are not selected
-                    if (instance.g.target(a) != u)
+                    //if (instance.g.target(a) != u)
                         SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], SCIPgetVarSol(scip, z[a])));
                 }
             }
@@ -547,9 +553,9 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
             //cout << "SCIPgetRelaxSolObj(scip) = " << SCIPgetRelaxSolObj(scip) << endl;
         }
         else
-            cout << "relaxed solution didn't improve the corrent relaxation\n";
+            cout << "relaxed solution didn't improve the corrent relaxation\n"; */
 
-        printf("Heuristic lower bound = %g\n", relaxval);
+        //printf("Heuristic lower bound = %g\n", relaxval);
         *lowerbound = relaxval;
         *result = SCIP_SUCCESS;
     }
