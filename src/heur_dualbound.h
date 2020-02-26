@@ -18,19 +18,26 @@ public:
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
         ArcSCIPVarMap &p_z,
+        DNodeSCIPVarsMap &p_xip
+    );
+    /* HeurDualBound(
+        SCIP *scip,
+        GLCIPInstance &p_instance,
+        DNodeSCIPVarMap &p_x,
+        ArcSCIPVarMap &p_z,
         DNodeSCIPVarsMap &p_xip) : ObjRelax(scip,
                                        "heuristic-dual-bound",
                                        "Heuristic dual bound for GLCIP",
                                        -1.0, //priority of the relaxator (negative: after LP, non-negative: before LP)
-                                       0,    //frequency for calling relaxator
-                                       0),   //Does the relaxator contain all cuts in the LP?
+                                       10,    //frequency for calling relaxator
+                                       1),   //Does the relaxator contain all cuts in the LP?
                               instance(p_instance),
                               x(p_x),
                               z(p_z),
                               xip(p_xip),
                               sol_(NULL)
     {
-    }
+    } */
     //destructor
     virtual ~HeurDualBound() {}
 

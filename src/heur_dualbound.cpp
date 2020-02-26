@@ -1,5 +1,24 @@
 #include "heur_dualbound.h"
 
+HeurDualBound::HeurDualBound(
+    SCIP *scip,
+    GLCIPInstance &p_instance,
+    DNodeSCIPVarMap &p_x,
+    ArcSCIPVarMap &p_z,
+    DNodeSCIPVarsMap &p_xip) : ObjRelax(scip,
+                                        "heuristic-dual-bound",
+                                        "Heuristic dual bound for GLCIP",
+                                        -1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
+                                        10,      //frequency for calling relaxator
+                                        TRUE), //Does the relaxator contain all cuts in the LP?
+                               instance(p_instance),
+                               x(p_x),
+                               z(p_z),
+                               xip(p_xip),
+                               sol_(NULL)
+{
+}
+
 SCIP_DECL_RELAXFREE(HeurDualBound::scip_free)
 {
     //cout << "RELAXFREE()" << endl;
@@ -29,130 +48,6 @@ SCIP_DECL_RELAXEXITSOL(HeurDualBound::scip_exitsol)
     //cout << "RELAXEXITSOL()" << endl;
     return SCIP_OKAY;
 }
-
-/* double getLowerBound(
-    SCIP *scip,
-    GLCIPInstance &instance,
-    DNodeSCIPVarMap &x,
-    ArcSCIPVarMap &z,
-    DNode &node)
-{
-    double minCost = SCIPinfinity(scip);
-
-    //get the support graph of the current feasible solution
-    Digraph graph;
-    //GLCIPBase::getSuportGraph(scip, instance, NULL, z, graph);
-
-    DNodeDNodeMap nodeRef(graph); //save the reference to the original node
-    ArcArcMap arcRef(graph);      //save the reference to the original arc
-    digraphCopy(instance.g, graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
-
-    for (ArcIt a(graph); a != INVALID; ++a)
-    {
-        if (SCIPisEQ(scip, SCIPgetVarSol(scip, z[arcRef[a]]), 0))
-        {
-            graph.erase(a);
-        }
-    }
-
-    //GraphViewer::ViewGLCIPSupportGraph(instance, new_graph, "Support Graph", nodeRef);
-
-    if (stronglyConnected(graph))
-    {
-        cout << "support graph is strongly connected\n";
-        //find minimum threshold vertex
-        for (DNodeIt v(graph); v != INVALID; ++v)
-        {
-            double cost = GLCIPBase::cheapestIncentive(instance, nodeRef[v], 0);
-            if (cost < minCost)
-            {
-                minCost = cost;
-                node = nodeRef[v];
-
-                // stop if thr(v) = 1 because there is no smaller threshold
-                if (instance.threshold[nodeRef[v]] == 1)
-                    break;
-            }
-        }
-    }
-    else
-    {
-        int nComponents = countStronglyConnectedComponents(graph);
-        cout << "support graph isn't strongly connected: ";
-        cout << nComponents << " components\n";
-
-        Digraph condensed;
-        for (int i = 0; i < nComponents; i++)
-        {
-            DNode v = condensed.addNode();
-            //cout << "adding condensed node: " << condensed.id(v) << endl;
-        }
-
-        //compute the components of 'graph'
-        Digraph::NodeMap<int> components(graph);
-        stronglyConnectedComponents(graph, components);
-
-        //save each component in a vector of vertices
-        vector<vector<DNode>> listOfComponents(nComponents);
-        for (DNodeIt v(graph); v != INVALID; ++v)
-        {
-            listOfComponents[components[v]].push_back(nodeRef[v]);
-        }
-
-        vector<double> thr(nComponents);
-        //find the minimum threshold on each component
-        for (int i = 0; i < nComponents; i++)
-        {
-            double minThreshold = SCIPinfinity(scip);
-            printf("size of component %d: %ld\n", i, listOfComponents[i].size());
-            for (size_t j = 0; j < listOfComponents[i].size(); j++)
-            {
-                DNode w = listOfComponents[i][j];
-                minThreshold = min(minThreshold, instance.threshold[w]);
-                //printf("threshold of %s: %f\n", instance.nodeName[w].c_str(), instance.threshold[w]);
-            }
-            thr[i] = minThreshold;
-            //printf("threshold(%d) = %.1f\n", i, minThreshold);
-        }
-
-        //get the cut arcs of the strongly connected components
-        Digraph::ArcMap<bool> cutArcs(graph, FALSE);
-        stronglyConnectedCutArcs(graph, cutArcs);
-
-        // add the condensed arcs in the condensed graph
-        ArcValueMap condensedInfluence(condensed);
-        for (ArcIt a(graph); a != INVALID; ++a)
-        {
-            //compute the weigh of influence of the arcs
-            //each arc receives the total of weights of all arcs from a component to another
-            if (cutArcs[a])
-            {
-                //reference to what component each vertex belong
-                int i = components[graph.source(a)];
-                int j = components[graph.target(a)];
-
-                Arc b = findArc(condensed, condensed.nodeFromId(i), condensed.nodeFromId(j));
-                if (b == INVALID)
-                {
-                    Arc c = condensed.addArc(condensed.nodeFromId(i), condensed.nodeFromId(j));
-                    condensedInfluence[c] = instance.influence[arcRef[a]];
-                    //cout << "adding condensed arc: " << i << " -> " << j << ": " << instance.influence[arcRef[a]] << endl;
-                }
-                else
-                    condensedInfluence[b] += instance.influence[arcRef[a]];
-            }
-        }
-
-        for (ArcIt a(condensed); a != INVALID; ++a)
-        {
-            cout << "condensed arc: " << condensed.id(condensed.source(a)) << " -> "
-                 << condensed.id(condensed.target(a)) << ": " << condensedInfluence[a] << endl;
-        }
-    }
-
-    //exit(0);
-    return minCost;
-} */
 
 SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 {
@@ -190,7 +85,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
         }
     }
 
-    GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Support Graph", nodeRef);
+    //GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Support Graph", nodeRef);
 
     if (stronglyConnected(graph))
     {
@@ -235,7 +130,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
             SCIP_CALL(SCIPsetRelaxSolVal(scip, x[node], 1.0));
             SCIP_CALL(SCIPsetRelaxSolVal(scip, xip[node][index], 1.0));
 
-            /* for (DNodeIt v(instance.g); v != INVALID; ++v)
+            for (DNodeIt v(instance.g); v != INVALID; ++v)
                 if (v != node)
                     SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], SCIPgetVarSol(scip, x[v])));
 
@@ -244,14 +139,14 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                 //arcs pointing to the seed node are not selected
                 if (instance.g.target(a) != node)
                     SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], SCIPgetVarSol(scip, z[a])));
-            } */
+            }
             // propagate in the graph using only the incentives selected in lowerBound()
 
             // start wiht empty solution
-            Digraph::NodeMap<set<DNode>> influencers(instance.g);
+            /* Digraph::NodeMap<set<DNode>> influencers(instance.g);
             set<DNode> actives;
             list<DNode> seeds;
-            list<DNode> waitingList;
+            list<DNode> waiting;
 
             // initialize set with seed nodes
             seeds.push_back(node);
@@ -315,7 +210,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                                     actives.insert(y);
                                     SCIP_CALL(SCIPsetRelaxSolVal(scip, x[y], 1.0));
 
-                                    waitingList.push_back(y);
+                                    waiting.push_back(y);
 
                                     double exerterdInfluence = 0;
                                     for (DNode w : influencers[v])
@@ -339,14 +234,14 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
                         }
                     }
 
-                    cout << "size of waiting list = " << waitingList.size() << endl;
+                    cout << "size of waiting list = " << waiting.size() << endl;
                 }
             }
 
-            while (!waitingList.empty())
+            while (!waiting.empty())
             {
-                DNode v = waitingList.front();
-                waitingList.pop_front();
+                DNode v = waiting.front();
+                waiting.pop_front();
 
                 double exerterdInfluence = 0;
                 for (InArcIt a(instance.g, v); a != INVALID; ++a)
@@ -372,7 +267,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
             if (actives.size() < instance.alpha * instance.n)
                 cout << "not all vertices were activated\n";
-            /* cout << "active nodes: ";
+            cout << "active nodes: ";
             for (DNode v : actives)
             {
                 cout << " " << instance.nodeName[v];
@@ -383,11 +278,10 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
             //mark relaxation solution to be valid and inform SCIP that the relaxation included all LP rows
             SCIP_CALL(SCIPmarkRelaxSolValid(scip, TRUE));
-
-            printf("Heuristic lower bound = %g\n", relaxval);
-            *lowerbound = relaxval;
-            *result = SCIP_SUCCESS;
         }
+        printf("Heuristic lower bound = %g\n", relaxval);
+        *lowerbound = relaxval;
+        *result = SCIP_SUCCESS;
     }
     else
     {
@@ -457,9 +351,9 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
             }
         }
 
-        //for (ArcIt a(condensed); a != INVALID; ++a)
-        //    cout << "condensed arc: " << condensed.id(condensed.source(a)) << " -> "
-        //         << condensed.id(condensed.target(a)) << ": " << condensedInfluence[a] << endl;
+        /* for (ArcIt a(condensed); a != INVALID; ++a)
+            cout << "condensed arc: " << condensed.id(condensed.source(a)) << " -> "
+                 << condensed.id(condensed.target(a)) << ": " << condensedInfluence[a] << endl; */
 
         //propagate in the topological ordering of condensed graph
         //for each condensed node, if the total of influence incident on
@@ -495,13 +389,13 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
                 assert(node != INVALID);
 
-                cout << "seed node: " << instance.nodeName[node] << endl;
+                //cout << "seed node: " << instance.nodeName[node] << endl;
                 int index = 0;
                 for (size_t i = 0; i < instance.incentives[node].size(); i++)
                 {
                     if (instance.incentives[node][i] >= instance.threshold[node])
                     {
-                        cout << "incentive paid: " << instance.incentives[node][i] << endl;
+                        //cout << "incentive paid: " << instance.incentives[node][i] << endl;
                         index = i;
                         break;
                     }
@@ -517,8 +411,38 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
         //cout << "cost of seed nodes: " << cost << endl;
         relaxval = cost;
 
+        //linear time algorithm to solve the problem in DAGs
+        vector<double> incentives(nComponents);
+        double total = 0;
+        for (int i = 0; i < nComponents; i++)
+        {
+            //cout << "visiting node " << i << endl;
+            double sum = 0;
+            for (InArcIt a(condensed, condensed.nodeFromId(i)); a != INVALID; ++a)
+            {
+                sum += condensedInfluence[a];
+            }
+
+            //cout << "sum = " << sum << " thr = " << thr[i] << endl;
+            if (sum >= thr[i])
+            {
+                actives.insert(condensed.nodeFromId(i));
+                incentives[i] = 0;
+            }
+            else
+            {
+                incentives[i] = thr[i] - sum;
+                actives.insert(condensed.nodeFromId(i));
+                //cout << "paying incentive of: " << incentives[i] << " to " << i << endl;
+            }
+            total += incentives[i];
+        }
+        
+        //cout << "total incentives = " << total << endl;
+        //cout << "size of actives = " << actives.size() << endl;
+
         // while the seed set is not empty try to activate non active vertices
-        while (seeds.size() > 0)
+        /* while (seeds.size() > 0)
         {
             DNode u = seeds.front();
             seeds.pop_front();
@@ -539,11 +463,11 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
                         exerterdInfluence += condensedInfluence[e];
                     }
-                    //std::cout << " exerterd influence + incentive: "
-                    //<< (exerterdInfluence + solution.incentives[v]) << std::endl;
+
+                    cout << " exerterd influence: " << exerterdInfluence << endl;
                     if (exerterdInfluence >= thr[condensed.id(v)])
                     {
-                        //cout << condensed.id(v) << " is inserted in seed set" << endl;
+                        cout << condensed.id(v) << " is inserted in seed set" << endl;
                         seeds.push_back(v);
                     }
                 }
@@ -567,15 +491,17 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
                         exerterdInfluence += condensedInfluence[e];
                     }
-                    cout << condensed.id(v) << " not active\n";
-                    //double dif = thr[condensed.id(v)] - exerterdInfluence;
+                    cout << condensed.id(v) << " not active: ";
+                    cout << "exerterdInfluence = " << exerterdInfluence << " thr = "<< thr[condensed.id(v)] << endl;
+                    double dif = thr[condensed.id(v)] - exerterdInfluence;
+                    cout << "difference = " << dif << endl;
                     //TODO finish later if needed
                 }
             }
             exit(0);
-        }
+        } */
 
-        //relaxval = minCost;
+        relaxval = total;
 
         //store relaxation solution in original SCIP if it improves the best relaxation solution thus far
         if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
@@ -618,15 +544,14 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
             //mark relaxation solution to be valid and inform SCIP that the relaxation included all LP rows
             SCIP_CALL(SCIPmarkRelaxSolValid(scip, TRUE));
-            cout << "SCIPgetRelaxSolObj(scip) = " << SCIPgetRelaxSolObj(scip) << endl;
-            printf("Heuristic lower bound = %g\n", relaxval);
-            *lowerbound = relaxval;
-            *result = SCIP_SUCCESS;
+            //cout << "SCIPgetRelaxSolObj(scip) = " << SCIPgetRelaxSolObj(scip) << endl;
         }
         else
             cout << "relaxed solution didn't improve the corrent relaxation\n";
 
-        // test fucntions here
+        printf("Heuristic lower bound = %g\n", relaxval);
+        *lowerbound = relaxval;
+        *result = SCIP_SUCCESS;
     }
 
     return SCIP_OKAY;

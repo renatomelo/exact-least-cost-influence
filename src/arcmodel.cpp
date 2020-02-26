@@ -19,6 +19,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
     SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
+    SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
 
     // add variables to the model
     DNodeSCIPVarMap x(instance.g);
