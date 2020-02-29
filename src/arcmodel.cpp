@@ -89,7 +89,8 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     addCoverageConstraints(scip, instance, x);
 
     // add small cycle constraints
-    addSmallCycleConstraints(scip, instance, x, z);
+    //addSmallCycleConstraints(scip, instance, x, z);
+    addAllSmallDirectedCycles(scip, instance, x, z);
 
     //include cycle removal cuts
     //SCIP_CALL( addCuttingPlanes(scip, instance, x, z) );

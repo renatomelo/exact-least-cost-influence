@@ -136,7 +136,7 @@ SCIP_RETCODE ObjPricerGLCIP::pricing(SCIP *scip, bool isFarkas) const
    {
       /* compute the minimum cost influencing set w.r.t. dual values */
       set<DNode> nodes;
-      SCIP_Real reduced_cost = findMinCostInfluencingSet4(scip, v, dualArcValues, dualVertValues[v], nodes);
+      SCIP_Real reduced_cost = findMinCostInfluencingSet6(scip, v, dualArcValues, dualVertValues[v], nodes);
 
       /* add influencing set variable */
       if (SCIPisNegative(scip, reduced_cost))

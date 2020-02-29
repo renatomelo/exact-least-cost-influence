@@ -64,9 +64,8 @@ void getCondensedGraph(
         condensed.addNode();
         //DNode v = condensed.addNode();
         //assert(condensed.id(v) == i);
-           
     }
-    
+
     //compute the components of 'graph'
     stronglyConnectedComponents(graph, components);
 
@@ -491,14 +490,27 @@ double getCostInTopologicalOrdering(
         {
             incentives[i] = thr[i] - sum;
             actives.insert(condensed.nodeFromId(i));
-            cout << "paying incentive of: " << incentives[i] << " to " << i << endl;
+            //cout << "paying incentive of: " << incentives[i] << " to " << i << endl;
         }
         total += incentives[i];
     }
 
-    cout << "total incentives = " << total << endl;
+    /* if (total > incentives[0])
+    {
+        //show the diference and study what happens
+        for (int i = 0; i < nComponents; i++)
+        {
+            if (incentives[i] > 0)
+            {
+                cout << "paying incentive of: " << incentives[i] << " to " << i << endl;
+            }
+        }
+        cout << "total incentives = " << total << endl;
+    } */
+
+    //cout << "total incentives = " << total << endl;
     //cout << "size of actives = " << actives.size() << endl;
-    return total;
+    return incentives[0];
 }
 
 SCIP_RETCODE setRelaxedSol(

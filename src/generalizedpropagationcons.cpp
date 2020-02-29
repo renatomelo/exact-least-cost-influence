@@ -359,7 +359,7 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
 
                if (SCIPisLT(scip, sum, SCIPgetSolVal(scip, sol, x[k])))
                {
-                  if (cycle.size() <= 4)
+                  /* if (cycle.size() <= 4)
                   {
                      cout << "cycle found: ";
                      for (DNode node : cycle)
@@ -369,7 +369,7 @@ SCIP_RETCODE GeneralizedPropagation::sepaGeneralizedPropCons(
                      cout << endl;
 
                      cout << "sum = " << sum << ", value of x[k] = " << SCIPgetSolVal(scip, sol, x[k]) << endl;
-                  }
+                  } */
                   *result = SCIP_SEPARATED;
 
                   //cout << "adding violated inequality\n";
@@ -1077,8 +1077,8 @@ SCIP_DECL_CONSENFOLP(GeneralizedPropagation::scip_enfolp)
       *result = SCIP_INFEASIBLE;
       //cout << "(SUPORT GRAPH) solution has a cycle\n";
 
-      //SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
-      SCIP_CALL(exactSeparationGrbModel(scip, conshdlr, NULL, result));
+      SCIP_CALL(sepaGeneralizedPropCons(scip, conshdlr, NULL, result));
+      //SCIP_CALL(exactSeparationGrbModel(scip, conshdlr, NULL, result));
 
       if (*result == SCIP_DIDNOTFIND)
       {

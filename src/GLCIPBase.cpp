@@ -152,60 +152,6 @@ void GLCIPBase::addAllSmallDirectedCycles(
 {
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        cout << instance.nodeName[v] << "::";
-        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
-        {
-            //cycles of length two
-            DNode u = instance.g.target(a);
-            if (findArc(instance.g, u, v) != INVALID)
-            {
-                vector<DNode> nodes{u, v};
-                vector<Arc> arcs{a, findArc(instance.g, u, v)};
-
-                addCycleCons(scip, instance, x, z, arcs, nodes);
-            }
-            else
-            {
-                for (OutArcIt b(instance.g, u); b != INVALID; ++b)
-                {
-                    //cycles of length three
-                    DNode w = instance.g.target(b);
-                    if (findArc(instance.g, w, v) != INVALID)
-                    {
-                        vector<DNode> nodes{v, u, w};
-                        vector<Arc> arcs{a, b, findArc(instance.g, w, v)};
-
-                        addCycleCons(scip, instance, x, z, arcs, nodes);
-                    }
-                    else
-                    {
-                        for (OutArcIt c(instance.g, w); c != INVALID; ++c)
-                        {
-                            //cycles of length four
-                            DNode y = instance.g.target(c);
-                            if (findArc(instance.g, y, v) != INVALID)
-                            {
-                                vector<DNode> nodes{v, u, w, y};
-                                vector<Arc> arcs{a, b, c, findArc(instance.g, y, v)};
-
-                                addCycleCons(scip, instance, x, z, arcs, nodes);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-void GLCIPBase::addAllSmallDirectedCycles2(
-    SCIP *scip,
-    GLCIPInstance &instance,
-    DNodeSCIPVarMap &x,
-    ArcSCIPVarMap &z)
-{
-    for (DNodeIt v(instance.g); v != INVALID; ++v)
-    {
         //cout << "cycles from " << instance.nodeName[v] << ": ";
         for (OutArcIt a(instance.g, v); a != INVALID; ++a)
         {

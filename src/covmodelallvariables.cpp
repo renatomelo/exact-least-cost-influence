@@ -270,8 +270,8 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
     addCoverageConstraints(scip, instance, x);
 
     // add all cycles of size up to 4
-    //addAllSmallDirectedCycles(scip, instance, x, z);
-    addSmallCycleConstraints(scip, instance, x, z);
+    addAllSmallDirectedCycles(scip, instance, x, z);
+    //addSmallCycleConstraints(scip, instance, x, z);
 
     //SCIP_CALL(SCIPwriteOrigProblem(scip, "glcip_original.lp", "lp", FALSE));
 

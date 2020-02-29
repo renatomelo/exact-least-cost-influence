@@ -545,7 +545,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     // add all cycles of size up to 4
     //addSmallCycleConstraints(scip, instance, x, z);
-    addAllSmallDirectedCycles2(scip, instance, x, z);
+    addAllSmallDirectedCycles(scip, instance, x, z);
 
     //SCIPwriteOrigProblem(scip, "initial.lp", "lp", FALSE);
 
@@ -609,9 +609,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                                      x,
                                      z,
                                      infSet,
-                                     arcCons,
-                                     vertCons,
-                                     gpcRows);
+                                     &arcCons,
+                                     &vertCons,
+                                     &gpcRows);
     SCIP_CALL(SCIPincludeObjHeur(scip,
                                  primalHeur,
                                  TRUE));

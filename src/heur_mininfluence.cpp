@@ -8,9 +8,9 @@ SCIP_RETCODE addInfluencingSetVar(
     DNode &v,
     set<DNode> &nodes,
     DNodeInfSetsMap &infSet,
-    ArcConsMap &arcCons,    /**< map of arc constraints */
-    DNodeConsMap &vertCons, /**< map of partitioning constraints */
-    vector<Phi> &gpcRows)
+    ArcConsMap *arcCons,    /**< map of arc constraints */
+    DNodeConsMap *vertCons, /**< map of partitioning constraints */
+    vector<Phi> *gpcRows)
 {
    // data structure to save the variables and associated nodes
    InfluencingSet ifs(instance, v, nodes);
@@ -46,7 +46,7 @@ SCIP_RETCODE addInfluencingSetVar(
    // add new variable to the list of variables to price into LP
    SCIP_CALL(SCIPaddVar(scip, var));
 
-   SCIP_CALL(SCIPaddCoefLinear(scip, vertCons[v], var, 1.0));
+   SCIP_CALL(SCIPaddCoefLinear(scip, (*vertCons)[v], var, 1.0));
 
    ifs.setVar(var);
 
@@ -56,19 +56,19 @@ SCIP_RETCODE addInfluencingSetVar(
       {
          Arc a = findArc(instance.g, u, v);
          assert(a != INVALID);
-         SCIP_CALL(SCIPaddCoefLinear(scip, arcCons[a], var, 1.0));
+         SCIP_CALL(SCIPaddCoefLinear(scip, (*arcCons)[a], var, 1.0));
          //in.nodes.insert(u);
       }
    }
 
    //update the GPC rows by adding the new var on each constraint in which the set X contains v
-   for (unsigned int i = 0; i < gpcRows.size(); i++)
+   for (unsigned int i = 0; i < (*gpcRows).size(); i++)
    {
-      if (gpcRows[i].generalizedSet.count(v))
+      if ((*gpcRows)[i].generalizedSet.count(v))
       {
-         if (!GLCIPBase::intersects(gpcRows[i].generalizedSet, ifs.getNodes()))
+         if (!GLCIPBase::intersects((*gpcRows)[i].generalizedSet, ifs.getNodes()))
          {
-            SCIPaddVarToRow(scip, gpcRows[i].row, ifs.getVar(), 1.0);
+            SCIPaddVarToRow(scip, (*gpcRows)[i].row, ifs.getVar(), 1.0);
          }
       }
    }

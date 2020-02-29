@@ -9,9 +9,9 @@ class HeurMinInfluence : public scip::ObjHeur
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
     DNodeInfSetsMap &infSet;
-    ArcConsMap &arcCons;    /**< map of arc constraints */
-    DNodeConsMap &vertCons; /**< map of partitioning constraints */
-    vector<Phi> &gpcRows;
+    ArcConsMap *arcCons;    /**< map of arc constraints */
+    DNodeConsMap *vertCons; /**< map of partitioning constraints */
+    vector<Phi> *gpcRows;
     SCIP_SOL *sol;          /**< current solution */
 
 public:
@@ -22,9 +22,9 @@ public:
         DNodeSCIPVarMap &p_x,
         ArcSCIPVarMap &p_z,
         DNodeInfSetsMap &p_infset,
-        ArcConsMap &p_arcCons,    /**< map of arc constraints */
-        DNodeConsMap &p_vertCons, /**< map of partitioning constraints */
-        vector<Phi> &p_gpcRows)
+        ArcConsMap *p_arcCons,    /**< map of arc constraints */
+        DNodeConsMap *p_vertCons, /**< map of partitioning constraints */
+        vector<Phi> *p_gpcRows)
         : ObjHeur(
               scip,
               "MinInfluence",               //name
@@ -47,6 +47,37 @@ public:
           sol(NULL)
     {
     }
+
+     HeurMinInfluence(
+        SCIP *scip,
+        GLCIPInstance &p_instance,
+        DNodeSCIPVarMap &p_x,
+        ArcSCIPVarMap &p_z,
+        DNodeInfSetsMap &p_infset)
+        : ObjHeur(
+              scip,
+              "MinInfluence",               //name
+              "Primal heuristic for GLCIP", //description
+              'H',                          //display character of primal heuristic
+              -1000000,                     //priority of the primal heuristic
+              5,                            //frequency for calling primal heuristic
+              0,                            //frequency offset for calling primal heuristic
+              -1,                           //maximal depth level to call heuristic at (-1: no limit)
+              SCIP_HEURTIMING_AFTERNODE,    //positions in the node solving loop where heuristic should be executed;
+                                            //see definition of SCIP_HEURTIMING for possible values
+              FALSE),                       //does the heuristic use a secondary SCIP instance?
+          instance(p_instance),
+          x(p_x),
+          z(p_z),
+          infSet(p_infset),
+/*           arcCons(NULL),
+          vertCons(NULL),
+          gpcRows(NULL), */
+          sol(NULL)
+    {
+    }
+
+
 
     /** destructor */
     virtual ~HeurMinInfluence()
