@@ -30,13 +30,17 @@ int main(int argc, char *argv[]){
         ArcModel::run(instance, solution, params.timeLimit);
         //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Arc Model");
     }
+    if(params.alg.compare("arcwb") == 0){
+        ArcModelWithBounds::run(instance, solution, params.timeLimit);
+        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Arc Model");
+    }
     if(params.alg.compare("cov") == 0){
         CovModelAllVariables::run(instance, solution, params.timeLimit);
         //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with all variables");
     }
     if(params.alg.compare("covcg") == 0){
         CovModel::run(instance, solution, params.timeLimit);
-        GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with column generation");
+        //GraphViewer::ViewGLCIPSolution(instance, solution, "GLCIP Solution - Cov Model with column generation");
     }
 
     /* auto done = chrono::high_resolution_clock::now();
@@ -49,7 +53,7 @@ int main(int argc, char *argv[]){
 void readCheckParams(Params &params,int argc, char *argv[])
 {
     params.alg        = "";
-    params.timeLimit  = 10800;
+    params.timeLimit  = 1800;
     params.inputFile  = "";
     params.graph = false;
     params.alpha = 0.5;

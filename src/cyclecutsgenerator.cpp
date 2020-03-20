@@ -195,7 +195,7 @@ SCIP_RETCODE CycleCutsGenerator::addCycleInequality(SCIP* scip, SCIP_RESULT* res
     SCIP_ROW* row;
 
     // (the bounds in SCIP are in the following format LHS <= expr <= RHS)
-    SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "cycleRemoval", -SCIPinfinity(scip), 0.0, FALSE, FALSE, FALSE));
+    SCIP_CALL(SCIPcreateEmptyRowCons(scip, &row, conshdlr, "cycle-elimination", -SCIPinfinity(scip), 0.0, FALSE, FALSE, FALSE));
     SCIP_CALL(SCIPcacheRowExtensions(scip, row));
 
     // traverse the cycle adding the x and z variables

@@ -1,7 +1,7 @@
 #include "GLCIPBase.h"
 #include "heur_dualbound.h"
 
-bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
+bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     //SCIP variables and initialization
     SCIP *scip;
@@ -84,11 +84,9 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     addCoverageConstraints(scip, instance, x);
 
     // add small cycle constraints
-    //addSmallCycleConstraints(scip, instance, x, z);
     addAllSmallDirectedCycles(scip, instance, x, z);
 
     //include cycle removal cuts
-    //SCIP_CALL( addCuttingPlanes(scip, instance, x, z) );
     CycleCutsGenerator cuts = CycleCutsGenerator(scip, instance, x, z);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
@@ -96,6 +94,9 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(cuts.createCycleCuts(scip, &cons, "cycle-elimination", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
+
+    //include combinatorial relaxation
+    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z, xip), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
@@ -117,7 +118,6 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         return 0;
     }
 
-    //std::cout << SCIPgetSolvingTime(scip) << std::endl;
     //cout << "time \tnodes \tdualbound \tprimalbound \tgap" << endl;
     printf("%.2lf \t%lld \t%lf \t%lf \t%.2lf\n", SCIPgetSolvingTime(scip), 
                                              SCIPgetNNodes(scip), 
@@ -125,44 +125,6 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                                              SCIPgetPrimalbound(scip),
                                              SCIPgetGap(scip));
 
-    //founded optimal solution, now we need to construct the solution
-    /* else
-    {
-        // get measures
-        SCIP_SOL *sol = SCIPgetBestSol(scip);
-
-        for (DNodeIt v(instance.g); v != INVALID; ++v)
-        {
-            solution.incentives[v] = 0.0;
-            for (unsigned int p = 0; p < instance.incentives[v].size(); p++)
-            {
-                double aux = SCIPgetSolVal(scip, sol, xip[v][p]);
-
-                if (aux > 0.1)
-                {
-                    cout << "xip[" << instance.nodeName[v] << "," << instance.incentives[v][p] << "] = " << aux << endl;
-                    solution.incentives[v] = instance.incentives[v][p];
-                    //cout << "node incentive " << solution.incentives[v] << endl;
-                }
-            }
-        }
-        cout << endl;
-
-        for (ArcIt a(instance.g); a != INVALID; ++a)
-        {
-            double aux = SCIPgetSolVal(scip, sol, z[a]);
-
-            if (aux > 0.1)
-            {
-                cout << "z[" << instance.nodeName[instance.g.source(a)] << "," << instance.nodeName[instance.g.target(a)] << "] = " << aux << endl;
-                solution.influence[a] = true;
-            }
-            else
-            {
-                solution.influence[a] = false;
-            }
-        }
-    } */
 
     return SCIP_OKAY;
 }

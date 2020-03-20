@@ -122,6 +122,11 @@ void getCondensedArcWeights(
             int i = components[graph.source(a)];
             int j = components[graph.target(a)];
 
+            if (i == j)
+            {
+                cout << "something wrong i == j\n";
+            }
+
             Arc b = findArc(condensed, condensed.nodeFromId(i), condensed.nodeFromId(j));
             if (b == INVALID)
             {
@@ -130,6 +135,17 @@ void getCondensedArcWeights(
             }
             else
                 weights[b] += instance.influence[arcRef[a]];
+        }
+        else
+        {
+            //reference to what component each vertex belong
+            int i = components[graph.source(a)];
+            int j = components[graph.target(a)];
+
+            if (i != j)
+            {
+                cout << "something wrong i != j\n";
+            }
         }
     }
 }
@@ -324,7 +340,7 @@ int getIndexOfChepeastIncentive(GLCIPInstance &instance, DNode &node)
     return index;
 }
 
-void getSupportGraph(
+void getSubGraph(
     SCIP *scip,
     GLCIPInstance &instance,
     Digraph &graph,
@@ -336,13 +352,14 @@ void getSupportGraph(
 
     for (ArcIt a(graph); a != INVALID; ++a)
     {
-        if (SCIPisEQ(scip, SCIPgetVarSol(scip, z[arcRef[a]]), 0))
+        if (SCIPisEQ(scip, SCIPvarGetUbLocal(z[arcRef[a]]), 0))
         {
+            //removing arc variables fixed in zero
             graph.erase(a);
         }
     }
 
-    //GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Support Graph", nodeRef);
+    //GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Sub-graph", nodeRef);
 }
 
 /**
@@ -510,7 +527,27 @@ double getCostInTopologicalOrdering(
 
     //cout << "total incentives = " << total << endl;
     //cout << "size of actives = " << actives.size() << endl;
-    return incentives[0];
+    //return incentives[0];
+    return total;
+}
+
+bool isIntegral(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z)
+{
+    bool integral = TRUE;
+    for (ArcIt a(instance.g); a != INVALID; ++a)
+    {
+        if (!SCIPisIntegral(scip, SCIPgetVarSol(scip, z[a])))
+        {
+            integral = FALSE;
+            //cout << SCIPvarGetName(z[a]) << " = " << SCIPgetVarSol(scip, z[a]) << endl;
+        }
+    }
+
+    if (!integral)
+    {
+        cout << "fractional solution\n";
+    }
+    return integral;
 }
 
 SCIP_RETCODE setRelaxedSol(
@@ -557,15 +594,6 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 {
     //cout << "RELAXEXEC()" << endl;
 
-    //SCIP_Bool *cutoff = 0;
-    //cout << "SCIPconstructLP(scip, cutoff) = " << SCIPconstructLP(scip, cutoff) << endl;
-    /* cout << "SCIPgetDualbound(scip) = " << SCIPgetDualbound(scip) << endl;
-    cout << "SCIPgetRelaxSolObj(scip) = " << SCIPgetRelaxSolObj(scip) << endl;
-    cout << "SCIPgetFocusNode(scip) = " << SCIPnodeGetNumber(SCIPgetFocusNode(scip)) << endl;
-    cout << "SCIPgetNodeDualbound() = " << SCIPgetNodeDualbound(scip, SCIPgetFocusNode(scip)) << endl;
-    cout << "SCIPgetDualboundRoot(scip) = " << SCIPgetDualboundRoot(scip) << endl;
-    cout << "*lowerbound = " << *lowerbound << endl; */
-
     SCIP_Real relaxval;
 
     *result = SCIP_DIDNOTRUN;
@@ -576,7 +604,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
     DNodeDNodeMap nodeRef(graph); //save the reference to the original node
     ArcArcMap arcRef(graph);      //save the reference to the original arc
-    getSupportGraph(scip, instance, graph, nodeRef, arcRef, z);
+    getSubGraph(scip, instance, graph, nodeRef, arcRef, z);
 
     if (stronglyConnected(graph))
     {
@@ -615,15 +643,6 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
         //linear time algorithm to solve the problem in DAGs
         relaxval = getCostInTopologicalOrdering(condensed, nComponents, thr, arcWeight);
-
-        //store relaxation solution in original SCIP if it improves the best relaxation solution thus far
-        /* if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
-        {
-            set<DNode> seed; //get the seed set from topological sorting
-            SCIP_CALL(setRelaxedSol(scip, instance, x, z, xip, seed));
-        }
-        else
-            cout << "relaxed solution didn't improve the corrent relaxation\n"; */
 
         //printf("Heuristic lower bound = %g\n", relaxval);
         *lowerbound = relaxval;

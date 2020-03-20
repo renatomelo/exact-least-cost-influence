@@ -1,5 +1,6 @@
 #include "heur_mininfluence.h"
 #include "pricer_glcip.h"
+#include <queue>
 
 /** add influencing-set variable to problem */
 SCIP_RETCODE addInfluencingSetVar(
@@ -306,9 +307,51 @@ SCIP_DECL_HEUREXITSOL(HeurMinInfluence::scip_exitsol)
    return SCIP_OKAY;
 }
 
+struct compare
+{
+   GLCIPInstance &instance;
+   compare(GLCIPInstance &_instance) : instance(_instance) {}
+
+   bool operator()(const DNode &u, const DNode &v)
+   {
+      double sum1 = 0;
+      for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+      {
+         sum1 += instance.influence[a];
+      }
+
+      double sum2 = 0;
+      for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+      {
+         sum2 += instance.influence[a];
+      }
+      double dif1 = sum1 - instance.threshold[u];
+      double dif2 = sum2 - instance.threshold[v];
+
+      return dif1 < dif2;
+   }
+};
+
+/* void sortVerticesTest(GLCIPInstance &instance)
+{
+   compare cmp(instance);
+   priority_queue<DNode, vector<DNode>, cmp> q;
+   for (DNodeIt v(instance.g); v != INVALID; ++v)
+   {
+      cout << "inserting: " << instance.nodeName[v] << endl;
+      q.push(v);
+   }
+
+   while (!q.empty())
+   {
+      cout << "removing: " << instance.nodeName[q.top()] << endl;
+      q.pop();
+   }
+} */
 /** execution method of primal heuristic 2-Opt */
 SCIP_DECL_HEUREXEC(HeurMinInfluence::scip_exec)
 {
+   //sortVerticesTest(instance);
    //cout << "SCIP_DECL_HEUREXEC\n";
    assert(heur != NULL);
 

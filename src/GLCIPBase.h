@@ -115,7 +115,12 @@ public:
 class ArcModel : public GLCIPBase
 {
 public:
-    //   static SCIP_RETCODE addCuttingPlanes(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+    static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
+};
+
+class ArcModelWithBounds : public GLCIPBase
+{
+public:
     static bool run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit);
 };
 

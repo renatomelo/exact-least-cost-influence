@@ -536,7 +536,6 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //add initial heuristic solution
     //SCIP_CALL(addHeurInitialSol(scip, instance, arcCons, vertCons, infSet, isAble));
     SCIP_CALL(addInitialFeasibleSol(scip, instance, arcCons, vertCons, infSet, isAble));
-    cout << "Initial feasible solution done\n";
     // add linking constraints
     addLinkingConstraints(scip, instance, x, z);
 
@@ -554,7 +553,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPincludeObjConshdlr(scip, &cuts, TRUE));
 
     SCIP_CONS *cons;
-    SCIP_CALL(cuts.createCycleCuts(scip, &cons, "CycleRemovalCuts",
+    SCIP_CALL(cuts.createCycleCuts(scip, &cons, "cycle-elimination",
                                    FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons)); */
@@ -625,10 +624,17 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         return 0;
     }
 
-    std::cout << SCIPgetSolvingTime(scip) << std::endl;
+    //std::cout << SCIPgetSolvingTime(scip) << std::endl;
+
+    cout << "time \tnodes \tdualbound \tprimalbound \tgap" << endl;
+    printf("%.2lf \t%lld \t%lf \t%lf \t%.2lf\n", SCIPgetSolvingTime(scip), 
+                                             SCIPgetNNodes(scip), 
+                                             SCIPgetDualbound(scip), 
+                                             SCIPgetPrimalbound(scip),
+                                             SCIPgetGap(scip));
 
     // Construct solution
-    constructSoltion(scip, instance, solution, z, infSet);
+    //constructSoltion(scip, instance, solution, z, infSet);
 
 /*     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
@@ -639,10 +645,10 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         }
     } */
 
-    if (isFeasible(instance, solution))
+    /* if (isFeasible(instance, solution))
         std::cout << "The solution is feasible" << std::endl;
     else
-        std::cout << "The solution is NOT feasible" << std::endl;
+        std::cout << "The solution is NOT feasible" << std::endl; */
 
     return SCIP_OKAY;
 }
