@@ -1,10 +1,24 @@
 #include "glcipinstance.h"
 
-GLCIPInstance::GLCIPInstance(Digraph &g, DNodeStringMap &nodeName, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence,
-    DNodeValueMap &threshold, DNodeValueVectorMap &incentives, double alpha, int n, int m) : g(g), influence(influence),
-    threshold(threshold), incentives(incentives), nodeName(nodeName), posx(posx), posy(posy)
+GLCIPInstance::GLCIPInstance(
+    Digraph &_g, 
+    DNodeStringMap &_nodeName, 
+    DNodePosMap &_posx, 
+    DNodePosMap &_posy, 
+    ArcValueMap &_influence,
+    DNodeValueMap &_threshold, 
+    DNodeValueVectorMap &_incentives, 
+    double _alpha, 
+    int _n, 
+    int _m) : g(_g), 
+    nodeName(_nodeName), 
+    posx(_posx), 
+    posy(_posy),
+    influence(_influence),
+    threshold(_threshold), 
+    incentives(_incentives)
 {
-    this->alpha = alpha;
-    this->n = n;
-    this->m = m;
+    this->alpha = _alpha;
+    this->n = _n;
+    this->m = _m;
 }

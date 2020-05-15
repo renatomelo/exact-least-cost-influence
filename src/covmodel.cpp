@@ -430,7 +430,7 @@ void CovModel::constructSoltion(SCIP *scip,
             if (solVal > 0.1)
             {
                 solution.incentives[v] = infSet[v][i].getCost();
-                std::cout << SCIPvarGetName(infSet[v][i].getVar()) << " \t\t= " << solVal << std::endl;
+                //std::cout << SCIPvarGetName(infSet[v][i].getVar()) << " \t\t= " << solVal << std::endl;
             }
         }
     }
@@ -634,9 +634,9 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                                              SCIPgetGap(scip));
 
     // Construct solution
-    //constructSoltion(scip, instance, solution, z, infSet);
+    constructSoltion(scip, instance, solution, z, infSet);
 
-/*     for (DNodeIt v(instance.g); v != INVALID; ++v)
+    /* for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
         for(size_t i = 0; i < infSet[v].size(); i++)
         {
@@ -645,10 +645,10 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
         }
     } */
 
-    /* if (isFeasible(instance, solution))
+    if (isFeasible(instance, solution))
         std::cout << "The solution is feasible" << std::endl;
     else
-        std::cout << "The solution is NOT feasible" << std::endl; */
+        std::cout << "The solution is NOT feasible" << std::endl;
 
     return SCIP_OKAY;
 }

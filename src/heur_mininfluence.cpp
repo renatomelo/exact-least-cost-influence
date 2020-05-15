@@ -348,6 +348,7 @@ struct compare
       q.pop();
    }
 } */
+
 /** execution method of primal heuristic 2-Opt */
 SCIP_DECL_HEUREXEC(HeurMinInfluence::scip_exec)
 {

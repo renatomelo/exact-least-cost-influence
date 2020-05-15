@@ -70,9 +70,6 @@ public:
           x(p_x),
           z(p_z),
           infSet(p_infset),
-/*           arcCons(NULL),
-          vertCons(NULL),
-          gpcRows(NULL), */
           sol(NULL)
     {
     }

@@ -8,7 +8,6 @@
 #include <utility>
 #include <map>
 #include <vector>
-#include "star.h"
 
 class GLCIPSolution
 {

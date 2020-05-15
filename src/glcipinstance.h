@@ -8,7 +8,6 @@
 #include <utility>
 #include <map>
 #include <vector>
-#include "star.h"
 
 class GLCIPInstance
 {
@@ -23,8 +22,17 @@ public:
     double alpha;
     int n, m;
 
-    GLCIPInstance(Digraph &g, DNodeStringMap &nodeName, DNodePosMap &posx, DNodePosMap &posy, ArcValueMap &influence, DNodeValueMap &threshold,
-        DNodeValueVectorMap &incentives, double alpha, int n, int m);
+    GLCIPInstance(
+        Digraph &_g, 
+        DNodeStringMap &_nodeName, 
+        DNodePosMap &_posx, 
+        DNodePosMap &_posy, 
+        ArcValueMap &_influence, 
+        DNodeValueMap &_threshold,        
+        DNodeValueVectorMap &_incentives, 
+        double _alpha, 
+        int _n, 
+        int _m);
 };
 
 #endif // GLCIPINSTANCE_H

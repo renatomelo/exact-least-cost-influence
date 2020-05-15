@@ -5,21 +5,20 @@ import random
 import math
 
 #G = nx.directed_configuration_model()
-M = nx.scale_free_graph(2000, alpha=0.15, beta=0.7, gamma=0.15, delta_in=0.2,
+M = nx.scale_free_graph(1000, alpha=0.15, beta=0.7, gamma=0.15, delta_in=0.2,
                      delta_out=0, create_using=None, seed=None)
 #M = nx.scale_free_graph(20)
 G = nx.DiGraph(M) # to simple digraph
-
-print("nnodes narcs type")
-print(len(G.nodes()), len(G.edges()), "digraph")
-
-#random.normalvariate(mu, sigma)
+#G = nx.gnp_random_graph(20,.2, directed="True")
 
 #removing selfloops of G
 for u,v in list(G.edges()):
     if(u==v):
         G.remove_edge(u,v)
         #print("removing selfloop from ", u)
+
+print("nnodes narcs type")
+print(len(G.nodes()), len(G.edges()), "digraph")
 
 #defining the weight of influence on arcs
 for u,v,d in G.edges(data=True):
@@ -62,10 +61,12 @@ for i in range(len(thr)) :
 #print("max thr = ", max_thr)
 
 #printing the node attributes
-print("nodename posx posy threshold incentives")
+#print("nodename posx posy threshold incentives")
+print("nodename posx posy threshold")
 i = 0
 for v in list(G.nodes()):
-    print(v+1, posx[i], posy[i], thr[i], "1,2,3")
+    #print(v+1, posx[i], posy[i], thr[i], "1,2,3")
+    print(v+1, posx[i], posy[i], thr[i])
     i += 1
 
 print("tail head influence")

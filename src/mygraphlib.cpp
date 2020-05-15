@@ -1102,7 +1102,7 @@ bool GreedyColoring(Graph &g,int &ncolors,NodeIntMap &nodecolor)
       else {next[u]=next[listdegree[du]]; next[listdegree[du]]=u;
     previous[u]=listdegree[du]; previous[next[u]]=u;}
     }} // At this point, we have the removal order in "removalorder"
-  int maxremoveddegree=Max(g,degree); // maximum degree (considering degree when node was removed).
+  unsigned int maxremoveddegree=Max(g,degree); // maximum degree (considering degree when node was removed).
   int adjacentcolors[maxremoveddegree];
   for (NodeIt v(g);v!=INVALID;++v) nodecolor[v]=-1; // means no color
   for (int i=0;i<n;i++) {Node v =  removalorder[i]; // Let us paint node v
