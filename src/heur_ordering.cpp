@@ -1,6 +1,6 @@
 #include "heur_ordering.h"
 #include <queue>
-#include <functional>     // std::greater
+#include <functional> // std::greater
 
 /** destructor of primal heuristic to free user data (called when SCIP is exiting) */
 SCIP_DECL_HEURFREE(HeurOrdering::scip_free)
@@ -29,15 +29,17 @@ SCIP_DECL_HEUREXIT(HeurOrdering::scip_exit)
     return SCIP_OKAY;
 }
 
-/** solving process initialization method of primal heuristic (called when branch and bound process is about to begin)
+/** solving process initialization method of primal heuristic (called when branch and bound process 
+ * is about to begin)
  *
- *  This method is called when the presolving was finished and the branch and bound process is about to begin.
- *  The primal heuristic may use this call to initialize its branch and bound specific data.
- *
+ * This method is called when the presolving was finished and the branch and bound process is 
+ * about to begin. The primal heuristic may use this call to initialize its branch and bound 
+ * specific data.
  */
 SCIP_DECL_HEURINITSOL(HeurOrdering::scip_initsol)
 {
-    //cout << "SCIP_DECL_HEURINITSOL\n";
+    cout << "SCIP_DECL_HEURINITSOL\n";
+
     return SCIP_OKAY;
 }
 
@@ -51,13 +53,10 @@ SCIP_DECL_HEUREXITSOL(HeurOrdering::scip_exitsol)
     return SCIP_OKAY;
 }
 
-struct compare
+void sortVertices(GLCIPInstance &instance)
 {
-    GLCIPInstance &instance;
-    compare(GLCIPInstance &_instance) : instance(_instance) {}
-
-    bool operator()(const DNode &u, const DNode &v)
-    {
+    // Using lambda to compare vertices
+    auto cmp = [&](DNode &u, DNode &v) {
         double sum1 = 0;
         for (OutArcIt a(instance.g, u); a != INVALID; ++a)
         {
@@ -73,32 +72,120 @@ struct compare
         double dif2 = sum2 - instance.threshold[v];
 
         return dif1 < dif2;
+    };
+
+    priority_queue<DNode, vector<DNode>, decltype(cmp)> ordering(cmp);
+
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        cout << "inserting: " << instance.nodeName[v] << endl;
+        ordering.push(v);
     }
-};
 
-void sortVerticesTest(GLCIPInstance &instance)
+    while (!ordering.empty())
+    {
+        DNode v = ordering.top();
+
+        double sum1 = 0;
+        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            sum1 += instance.influence[a];
+        }
+        double score = sum1 - instance.threshold[v];
+        cout << "removing: " << instance.nodeName[v] << ", thr = " << instance.threshold[v]
+             << ", influence = " << sum1 << ", score = " << score << endl;
+        ordering.pop();
+    }
+}
+
+SCIP_RETCODE HeurOrdering::constructNewSol(
+    SCIP *scip,
+    SCIP_SOL *newsol)
 {
-   compare cmp(instance);
-   priority_queue<DNode, vector<DNode>, cmp> q;
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      cout << "inserting: " << instance.nodeName[v] << endl;
-      q.push(v);
-   }
+    double totalCost = 0;
+    set<DNode> actives; // start with a empty solution
 
-   while (!q.empty())
-   {
-      cout << "removing: " << instance.nodeName[q.top()] << endl;
-      q.pop();
-   }
+    // Using lambda to compare vertices
+    auto cmp = [&](DNode &u, DNode &v) {
+        double sum1 = 0;
+        for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+        {
+            if (SCIPisPositive(scip, SCIPgetSolVal(scip, sol, z[a])))
+            {
+                sum1 += instance.influence[a];
+            }
+        }
+
+        double sum2 = 0;
+        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            if (SCIPisPositive(scip, SCIPgetSolVal(scip, sol, z[a])))
+            {
+                sum2 += instance.influence[a];
+            }
+        }
+        double dif1 = sum1 - instance.threshold[u];
+        double dif2 = sum2 - instance.threshold[v];
+
+        return dif1 < dif2;
+    };
+
+    // list of vertices sorted by the score defined above
+    priority_queue<DNode, vector<DNode>, decltype(cmp)> ordering(cmp);
+
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        //cout << "inserting: " << instance.nodeName[v] << endl;
+        ordering.push(v);
+    }
+
+    while (actives.size() < instance.alpha * instance.n)
+    {
+        DNode v = ordering.top();
+        actives.insert(v);
+        ordering.pop();
+
+        assert(v != INVALID);
+        SCIP_CALL(SCIPsetSolVal(scip, newsol, x[v], 1.0));
+
+        double sum = 0;
+        for (InArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            DNode u = instance.g.source(a);
+            if (actives.count(u) && SCIPisPositive(scip, SCIPgetSolVal(scip, sol, z[a])))
+            {
+                sum += instance.influence[a];
+
+                SCIP_CALL(SCIPsetSolVal(scip, newsol, z[a], 1.0));
+            }
+        }
+
+        double cost = 0;
+        // assuming that the incentives are sorted in an increasing order
+        // uses the first incentive that overcomes the threshold of v
+        for (size_t i = 0; i < instance.incentives[v].size(); i++)
+        {
+            if (sum + instance.incentives[v][i] >= instance.threshold[v])
+            {
+                cost = instance.incentives[v][i];
+                SCIP_CALL(SCIPsetSolVal(scip, newsol, xip[v][i], 1.0));
+                break;
+            }
+        }
+        //cout << "cost of " << instance.nodeName[v] << " is " << cost << endl;
+        totalCost += cost;
+    }
+
+    //cout << "Total cost: " << totalCost << endl;
+
+    return SCIP_OKAY;
 }
 
 /** execution method of primal heuristic 2-Opt */
 SCIP_DECL_HEUREXEC(HeurOrdering::scip_exec)
 {
-    sortVerticesTest(instance);
-    exit(0);
     //cout << "SCIP_DECL_HEUREXEC\n";
+
     assert(heur != NULL);
 
     SCIP_Bool success = FALSE;
@@ -122,8 +209,9 @@ SCIP_DECL_HEUREXEC(HeurOrdering::scip_exec)
     /* allocate local memory */
     SCIP_CALL(SCIPcreateSol(scip, &newsol, heur));
 
-    //call here the ordering
-    greedyConstruction(scip, newsol);
+    //TODO call here the ordering
+    constructNewSol(scip, newsol);
+    //exit(0);
 
     // due to construction we already know, that the solution will be feasible
     SCIP_CALL(SCIPtrySol(scip, newsol, TRUE, TRUE, FALSE, FALSE, FALSE, &success));
@@ -135,12 +223,11 @@ SCIP_DECL_HEUREXEC(HeurOrdering::scip_exec)
     else
     { // the solution total cost is worst than already existent solutions
         *result = SCIP_DIDNOTFIND;
-        //cout << "heur solution not found !\n";
+        //cout << "the solution total cost is worst than already existent solutions\n";
     }
 
     /* free all local memory */
     SCIP_CALL(SCIPfreeSol(scip, &newsol));
-    //cout << "free all local memory \n";
 
     return SCIP_OKAY;
 }

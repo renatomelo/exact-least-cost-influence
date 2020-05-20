@@ -14,7 +14,7 @@ class HeurOrdering : public scip::ObjHeur
 public:
     HeurOrdering(
         SCIP *scip,
-        GLCIPBase &p_instance,
+        GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
         ArcSCIPVarMap &p_z,
         DNodeSCIPVarsMap &p_xip) : ObjHeur(scip,
@@ -22,9 +22,9 @@ public:
                                       "Ordering primal heuristic", //description
                                       'O',                         //display character of primal heuristic
                                       -1000000,                    //priority of the primal heuristic
-                                      5,                           //frequency for calling primal heuristic
+                                      10,                           //frequency for calling primal heuristic
                                       0,                           //frequency offset for calling primal heuristic
-                                      -1,                          //maximal depth level to call heuristic at (-1: no limit)
+                                      100,                          //maximal depth level to call heuristic at (-1: no limit)
                                       SCIP_HEURTIMING_AFTERNODE,   //positions in the node solving loop where heuristic should be executed;
                                                                    //see definition of SCIP_HEURTIMING for possible values
                                       FALSE),                      //does the heuristic use a secondary SCIP instance?
@@ -75,6 +75,9 @@ public:
     *                      its frequency
     */
     virtual SCIP_DECL_HEUREXEC(scip_exec);
+
+    SCIP_RETCODE constructNewSol(SCIP* scip, SCIP_SOL *newsol);
+
 };
 
 #endif

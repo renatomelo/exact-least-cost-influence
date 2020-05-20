@@ -1,5 +1,7 @@
 #include "GLCIPBase.h"
 #include "heur_dualbound.h"
+#include "heur_ordering.h"
+
 
 bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
@@ -15,6 +17,8 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
     SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
+
+    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
 
     // add variables to the model
     DNodeSCIPVarMap x(instance.g);
@@ -94,6 +98,10 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     SCIP_CALL(cuts.createCycleCuts(scip, &cons, "cycle-elimination", FALSE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE));
     SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
+
+    //primal heuristic
+    HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
+    SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE));
 
     //include combinatorial relaxation
     SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z, xip), TRUE));

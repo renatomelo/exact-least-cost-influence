@@ -332,23 +332,6 @@ struct compare
    }
 };
 
-/* void sortVerticesTest(GLCIPInstance &instance)
-{
-   compare cmp(instance);
-   priority_queue<DNode, vector<DNode>, cmp> q;
-   for (DNodeIt v(instance.g); v != INVALID; ++v)
-   {
-      cout << "inserting: " << instance.nodeName[v] << endl;
-      q.push(v);
-   }
-
-   while (!q.empty())
-   {
-      cout << "removing: " << instance.nodeName[q.top()] << endl;
-      q.pop();
-   }
-} */
-
 /** execution method of primal heuristic 2-Opt */
 SCIP_DECL_HEUREXEC(HeurMinInfluence::scip_exec)
 {
