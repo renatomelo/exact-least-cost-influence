@@ -5,7 +5,7 @@ import random
 import math
 
 #G = nx.directed_configuration_model()
-M = nx.scale_free_graph(1000, alpha=0.15, beta=0.7, gamma=0.15, delta_in=0.2,
+M = nx.scale_free_graph(500, alpha=0.05, beta=0.9, gamma=0.05, delta_in=0.2,
                      delta_out=0, create_using=None, seed=None)
 #M = nx.scale_free_graph(20)
 G = nx.DiGraph(M) # to simple digraph

@@ -376,112 +376,6 @@ double getCostInTopologicalOrdering(
 {
     // start wiht empty solution
     set<DNode> actives;
-    /* Digraph::NodeMap<set<DNode>> influencers(condensed);
-    list<DNode> seeds;
-
-    //TODO add to seed set every node that has no input arc
-    double cost = 0;
-    InDegMap<Digraph> inDegree(condensed);
-    for (DNodeIt v(condensed); v != INVALID; ++v)
-    {
-        if (inDegree[v] == 0)
-        {
-            //in the associated component find the smaller threshold vertex to be the seed
-            DNode node = INVALID;
-            // find the vertex in component 0 to pay the incentive and start spreading
-            for (size_t i = 0; i < listOfComponents[condensed.id(v)].size(); i++)
-            {
-                DNode w = listOfComponents[condensed.id(v)][i];
-                if (thr[condensed.id(v)] == instance.threshold[w])
-                {
-                    node = w;
-                    break;
-                }
-            }
-
-            assert(node != INVALID);
-
-            //cout << "seed node: " << instance.nodeName[node] << endl;
-            int index = 0;
-            for (size_t i = 0; i < instance.incentives[node].size(); i++)
-            {
-                if (instance.incentives[node][i] >= instance.threshold[node])
-                {
-                    //cout << "incentive paid: " << instance.incentives[node][i] << endl;
-                    index = i;
-                    break;
-                }
-            }
-
-            cost += instance.incentives[node][index];
-            //cost += thr[condensed.id(v)];
-
-            seeds.push_back(v);
-            originalSeeds.push_back(node);
-        }
-    }
-
-    //cout << "cost of seed nodes: " << cost << endl;
-
-    // while the seed set is not empty try to activate non active vertices
-    while (seeds.size() > 0)
-    {
-        DNode u = seeds.front();
-        seeds.pop_front();
-        actives.insert(u);
-
-        for (OutArcIt a(condensed, u); a != INVALID; ++a)
-        {
-            DNode v = condensed.target(a);
-            if (!actives.count(v))
-            {
-                influencers[v].insert(u);
-
-                double exerterdInfluence = 0;
-                for (DNode w : influencers[v])
-                {
-                    Arc e = findArc(condensed, w, v);
-                    assert(e != INVALID);
-
-                    exerterdInfluence += condensedInfluence[e];
-                }
-
-                cout << " exerterd influence: " << exerterdInfluence << endl;
-                if (exerterdInfluence >= thr[condensed.id(v)])
-                {
-                    cout << condensed.id(v) << " is inserted in seed set" << endl;
-                    seeds.push_back(v);
-                }
-            }
-        }
-    }
-
-    //if not all vertices have been reached give more incentives
-    if ((int)actives.size() < nComponents)
-    {
-        cout << "not all vertices have been reached\n";
-        //visit all non-active vertices and pay the necessary incentive
-        for (DNodeIt v(condensed); v != INVALID; ++v)
-        {
-            if (!actives.count(v))
-            {
-                double exerterdInfluence = 0;
-                for (DNode w : influencers[v])
-                {
-                    Arc e = findArc(condensed, w, v);
-                    assert(e != INVALID);
-
-                    exerterdInfluence += condensedInfluence[e];
-                }
-                cout << condensed.id(v) << " not active: ";
-                cout << "exerterdInfluence = " << exerterdInfluence << " thr = " << thr[condensed.id(v)] << endl;
-                double dif = thr[condensed.id(v)] - exerterdInfluence;
-                cout << "difference = " << dif << endl;
-                //TODO finish later if needed
-            }
-        }
-        exit(0);
-    } */
 
     //linear time algorithm to solve the problem in DAGs
     vector<double> incentives(nComponents);
@@ -512,22 +406,6 @@ double getCostInTopologicalOrdering(
         total += incentives[i];
     }
 
-    /* if (total > incentives[0])
-    {
-        //show the diference and study what happens
-        for (int i = 0; i < nComponents; i++)
-        {
-            if (incentives[i] > 0)
-            {
-                cout << "paying incentive of: " << incentives[i] << " to " << i << endl;
-            }
-        }
-        cout << "total incentives = " << total << endl;
-    } */
-
-    //cout << "total incentives = " << total << endl;
-    //cout << "size of actives = " << actives.size() << endl;
-    //return incentives[0];
     return total;
 }
 
@@ -608,7 +486,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
     if (stronglyConnected(graph))
     {
-        //cout << "support graph is strongly connected\n";
+        //cout << "assossiated subgraph is strongly connected\n";
         //find minimum threshold vertex
         DNode node = INVALID;
         relaxval = getMinimumThreshold(instance, node);
@@ -627,7 +505,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
     else
     {
         int nComponents = countStronglyConnectedComponents(graph);
-        //cout << "support graph isn't strongly connected: ";
+        //cout << "assossiated subgraph isn't strongly connected: ";
         //cout << nComponents << " components\n";
 
         Digraph condensed;

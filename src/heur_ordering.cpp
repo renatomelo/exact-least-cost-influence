@@ -38,7 +38,7 @@ SCIP_DECL_HEUREXIT(HeurOrdering::scip_exit)
  */
 SCIP_DECL_HEURINITSOL(HeurOrdering::scip_initsol)
 {
-    cout << "SCIP_DECL_HEURINITSOL\n";
+    //cout << "SCIP_DECL_HEURINITSOL\n";
 
     return SCIP_OKAY;
 }
