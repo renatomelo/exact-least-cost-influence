@@ -1,6 +1,7 @@
 #include "GLCIPBase.h"
 #include "heur_dualbound.h"
 #include "heur_ordering.h"
+#include "heur_greedy_construction.h"
 
 
 bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
@@ -15,7 +16,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 1));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
 
     SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
@@ -100,8 +101,12 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
 
     //primal heuristic
-    HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
-    SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE));
+    /* HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
+    SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE)); */
+
+     //primal heuristic
+    HeurGreedyConstruction *greedy = new HeurGreedyConstruction(scip, instance, x, z, xip);
+    SCIP_CALL(SCIPincludeObjHeur(scip, greedy, TRUE));
 
     //include combinatorial relaxation
     SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z, xip), TRUE));

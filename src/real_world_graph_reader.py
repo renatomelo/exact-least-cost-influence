@@ -4,8 +4,8 @@ from operator import itemgetter
 import random
 import math
 
-#fh = open("../in/realworld/wiki-vote.txt", 'rb')
-#G = nx.read_edgelist(fh, nodetype=str, create_using=nx.DiGraph)
+fh = open("../in/realworld/wiki-vote.txt", 'rb')
+G = nx.read_edgelist(fh, nodetype=str, create_using=nx.DiGraph)
 
 #fh = open("../in/realworld/adolescent_health.txt", 'rb')
 #G = nx.nx.read_weighted_edgelist(fh, comments='%', nodetype=int, create_using=nx.DiGraph)
@@ -27,8 +27,8 @@ import math
 #fh = open("../in/realworld/dblp.txt", 'rb')
 #G = nx.nx.read_weighted_edgelist(fh, comments='%', nodetype=int, create_using=nx.DiGraph)
 
-fh = open("../in/realworld/cora.txt", 'rb')
-G = nx.nx.read_weighted_edgelist(fh, comments='%', nodetype=int, create_using=nx.DiGraph)
+#fh = open("../in/realworld/cora.txt", 'rb')
+#G = nx.nx.read_weighted_edgelist(fh, comments='%', nodetype=int, create_using=nx.DiGraph)
 
 fh.close()
 labels = [1]

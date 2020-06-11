@@ -484,7 +484,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
     ArcArcMap arcRef(graph);      //save the reference to the original arc
     getSubGraph(scip, instance, graph, nodeRef, arcRef, z);
 
-    if (stronglyConnected(graph))
+    if (stronglyConnected(graph) || instance.alpha < 1)
     {
         //cout << "assossiated subgraph is strongly connected\n";
         //find minimum threshold vertex

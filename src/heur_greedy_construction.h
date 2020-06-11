@@ -1,9 +1,9 @@
-#ifndef __HEURORDERING_H__
-#define __HEURORDERING_H__
+#ifndef __HEURGREEDYCONSTRUCTION_H__
+#define __HEURGREEDYCONSTRUCTION_H__
 
 #include "GLCIPBase.h"
 
-class HeurOrdering : public scip::ObjHeur
+class HeurGreedyConstruction : public scip::ObjHeur
 {
     GLCIPInstance &instance; /**< the instance for GLCIP */
     DNodeSCIPVarMap &x;
@@ -12,17 +12,17 @@ class HeurOrdering : public scip::ObjHeur
     SCIP_SOL *sol; /**< current solution */
 
 public:
-    HeurOrdering(
+    HeurGreedyConstruction(
         SCIP *scip,
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
         ArcSCIPVarMap &p_z,
         DNodeSCIPVarsMap &p_xip) : ObjHeur(scip,
-                                      "ordering",              //name
-                                      "Ordering primal heuristic", //description
+                                      "greedy_construction",              //name
+                                      "Greedy construction primal heuristic", //description
                                       'O',                         //display character of primal heuristic
                                       -1000000,                    //priority of the primal heuristic
-                                      10,                           //frequency for calling primal heuristic
+                                      5,                           //frequency for calling primal heuristic
                                       0,                           //frequency offset for calling primal heuristic
                                       100,                          //maximal depth level to call heuristic at (-1: no limit)
                                       SCIP_HEURTIMING_AFTERNODE,   //positions in the node solving loop where heuristic should be executed;
@@ -36,10 +36,9 @@ public:
     {
     }
 
-    /** destructor */
-    virtual ~HeurOrdering() {}
+    virtual ~HeurGreedyConstruction() {}
 
-    /** destructor of primal heuristic to free user data (called when SCIP is exiting) */
+     /** destructor of primal heuristic to free user data (called when SCIP is exiting) */
     virtual SCIP_DECL_HEURFREE(scip_free);
 
     /** initialization method of primal heuristic (called after problem was transformed) */
