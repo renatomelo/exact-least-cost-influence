@@ -1,5 +1,6 @@
 #include "heur_greedy_construction.h"
 #include <lemon/min_cost_arborescence.h>
+#include <queue>
 
 /** destructor of primal heuristic to free user data (called when SCIP is exiting) */
 SCIP_DECL_HEURFREE(HeurGreedyConstruction::scip_free)
@@ -52,40 +53,43 @@ SCIP_DECL_HEUREXITSOL(HeurGreedyConstruction::scip_exitsol)
     return SCIP_OKAY;
 }
 
-SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
-    SCIP *scip,
-    SCIP_SOL *newsol)
+double getCostOfSolution(
+    GLCIPInstance &instance,
+    Digraph &graph,
+    DNodeDNodeMap &nodeRef,
+    ArcArcMap &arcRef)
 {
     double totalCost = 0;
-    set<DNode> actives; // start with a empty solution
 
-    //negated weights
-    ArcValueMap w(instance.g);
-    for (ArcIt a(instance.g); a != INVALID; ++a)
+    for (DNodeIt v(graph); v != INVALID; ++v)
     {
-        w[a] = -instance.influence[a];
-    }
+        double sum = 0;
+        for (InArcIt a(graph, v); a != INVALID; ++a)
+            sum += instance.influence[arcRef[a]];
 
-    //find the maximum spanning arborecence here. As we negated the weiths on the arcs,
-    //we get the maximum spanning arborecence instead of the minimum
-    double minCost = 0;
-    DNode root = INVALID;
-    for (DNodeIt v(instance.g); v != INVALID; ++v)
-    {
-        double cost = 0;
-        ArcBoolMap arborescence(instance.g);
-
-        cost = minCostArborescence(instance.g, w, v, arborescence);
-
-        if (cost < minCost)
+        double solCost = 0;
+        // assuming that the incentives are sorted in an increasing order
+        // uses the first incentive that overcomes the threshold of v
+        for (size_t i = 0; i < instance.incentives[nodeRef[v]].size(); i++)
         {
-            minCost = cost;
-            root = v;
+            if (sum + instance.incentives[nodeRef[v]][i] >= instance.threshold[nodeRef[v]])
+            {
+                solCost = instance.incentives[nodeRef[v]][i];
+                break;
+            }
         }
+        totalCost += solCost;
     }
 
-    cout << "cost = " << minCost << ", root: " << instance.nodeName[root] << endl;
+    return totalCost;
+}
 
+//saves the set of edges not in arborescence and add arbitrarely while there is no cycles
+void addExternalArcs(
+    GLCIPInstance &instance,
+    ArcValueMap &w,
+    DNode &root)
+{
     ArcBoolMap arborescence(instance.g);
 
     minCostArborescence(instance.g, w, root, arborescence);
@@ -107,38 +111,6 @@ SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
             graph.erase(a);
         }
     }
-
-    //GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Arborescence", nodeRef);
-
-    totalCost = 0;
-    for (DNodeIt v(instance.g); v != INVALID; ++v)
-    {
-        double sum = 0;
-        for (InArcIt a(instance.g, v); a != INVALID; ++a)
-        {
-            if (arborescence[a])
-            {
-                sum += instance.influence[a];
-            }
-        }
-
-        double solCost = 0;
-        // assuming that the incentives are sorted in an increasing order
-        // uses the first incentive that overcomes the threshold of v
-        for (size_t i = 0; i < instance.incentives[v].size(); i++)
-        {
-            if (sum + instance.incentives[v][i] >= instance.threshold[v])
-            {
-                solCost = instance.incentives[v][i];
-                break;
-            }
-        }
-        totalCost += solCost;
-    }
-
-    cout << "Cost of the arborescence: " << totalCost << endl;
-    delete[] sorting;
-
     //add new arcs to the arborescence while does not form cycle
     while (!externalArcs.empty())
     {
@@ -158,72 +130,187 @@ SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
         }
     }
 
-    totalCost = 0;
-    for (DNodeIt v(instance.g); v != INVALID; ++v)
-    {
-        double sum = 0;
-        for (InArcIt a(instance.g, v); a != INVALID; ++a)
-        {
-            if (arborescence[a])
-            {
-                sum += instance.influence[a];
-            }
-        }
+    double totalCost = getCostOfSolution(instance, graph, nodeRef, arcRef);
+    cout << "cost of addExternalArcs() = " << totalCost << endl;
+}
 
-        double solCost = 0;
-        // assuming that the incentives are sorted in an increasing order
-        // uses the first incentive that overcomes the threshold of v
-        for (size_t i = 0; i < instance.incentives[v].size(); i++)
+//save the set of edges not in arborescence and sort them by the influence weights in decreasing order
+void addSortedArcs(
+    GLCIPInstance &instance,
+    Digraph &graph,
+    DNodeDNodeMap &nodeRef,
+    ArcArcMap &arcRef)
+{
+}
+
+typedef Digraph::NodeMap<vector<Arc>> DNodeArcsMap;
+
+//sort the vertices by the cost of given incentives in decreasing order
+//while there is no cycles add new arcs to the most expensive vertices
+//for each vertex, the incoming arcs are sorted in decreasing order by the influence weights
+void addArcsBySortedVertices(
+    GLCIPInstance &instance,
+    ArcValueMap &w,
+    DNode &root)
+{
+    ArcBoolMap arborescence(instance.g);
+
+    minCostArborescence(instance.g, w, root, arborescence);
+
+    Digraph graph;
+    DNodeDNodeMap nodeRef(graph);
+    ArcArcMap arcRef(graph);
+
+    digraphCopy(instance.g, graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
+
+    DNodeArcsMap incomingArcs(graph);
+
+    for (ArcIt a(graph); a != INVALID; ++a)
+    {
+        if (!arborescence[arcRef[a]])
         {
-            if (sum + instance.incentives[v][i] >= instance.threshold[v])
-            {
-                solCost = instance.incentives[v][i];
-                break;
-            }
+            //removing arcs that are not in the arborescence
+            incomingArcs[graph.target(a)].push_back(a);
+            graph.erase(a);
         }
-        totalCost += solCost;
     }
 
-    cout << "New total cost: " << totalCost << endl;
-    //set the new solution and get the cost
-    /* while (actives.size() < instance.alpha * instance.n)
+    // Using lambda to compare arcs by the influence weights
+    auto compare_arcs = [&](Arc &a, Arc &b) {
+        return instance.influence[arcRef[a]] < instance.influence[arcRef[b]];
+    };
+
+    for (DNodeIt v(graph); v != INVALID; ++v)
     {
+        sort(incomingArcs[v].begin(), incomingArcs[v].end(), compare_arcs);
+
+        /* cout << "weight of external incoming arcs of " << instance.nodeName[nodeRef[v]] << ": ";
+        while (!incomingArcs[v].empty())
+        {
+            Arc a = incomingArcs[v].back();
+            incomingArcs[v].pop_back();
+            cout << instance.influence[arcRef[a]] << " ";
+        }
+        
+        cout << endl; */
+    }
+
+    // Using lambda to compare vertices by the cost of incentives to be given
+    auto cmp = [&](DNode &u, DNode &v) {
+        double sum1 = 0;
+        double sum2 = 0;
+
+        for (InArcIt a(graph, u); a != INVALID; ++a)
+            sum1 += instance.influence[arcRef[a]];
+
+        for (InArcIt a(graph, v); a != INVALID; ++a)
+            sum2 += instance.influence[arcRef[a]];
+
+        double dif1 = instance.threshold[nodeRef[u]] - sum1;
+        double dif2 = instance.threshold[nodeRef[v]] - sum2;
+
+        return dif1 < dif2;
+    };
+
+    // list of vertices sorted by the cost of incentive offered
+    priority_queue<DNode, vector<DNode>, decltype(cmp)> ordering(cmp);
+
+    for (DNodeIt v(graph); v != INVALID; ++v)
+    {
+        double sum = 0;
+        for (InArcIt a(graph, v); a != INVALID; ++a)
+            sum += instance.influence[arcRef[a]];
+        double dif = instance.threshold[nodeRef[v]] - sum;
+
+        if (dif > 0 && nodeRef[v] != root)
+        {
+            //cout << "inserting: " << instance.nodeName[nodeRef[v]] << endl;
+            ordering.push(v);
+        }
+    }
+
+    while (!ordering.empty())
+    {
+        double sum = 0;
+        double diff = 0;
         DNode v = ordering.top();
-        actives.insert(v);
+
+        //cout << "removing: " << instance.nodeName[nodeRef[v]] << ": " << dif << endl;
         ordering.pop();
 
-        assert(v != INVALID);
-        SCIP_CALL(SCIPsetSolVal(scip, newsol, x[v], 1.0));
-
-        double sum = 0;
-        for (InArcIt a(instance.g, v); a != INVALID; ++a)
+        //add a new edge to the most expensive if does not form cycles
+        while (!incomingArcs[v].empty())
         {
-            DNode u = instance.g.source(a);
-            if (actives.count(u) && SCIPisPositive(scip, SCIPgetSolVal(scip, sol, z[a])))
-            {
-                sum += instance.influence[a];
+            Arc a = incomingArcs[v].back();
 
-                SCIP_CALL(SCIPsetSolVal(scip, newsol, z[a], 1.0));
-            }
-        }
+            incomingArcs[v].pop_back();
 
-        double cost = 0;
-        // assuming that the incentives are sorted in an increasing order
-        // uses the first incentive that overcomes the threshold of v
-        for (size_t i = 0; i < instance.incentives[v].size(); i++)
-        {
-            if (sum + instance.incentives[v][i] >= instance.threshold[v])
+            Arc e = graph.addArc(graph.source(a), graph.target(a));
+            if (dag(graph))
             {
-                cost = instance.incentives[v][i];
-                SCIP_CALL(SCIPsetSolVal(scip, newsol, xip[v][i], 1.0));
+                //cout << "arc added to the arborescence\n";
+                arborescence[arcRef[a]] = TRUE;
+
+                for (InArcIt b(graph, v); b != INVALID; ++b)
+                    sum += instance.influence[arcRef[b]];
+
+                diff = instance.threshold[nodeRef[v]] - sum;
+
+                if (diff - instance.influence[arcRef[a]] > 0)
+                {
+                    ordering.push(v);
+                    //cout << "re inserting " << instance.nodeName[nodeRef[v]] << ": " << diff - instance.influence[arcRef[a]] << endl;
+                }
                 break;
             }
+            else
+            {
+                //cout << "cycle created\n";
+                graph.erase(e);
+            }
         }
-        //cout << "cost of " << instance.nodeName[v] << " is " << cost << endl;
-        totalCost += cost;
-    } */
+    }
 
-    cout << "Total cost: " << totalCost << endl;
+    double totalCost = getCostOfSolution(instance, graph, nodeRef, arcRef);
+    cout << "cost of addArcsBySortedVertices() = " << totalCost << endl;
+}
+
+SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
+    SCIP *scip,
+    SCIP_SOL *newsol)
+{
+    set<DNode> actives; // start with a empty solution
+
+    //negated weights
+    ArcValueMap w(instance.g);
+    for (ArcIt a(instance.g); a != INVALID; ++a)
+        w[a] = -instance.influence[a];
+
+    //find the maximum spanning arborecence here. As we negated the weiths on the arcs,
+    //we get the maximum spanning arborecence instead of the minimum
+    double minCost = 0;
+    DNode root = INVALID;
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        double cost = 0;
+        ArcBoolMap arborescence(instance.g);
+
+        cost = minCostArborescence(instance.g, w, v, arborescence);
+
+        if (cost < minCost)
+        {
+            minCost = cost;
+            root = v;
+        }
+    }
+
+    //cout << "cost = " << minCost << ", root: " << instance.nodeName[root] << endl;
+
+    addArcsBySortedVertices(instance, w, root);
+
+    addExternalArcs(instance, w, root);
+
+    //TODO set the new solution and get the cost
 
     return SCIP_OKAY;
 }
