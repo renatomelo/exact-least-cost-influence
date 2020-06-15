@@ -137,10 +137,59 @@ void addExternalArcs(
 //save the set of edges not in arborescence and sort them by the influence weights in decreasing order
 void addSortedArcs(
     GLCIPInstance &instance,
-    Digraph &graph,
-    DNodeDNodeMap &nodeRef,
-    ArcArcMap &arcRef)
+    ArcValueMap &w,
+    DNode &root)
 {
+    ArcBoolMap arborescence(instance.g);
+
+    minCostArborescence(instance.g, w, root, arborescence);
+
+    Digraph graph;
+    DNodeDNodeMap nodeRef(graph);
+    ArcArcMap arcRef(graph);
+
+    digraphCopy(instance.g, graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
+
+    vector<Arc> externalArcs;
+
+    for (ArcIt a(graph); a != INVALID; ++a)
+    {
+        if (!arborescence[arcRef[a]])
+        {
+            //removing arcs that are not in the arborescence
+            externalArcs.push_back(a);
+            graph.erase(a);
+        }
+    }
+
+    // Using lambda to compare arcs by the influence weights
+    auto compare_arcs = [&](Arc &a, Arc &b) {
+        return instance.influence[arcRef[a]] < instance.influence[arcRef[b]];
+    };
+
+    sort(externalArcs.begin(), externalArcs.end(), compare_arcs);
+
+    //add new arcs to the arborescence while does not form cycle
+    while (!externalArcs.empty())
+    {
+        Arc a = externalArcs.back();
+        externalArcs.pop_back();
+
+        Arc e = graph.addArc(graph.source(a), graph.target(a));
+        if (!dag(graph))
+        {
+            //cout << "cycle created\n";
+            graph.erase(e);
+        }
+        else
+        {
+            //cout << "arc added to the arborescence\n";
+            arborescence[arcRef[a]] = TRUE;
+        }
+    }
+
+    double totalCost = getCostOfSolution(instance, graph, nodeRef, arcRef);
+    cout << "cost of addSortedArcs() = " << totalCost << endl;
 }
 
 typedef Digraph::NodeMap<vector<Arc>> DNodeArcsMap;
@@ -176,15 +225,15 @@ void addArcsBySortedVertices(
     }
 
     // Using lambda to compare arcs by the influence weights
-    auto compare_arcs = [&](Arc &a, Arc &b) {
+    /* auto compare_arcs = [&](Arc &a, Arc &b) {
         return instance.influence[arcRef[a]] < instance.influence[arcRef[b]];
-    };
+    }; */
 
-    for (DNodeIt v(graph); v != INVALID; ++v)
+    /* for (DNodeIt v(graph); v != INVALID; ++v)
     {
         sort(incomingArcs[v].begin(), incomingArcs[v].end(), compare_arcs);
 
-        /* cout << "weight of external incoming arcs of " << instance.nodeName[nodeRef[v]] << ": ";
+         cout << "weight of external incoming arcs of " << instance.nodeName[nodeRef[v]] << ": ";
         while (!incomingArcs[v].empty())
         {
             Arc a = incomingArcs[v].back();
@@ -192,8 +241,8 @@ void addArcsBySortedVertices(
             cout << instance.influence[arcRef[a]] << " ";
         }
         
-        cout << endl; */
-    }
+        cout << endl;
+    } */
 
     // Using lambda to compare vertices by the cost of incentives to be given
     auto cmp = [&](DNode &u, DNode &v) {
@@ -275,6 +324,149 @@ void addArcsBySortedVertices(
     cout << "cost of addArcsBySortedVertices() = " << totalCost << endl;
 }
 
+void heurOrdering(GLCIPInstance &instance)
+{
+    // Using lambda to compare vertices
+    auto cmp = [&](DNode &u, DNode &v) {
+        double sum1 = 0;
+        double sum2 = 0;
+
+        for (OutArcIt a(instance.g, u); a != INVALID; ++a)
+            sum1 += instance.influence[a];
+
+        for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+            sum2 += instance.influence[a];
+
+        double dif1 = sum1 - instance.threshold[u];
+        double dif2 = sum2 - instance.threshold[v];
+
+        return dif1 < dif2;
+    };
+
+    priority_queue<DNode, vector<DNode>, decltype(cmp)> ordering(cmp);
+
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        //cout << "inserting: " << instance.nodeName[v] << endl;
+        ordering.push(v);
+    }
+
+    set<DNode> actives; // start with a empty solution
+    double totalCost = 0;
+
+    while (!ordering.empty())
+    {
+        DNode v = ordering.top();
+        actives.insert(v);
+        ordering.pop();
+
+        assert(v != INVALID);
+
+        double sum = 0;
+        for (InArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            DNode u = instance.g.source(a);
+            if (actives.count(u))
+                sum += instance.influence[a];
+        }
+
+        double cost = 0;
+        // assuming that the incentives are sorted in an increasing order
+        // uses the first incentive that overcomes the threshold of v
+        for (size_t i = 0; i < instance.incentives[v].size(); i++)
+        {
+            if (sum + instance.incentives[v][i] >= instance.threshold[v])
+            {
+                cost = instance.incentives[v][i];
+                break;
+            }
+        }
+        totalCost += cost;
+    }
+    cout << "cost of heurOrdering() = " << totalCost << endl;
+}
+
+double getMinIncentiveNodeLocal(
+    GLCIPInstance &instance,
+    set<DNode> actives,
+    DNode &node)
+{
+    double minCost = 1e+20;
+    set<DNode> activeNeigbors;
+
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        activeNeigbors.clear();
+
+        if (!actives.count(v))
+        {
+            for (InArcIt a(instance.g, v); a != INVALID; ++a)
+            {
+                DNode u = instance.g.source(a);
+
+                if (actives.count(u))
+                {
+                    activeNeigbors.insert(u);
+
+                    // if the cost is zero it cannot be improved, then stop
+                    if (GLCIPBase::costInfluencingSet(instance, v, activeNeigbors) == 0)
+                        break;
+                }
+            }
+
+            double cost = GLCIPBase::costInfluencingSet(instance, v, activeNeigbors);
+            if (cost < minCost)
+            {
+                minCost = cost;
+                node = v;
+
+                // if the cost is zero it cannot be improved, then stop
+                if (cost == 0)
+                    break;
+            }
+        }
+    }
+
+    return minCost;
+}
+
+void heurMinIncentive(GLCIPInstance &instance)
+{
+    set<DNode> actives; // start with a empty solution
+    double totalCost = 0;
+
+    //find the vertex of minimum threshold
+    double minThr = 1e+20;
+    DNode node = INVALID;
+
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        //choose the minimum cost
+        if (instance.threshold[v] < minThr)
+        {
+            minThr = instance.threshold[v];
+            node = v;
+            //stops if the threshold is 1 because there is no threshold less than 1
+            if (minThr == 1)
+                break;
+        }
+    }
+
+    actives.insert(node);
+    totalCost += GLCIPBase::cheapestIncentive(instance, node, 0);
+
+    while (actives.size() < instance.alpha * instance.n)
+    {
+        DNode v = INVALID;
+        set<DNode> nodes;
+        //double cost;
+        totalCost += getMinIncentiveNodeLocal(instance, actives, v);
+
+        actives.insert(v);
+    }
+    cout << "cost of heurMinIncentive() = " << totalCost << endl;
+}
+
 SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
     SCIP *scip,
     SCIP_SOL *newsol)
@@ -309,6 +501,12 @@ SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
     addArcsBySortedVertices(instance, w, root);
 
     addExternalArcs(instance, w, root);
+
+    addSortedArcs(instance, w, root);
+
+    heurOrdering(instance);
+
+    heurMinIncentive(instance);
 
     //TODO set the new solution and get the cost
 
