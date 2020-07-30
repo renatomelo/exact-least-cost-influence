@@ -2,57 +2,6 @@
 #include <lemon/min_cost_arborescence.h>
 #include <queue>
 
-/** destructor of primal heuristic to free user data (called when SCIP is exiting) */
-SCIP_DECL_HEURFREE(HeurGreedyConstruction::scip_free)
-{
-    return SCIP_OKAY;
-}
-
-/** initialization method of primal heuristic (called after problem was transformed) */
-SCIP_DECL_HEURINIT(HeurGreedyConstruction::scip_init)
-{
-    //cout << "SCIP_DECL_HEURINIT\n";
-
-    /* create heuristic data */
-    SCIP_CALL(SCIPcreateSol(scip, &sol, heur));
-    return SCIP_OKAY;
-}
-
-/** deinitialization method of primal heuristic (called before transformed problem is freed) */
-SCIP_DECL_HEUREXIT(HeurGreedyConstruction::scip_exit)
-{
-    //cout << "SCIP_DECL_HEUREXIT\n";
-
-    /* free everything which was created in scip_init */
-    SCIP_CALL(SCIPfreeSol(scip, &sol));
-
-    return SCIP_OKAY;
-}
-
-/** solving process initialization method of primal heuristic (called when branch and bound process 
- * is about to begin)
- *
- * This method is called when the presolving was finished and the branch and bound process is 
- * about to begin. The primal heuristic may use this call to initialize its branch and bound 
- * specific data.
- */
-SCIP_DECL_HEURINITSOL(HeurGreedyConstruction::scip_initsol)
-{
-    //cout << "SCIP_DECL_HEURINITSOL\n";
-
-    return SCIP_OKAY;
-}
-
-/** solving process deinitialization method of primal heuristic (called before branch and bound process data is freed)
- *
- *  This method is called before the branch and bound process is freed.
- *  The primal heuristic should use this call to clean up its branch and bound data.
- */
-SCIP_DECL_HEUREXITSOL(HeurGreedyConstruction::scip_exitsol)
-{
-    return SCIP_OKAY;
-}
-
 double getCostOfSolution(
     GLCIPInstance &instance,
     Digraph &graph,
@@ -467,6 +416,67 @@ void heurMinIncentive(GLCIPInstance &instance)
     cout << "cost of heurMinIncentive() = " << totalCost << endl;
 }
 
+
+/** destructor of primal heuristic to free user data (called when SCIP is exiting) */
+SCIP_DECL_HEURFREE(HeurGreedyConstruction::scip_free)
+{
+    return SCIP_OKAY;
+}
+
+/** initialization method of primal heuristic (called after problem was transformed) */
+SCIP_DECL_HEURINIT(HeurGreedyConstruction::scip_init)
+{
+    //cout << "SCIP_DECL_HEURINIT\n";
+
+    /* create heuristic data */
+    SCIP_CALL(SCIPcreateSol(scip, &sol, heur));
+    return SCIP_OKAY;
+}
+
+/** deinitialization method of primal heuristic (called before transformed problem is freed) */
+SCIP_DECL_HEUREXIT(HeurGreedyConstruction::scip_exit)
+{
+    //cout << "SCIP_DECL_HEUREXIT\n";
+
+    /* free everything which was created in scip_init */
+    SCIP_CALL(SCIPfreeSol(scip, &sol));
+
+    return SCIP_OKAY;
+}
+
+/** solving process initialization method of primal heuristic (called when branch and bound process 
+ * is about to begin)
+ *
+ * This method is called when the presolving was finished and the branch and bound process is 
+ * about to begin. The primal heuristic may use this call to initialize its branch and bound 
+ * specific data.
+ */
+SCIP_DECL_HEURINITSOL(HeurGreedyConstruction::scip_initsol)
+{
+    cout << "SCIP_DECL_HEURINITSOL\n";
+    SCIP_SOL *newsol = SCIPgetBestSol(scip);
+
+    /* allocate local memory */
+    SCIP_CALL(SCIPcreateSol(scip, &newsol, heur));
+
+    //call here the greedy construction
+    constructNewSol(scip, newsol);
+    exit(0);
+
+    return SCIP_OKAY;
+}
+
+/** solving process deinitialization method of primal heuristic (called before branch and bound process data is freed)
+ *
+ *  This method is called before the branch and bound process is freed.
+ *  The primal heuristic should use this call to clean up its branch and bound data.
+ */
+SCIP_DECL_HEUREXITSOL(HeurGreedyConstruction::scip_exitsol)
+{
+    return SCIP_OKAY;
+}
+
+
 SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
     SCIP *scip,
     SCIP_SOL *newsol)
@@ -512,7 +522,13 @@ SCIP_RETCODE HeurGreedyConstruction::constructNewSol(
 
     return SCIP_OKAY;
 }
-
+/**
+ * Some implementations of Edmond's algorithm to MSA
+ * https://github.com/nineisprime/optimal-branch
+ * http://lemon.cs.elte.hu/pub/doc/1.2.3/a00222.html
+ * https://github.com/asad/GraphMST/blob/master/src/algorithm/EdmondsChuLiu.java
+ * https://github.com/stjepang/snippets/blob/master/directed_mst.cpp 
+ */
 SCIP_DECL_HEUREXEC(HeurGreedyConstruction::scip_exec)
 {
     //cout << "SCIP_DECL_HEUREXEC\n";

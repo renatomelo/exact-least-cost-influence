@@ -187,7 +187,7 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
     // create empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP_with_all_variables", 0, 0, 0, 0, 0, 0, 0));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 1));
 
     // to show the branch and bound tree
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
@@ -305,18 +305,32 @@ bool CovModelAllVariables::run(GLCIPInstance &instance, GLCIPSolution &solution,
 
     if (SCIPgetStatus(scip) == SCIP_STATUS_TIMELIMIT)
     {
-        cout << "Reached time limit" << endl;
+        //cout << "Reached time limit" << endl;
+        printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip), 
+                                             SCIPgetNNodes(scip),
+                                             SCIPgetNContVars(scip), 
+                                             SCIPgetDualbound(scip), 
+                                             SCIPgetPrimalbound(scip),
+                                             SCIPgetGap(scip));
+
         return 0;
     }
 
+    printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip), 
+                                             SCIPgetNNodes(scip),
+                                             SCIPgetNContVars(scip),
+                                             SCIPgetDualbound(scip), 
+                                             SCIPgetPrimalbound(scip),
+                                             SCIPgetGap(scip));
+
     //std::cout << SCIPgetSolvingTime(scip) << std::endl;
     // Construct solution
-    CovModel::constructSoltion(scip, instance, solution, z, infSet);
+    /* CovModel::constructSoltion(scip, instance, solution, z, infSet);
 
     if (CovModel::isFeasible(instance, solution))
         std::cout << "The solution is feasible" << std::endl;
     else
-        std::cout << "The solution is NOT feasible" << std::endl;
+        std::cout << "The solution is NOT feasible" << std::endl; */
 
     return SCIP_OKAY;
 }

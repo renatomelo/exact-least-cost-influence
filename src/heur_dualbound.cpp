@@ -458,7 +458,6 @@ SCIP_RETCODE setRelaxedSol(
                 SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], SCIPgetVarSol(scip, z[a])));
         }
     }
-    // propagate in the graph using only the incentives selected in lowerBound()
 
     //TODO: if we found a strongly connected component add a cuting plane
 
