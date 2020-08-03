@@ -6,6 +6,7 @@
 #include "consarcmarker.h"
 #include "generalizedpropagationcons.h"
 #include "heur_mininfluence.h"
+#include "heur_dualbound.h"
 
 using namespace arcmarker;
 
@@ -611,9 +612,10 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
                                      &arcCons,
                                      &vertCons,
                                      &gpcRows);
-    SCIP_CALL(SCIPincludeObjHeur(scip,
-                                 primalHeur,
-                                 TRUE));
+    SCIP_CALL(SCIPincludeObjHeur(scip, primalHeur, TRUE));
+
+    //include combinatorial relaxation
+    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));
@@ -622,11 +624,11 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     {
         //cout << "Reached time limit" << endl;
         printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip), 
-                                             SCIPgetNNodes(scip),
-                                             SCIPgetNContVars(scip), 
-                                             SCIPgetDualbound(scip), 
-                                             SCIPgetPrimalbound(scip),
-                                             SCIPgetGap(scip));
+                                            SCIPgetNNodes(scip),
+                                            SCIPgetNContVars(scip), 
+                                            SCIPgetDualbound(scip), 
+                                            SCIPgetPrimalbound(scip),
+                                            SCIPgetGap(scip));
         return 0;
     }
 
@@ -634,12 +636,11 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     //cout << "time \tnodes \tdualbound \tprimalbound \tgap" << endl;
     printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip), 
-                                             SCIPgetNNodes(scip),
-                                             SCIPgetNContVars(scip), 
-                                             SCIPgetDualbound(scip), 
-                                             SCIPgetPrimalbound(scip),
-                                             SCIPgetGap(scip));
-
+                                            SCIPgetNNodes(scip),
+                                            SCIPgetNContVars(scip), 
+                                            SCIPgetDualbound(scip), 
+                                            SCIPgetPrimalbound(scip),
+                                            SCIPgetGap(scip));
     // Construct solution
     //constructSoltion(scip, instance, solution, z, infSet);
 

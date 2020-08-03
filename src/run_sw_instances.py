@@ -20,7 +20,7 @@ alphas.append(1)
 alphas.append(.5)
 alphas.append(.1)
 
-algorithms.append("arc")
+algorithms.append("arcwb")
 algorithms.append("covcg")
 algorithms.append("cov")
 

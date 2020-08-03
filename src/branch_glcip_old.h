@@ -10,6 +10,8 @@ private:
     GLCIPInstance&          instance;
     DNodeSCIPVarMap&        x;
     ArcSCIPVarMap&          z;
+    DNodeInfSetsMap&        infSet;
+    ArcBoolMap&             isAble;
 
 public:
     /** Constructs the branching rule object with the data needed */
@@ -18,8 +20,9 @@ public:
         const char*         p_name,         // name of branching rule
         GLCIPInstance&      p_instance,     // problem data
         DNodeSCIPVarMap&    p_x,
-        ArcSCIPVarMap&      p_z
-        //DNodeInfSetsMap&    p_inf_set       // influencing set data structure 
+        ArcSCIPVarMap&      p_z,
+        DNodeInfSetsMap&    p_inf_set,       // influencing set data structure 
+        ArcBoolMap&         p_isAble
     );
 
     // Destructs the branching rule object

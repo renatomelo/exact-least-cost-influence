@@ -4,18 +4,19 @@ HeurDualBound::HeurDualBound(
     SCIP *scip,
     GLCIPInstance &p_instance,
     DNodeSCIPVarMap &p_x,
-    ArcSCIPVarMap &p_z,
-    DNodeSCIPVarsMap &p_xip) : ObjRelax(scip,
-                                        "heuristic-dual-bound",
-                                        "Heuristic dual bound for GLCIP",
-                                        -1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
-                                        10,     //frequency for calling relaxator
-                                        FALSE), //Does the relaxator contain all cuts in the LP?
-                               instance(p_instance),
-                               x(p_x),
-                               z(p_z),
-                               xip(p_xip),
-                               sol_(NULL)
+    ArcSCIPVarMap &p_z
+    //DNodeSCIPVarsMap &p_xip
+    ) : ObjRelax(scip,
+                 "heuristic-dual-bound",
+                 "Heuristic dual bound for GLCIP",
+                 -1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
+                 10,     //frequency for calling relaxator
+                 FALSE), //Does the relaxator contain all cuts in the LP?
+        instance(p_instance),
+        x(p_x),
+        z(p_z),
+        //xip(p_xip),
+        sol_(NULL)
 {
 }
 
@@ -433,7 +434,7 @@ SCIP_RETCODE setRelaxedSol(
     GLCIPInstance &instance,
     DNodeSCIPVarMap &x,
     ArcSCIPVarMap &z,
-    DNodeSCIPVarsMap &xip,
+ //   DNodeSCIPVarsMap &xip,
     set<DNode> seeds)
 {
     //cout << "Setting LP relaxation solution, which improved upon earlier solution\n";

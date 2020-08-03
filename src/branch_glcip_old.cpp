@@ -8,15 +8,14 @@ ObjBranchruleGLCIP::ObjBranchruleGLCIP(
     const char *p_name,
     GLCIPInstance &p_instance,
     DNodeSCIPVarMap &p_x,
-    ArcSCIPVarMap &p_z) : ObjBranchrule(scip,
-                                          p_name,                      
-                                          "Defines the branching rule", // description
-                                          50000,    // priority
-                                          -1,       // maximal depth level (-1 for no limit)
-                                          1.0),     //maximal relative distance from current node's dual bound to primal bound
+    ArcSCIPVarMap &p_z,
+    DNodeInfSetsMap &p_inf_set,
+    ArcBoolMap &p_isAble) : ObjBranchrule(scip, p_name, "Defines the branching rule", 50000, -1, 1.0),
                             instance(p_instance),
                             x(p_x),
-                            z(p_z)
+                            z(p_z),
+                            infSet(p_inf_set),
+                            isAble(p_isAble)
 {
 }
 
@@ -24,15 +23,17 @@ ObjBranchruleGLCIP::~ObjBranchruleGLCIP() {}
 
 /* Local methods */
 /**
- * get the set of candidates vertices viable for multinode branching based on the constraint
+ * get the branching candidates viable for multinode branching
  */
 SCIP_RETCODE getBranchCands(
     SCIP *scip,
     GLCIPInstance &instance,
     ArcSCIPVarMap &z,
-    DNode **branchCands,     //the address of branching candidates
-    int *nCands                 //number of branching candidates
-    )
+    ArcIt *arcCands,
+    SCIP_VAR **branchCands,     //the address of branching candidates
+    SCIP_Real *branchCandsFrac, //pointer to fractionalities of the candidates
+    int *nCands,                //number of branching candidates
+    ArcBoolMap &isAble)
 {
     //std::cout << "getBranchCands() FUNCTION \n";
     // all arc variables that are in the LP, and have fractional values are viable candidates
@@ -52,11 +53,81 @@ SCIP_RETCODE getBranchCands(
 }
 
 /**
- * branch on a selected vertex based on its incoming arcs
+ * branch on a selected binary arc variable
  */
-SCIP_RETCODE branchOnVertexDegree(
+SCIP_RETCODE branchOnArcVar(
     SCIP *scip,
-    DNode **candidates,
+    SCIP_VAR **candidates,
+    SCIP_Real *branchCandsFrac,
+    int nCands,
+    SCIP_RESULT *result //pointer to store result of branching
+)
+{
+    /* SCIP_Real priority;
+    SCIP_Real estimate;
+    SCIP_NODE *leftChild;
+    SCIP_NODE *rightChild;
+
+    // check all candidates
+    for (int i = 0; i < nCands; i++)
+    {
+        if (SCIPvarGetStatus(candidates[i]) == SCIP_VARSTATUS_LOOSE ||
+            SCIPvarGetStatus(candidates[i]) == SCIP_VARSTATUS_COLUMN &&
+                !SCIPisZero(scip, SCIPvarGetLPSol(z[arc])) && !SCIPisEQ(scip, SCIPvarGetSol(z[arc], 1.0)))
+        {
+            priority = SCIPcalcNodeselPriority(scip, candidates[i], SCIP_BRANCHDIR_UPWARDS, 1.0);
+            estimate = SCIPcalcChildEstimate(scip, candidates[i], 1.0);
+            tmp = SCIPcalcChildEstimate(scip, candidates[i], 0);
+            minestzero = MIN(tmp, minestzero);
+
+            // branch all viable candidates
+            SCIP_CALL(SCIPcreateChild(scip, &node, priority, estimate));
+            SCIP_CALL(SCIPchgVarLbNode(scip, node, candidates[i], 1.0));
+
+            branched = TRUE;
+            *result = SCIP_BRANCHED;
+        }
+    } */
+
+    // variables for finding the most fractional column
+    double fractionality;
+    double bestFractionality;
+
+    int bestCand = -1;
+
+    // search the least fractional candidate
+    bestFractionality = 1;
+    for (int i = 0; i < nCands; i++)
+    {
+        assert(candidates[i] != NULL);
+        fractionality = branchCandsFrac[i];
+        fractionality = min(fractionality, 1 - fractionality);
+
+        if (fractionality < bestFractionality)
+        {
+            bestFractionality = fractionality;
+            bestCand = i;
+        }
+    }
+
+    assert(bestCand >= 0);
+    assert(SCIPisFeasPositive(scip, bestFractionality));
+
+    /* SCIPinfoMessage(scip, NULL, " -> %d candidates, selected candidate %d: variable <%s> (frac=%g, factor=%g)\n",
+                    nCands, bestCand, SCIPvarGetName(candidates[bestCand]), branchCandsFrac[bestCand],
+                    SCIPvarGetBranchFactor(candidates[bestCand])); */
+
+    // perform the branching
+    SCIP_CALL(SCIPbranchVar(scip, candidates[bestCand], NULL, NULL, NULL));
+    *result = SCIP_BRANCHED;
+
+    return SCIP_OKAY;
+}
+
+SCIP_RETCODE branchOnArcVar2(
+    SCIP *scip,
+    SCIP_VAR **candidates,
+    ArcIt *arcCands,
     SCIP_Real *branchCandsFrac,
     int nCands,
     SCIP_RESULT *result //pointer to store result of branching
@@ -67,28 +138,48 @@ SCIP_RETCODE branchOnVertexDegree(
     SCIP_CONS *consWith;
     SCIP_CONS *consWithout;
 
-    //std::cout << "branchOnVertexDegree()\n";
+    //std::cout << "branchOnArcVar2 FUNCTION \n";
 
-    // search the best candidate (criterion to be defined)
+    // variables for finding the most fractional column
+    double fractionality;
+    double bestFractionality;
 
-    // chosen vertex
-    DNode best;
+    int bestCand = -1;
+
+    // search the least fractional candidate
+    bestFractionality = 1;
+    for (int i = 0; i < nCands; i++)
+    {
+        assert(candidates[i] != NULL);
+        fractionality = branchCandsFrac[i];
+
+        if (fractionality < bestFractionality)
+        {
+            bestFractionality = fractionality;
+            bestCand = i;
+        }
+    }
+
+    assert(bestCand >= 0);
+    assert(SCIPisFeasPositive(scip, bestFractionality));
+
+    ArcIt arc = arcCands[bestCand];
 
     /* SCIPinfoMessage(scip, NULL, "-> %d candidates, selected candidate: variable <%s> (frac=%g, factor=%g)\n",
                     nCands, SCIPvarGetName(candidates[bestCand]),
                     branchCandsFrac[bestCand], SCIPvarGetBranchFactor(candidates[bestCand])); */
 
-    // perform the branching (If the sum is fractional, create two child nodes. Otherwise, create three child nodes)
+    // perform the branching
     // create the branch-and-bound tree child nodes of the current node
     SCIP_CALL(SCIPcreateChild(scip, &leftChild, 0, SCIPgetLocalTransEstimate(scip)));
     SCIP_CALL(SCIPcreateChild(scip, &rightChild, 0, SCIPgetLocalTransEstimate(scip)));
 
     //std::cout << "creating the constraint handlers \n";
     // create corresponding constraints
-    SCIP_CALL(createConsArcMarker(scip, &consWith, "upper", candidates[bestCand],
-                                  best, UPPERBOUND, rightChild));
-    SCIP_CALL(createConsArcMarker(scip, &consWithout, "lower", candidates[bestCand],
-                                  best, LOWERBOUND, leftChild));
+    SCIP_CALL(createConsArcMarker(scip, &consWith, "with", candidates[bestCand],
+                                  arc, WITH, rightChild));
+    SCIP_CALL(createConsArcMarker(scip, &consWithout, "without", candidates[bestCand],
+                                  arc, WITHOUT, leftChild));
 
     // add constraints to nodes
 
@@ -113,7 +204,7 @@ SCIP_RETCODE branchOnVertexDegree(
  */
 SCIP_DECL_BRANCHEXECLP(ObjBranchruleGLCIP::scip_execlp)
 {
-    /*     cout << "vars able to be branched" << endl;
+/*     cout << "vars able to be branched" << endl;
     for (ArcIt a(instance.g); a != INVALID; ++a)
     {
         if (isAble[a])
@@ -141,6 +232,7 @@ SCIP_DECL_BRANCHEXECLP(ObjBranchruleGLCIP::scip_execlp)
     // perform the branching
     //SCIP_CALL(branchOnArcVar2(scip, candidates, arcCands, fractionalitiesCands, nCands, result));
     SCIP_CALL(branchOnArcVar(scip, candidates, fractionalitiesCands, nCands, result));
+
 
     // free memory
     SCIPfreeBufferArray(scip, &arcCands);

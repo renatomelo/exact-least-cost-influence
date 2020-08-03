@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 void readCheckParams(Params &params, int argc, char *argv[])
 {
     params.alg = "";
-    params.timeLimit = 120;
+    params.timeLimit = 300;
     params.inputFile = "";
     params.graph = false;
     params.alpha = 0.5;

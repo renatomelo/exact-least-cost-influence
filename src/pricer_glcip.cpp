@@ -197,7 +197,7 @@ SCIP_DECL_PRICERREDCOST(ObjPricerGLCIP::scip_redcost)
  */
 SCIP_DECL_PRICERFARKAS(ObjPricerGLCIP::scip_farkas)
 {
-   std::cout << "PRICERFARKAS()\n";
+   //std::cout << "PRICERFARKAS()\n";
 
    //SCIP_CALL(SCIPwriteTransProblem(scip, "glcip_transformed.lp", "lp", FALSE));
    /* call pricing routine */

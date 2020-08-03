@@ -3,7 +3,6 @@
 #include "heur_ordering.h"
 #include "heur_greedy_construction.h"
 
-
 bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     //SCIP variables and initialization
@@ -16,7 +15,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 1));
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
 
     SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
@@ -104,12 +103,12 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     /* HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
     SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE)); */
 
-     //primal heuristic
-    HeurGreedyConstruction *greedy = new HeurGreedyConstruction(scip, instance, x, z, xip);
-    SCIP_CALL(SCIPincludeObjHeur(scip, greedy, TRUE));
+    //primal heuristic
+    //HeurGreedyConstruction *greedy = new HeurGreedyConstruction(scip, instance, x, z, xip);
+    //SCIP_CALL(SCIPincludeObjHeur(scip, greedy, TRUE));
 
     //include combinatorial relaxation
-    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z, xip), TRUE));
+    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
@@ -122,22 +121,22 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //reached time limit
     if (SCIPgetStatus(scip) == SCIP_STATUS_TIMELIMIT)
     {
-        cout << "reached time limit" << endl;
-        printf("%.2lf \t%lld \t%lf \t%lf \t%.2lf\n", SCIPgetSolvingTime(scip), 
-                                             SCIPgetNNodes(scip), 
-                                             SCIPgetDualbound(scip), 
-                                             SCIPgetPrimalbound(scip),
-                                             SCIPgetGap(scip));
+        printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip),
+               SCIPgetNNodes(scip),
+               SCIPgetNContVars(scip),
+               SCIPgetDualbound(scip),
+               SCIPgetPrimalbound(scip),
+               SCIPgetGap(scip));
         return 0;
     }
 
     //cout << "time \tnodes \tdualbound \tprimalbound \tgap" << endl;
-    printf("%.2lf \t%lld \t%lf \t%lf \t%.2lf\n", SCIPgetSolvingTime(scip), 
-                                             SCIPgetNNodes(scip), 
-                                             SCIPgetDualbound(scip), 
-                                             SCIPgetPrimalbound(scip),
-                                             SCIPgetGap(scip));
-
+    printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip),
+           SCIPgetNNodes(scip),
+           SCIPgetNContVars(scip),
+           SCIPgetDualbound(scip),
+           SCIPgetPrimalbound(scip),
+           SCIPgetGap(scip));
 
     return SCIP_OKAY;
 }
