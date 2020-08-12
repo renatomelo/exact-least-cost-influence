@@ -3,12 +3,12 @@
 #include "pricer_glcip.h"
 #include "branch_glcip.h"
 #include "event_glcip.h"
-#include "consarcmarker.h"
+#include "degreecons.h"
 #include "generalizedpropagationcons.h"
 #include "heur_mininfluence.h"
 #include "heur_dualbound.h"
 
-using namespace arcmarker;
+using namespace degreecons;
 
 /**
  * Add to the model the influencing-set variables considering no incoming
@@ -588,14 +588,14 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
 
-    /* ConshdlrArcMarker *arcMarker = new ConshdlrArcMarker(scip, instance, z, x);
-    SCIP_CALL(SCIPincludeObjConshdlr(scip, arcMarker, TRUE));
+    DegreeCons *degCons = new DegreeCons(scip, instance, z, x);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, degCons, TRUE));
 
     //include branching rule
-    static const char *BRANCH_NAME = "GLCIP_branch";
-    ObjBranchruleGLCIP *branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, x, z, infSet, isAble);
+    static const char *BRANCH_NAME = "branching-rule";
+    ObjBranchruleGLCIP *branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, x, z);
 
-    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE)); */
+    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE));
     //end of branching rule
 
     // include event handler pluging

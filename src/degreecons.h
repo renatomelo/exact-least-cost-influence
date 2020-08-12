@@ -2,6 +2,7 @@
 #define __SCIP_CONSHDLRARCMARKER_H__
 
 #include "GLCIPBase.h"
+#include <string>
 
 #define CONSHDLR_NAME "degree-constraint-handler"
 
@@ -22,6 +23,7 @@ private:
     GLCIPInstance &instance;
     ArcSCIPVarMap &z; /**< map of arc variables */
     DNodeSCIPVarMap &x;
+    DNodeInfSetsMap &infSet;
 
 public:
     // default constructor
@@ -29,7 +31,8 @@ public:
         SCIP *scip,
         GLCIPInstance &p_instance,
         ArcSCIPVarMap &p_z, /**< map of arc variables */
-        DNodeSCIPVarMap &p_x
+        DNodeSCIPVarMap &p_x,
+        DNodeInfSetsMap &p_infSet
         ) : ObjConshdlr(scip,
                         CONSHDLR_NAME,                         //name
                         "stores the local branching decision", //description
@@ -47,7 +50,8 @@ public:
                         SCIP_PRESOLTIMING_FAST),               //presolving timing
             instance(p_instance),
             z(p_z),
-            x(p_x)
+            x(p_x),
+            infSet(p_infSet)
     {
     }
 
@@ -67,6 +71,7 @@ public:
     virtual SCIP_DECL_CONSDELVARS(scip_delvars);
     //virtual SCIP_DECL_CONSCOPY(scip_copy);
     virtual SCIP_DECL_CONSCHECK(scip_check);
+    virtual SCIP_DECL_CONSPRINT(scip_print);
 
     CONSTYPE getTypeArcMarker(SCIP *scip, SCIP_CONS *cons);
     Arc getArc(SCIP *scip, SCIP_CONS *cons);

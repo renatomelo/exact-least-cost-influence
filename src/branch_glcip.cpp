@@ -1,7 +1,7 @@
 #include "branch_glcip.h"
-#include "consarcmarker.h"
+#include "degreecons.h"
 
-using namespace arcmarker;
+using namespace degreecons;
 
 ObjBranchruleGLCIP::ObjBranchruleGLCIP(
     SCIP *scip,
@@ -24,26 +24,37 @@ ObjBranchruleGLCIP::~ObjBranchruleGLCIP() {}
 
 /* Local methods */
 /**
- * get the set of candidates vertices viable for multinode branching based on the constraint
+ * get the set of candidate vertices viable for multinode branching based on the constraint
  */
 SCIP_RETCODE getBranchCands(
     SCIP *scip,
     GLCIPInstance &instance,
+    DNodeSCIPVarMap& x,
     ArcSCIPVarMap &z,
-    DNode **branchCands,     //the address of branching candidates
+    DNode *branchCands,     //the address of branching candidates
+    SCIP_Real *branchCandsFrac,
     int *nCands                 //number of branching candidates
     )
 {
-    //std::cout << "getBranchCands() FUNCTION \n";
-    // all arc variables that are in the LP, and have fractional values are viable candidates
-    for (ArcIt a(instance.g); a != INVALID; ++a)
+    std::cout << "getBranchCands() FUNCTION \n";
+    // all the vertices in which the sum of incoming arcs' weights is fractional in the LP solution are viable candidates
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        if (isAble[a] && !SCIPisFeasIntegral(scip, SCIPvarGetLPSol(z[a])))
-        //if (!SCIPisFeasIntegral(scip, SCIPvarGetLPSol(z[a])))
+        //skip the vertex variables fixed in zero
+        if (SCIPisEQ(scip, SCIPvarGetUbLocal(x[v]), 0))
+            continue;
+
+        double sum = 0;
+        for (InArcIt a(instance.g, v); a != INVALID; ++a)
         {
-            (branchCands)[*nCands] = z[a];
-            (arcCands)[*nCands] = a;
-            (branchCandsFrac)[*nCands] = MAX(1 - SCIPvarGetLPSol(z[a]), SCIPvarGetLPSol(z[a]));
+            sum += SCIPvarGetLPSol(z[a]);
+        }
+
+        if (!SCIPisFeasIntegral(scip, sum))
+        {
+            //cout << "sum of " << instance.nodeName[v] << ": " << sum << endl;
+            (branchCands)[*nCands] = v;
+            (branchCandsFrac)[*nCands] = MAX(1 - sum, sum);
             (*nCands)++;
         }
     }
@@ -56,7 +67,8 @@ SCIP_RETCODE getBranchCands(
  */
 SCIP_RETCODE branchOnVertexDegree(
     SCIP *scip,
-    DNode **candidates,
+    GLCIPInstance &instance,
+    DNode *candidates,
     SCIP_Real *branchCandsFrac,
     int nCands,
     SCIP_RESULT *result //pointer to store result of branching
@@ -64,19 +76,32 @@ SCIP_RETCODE branchOnVertexDegree(
 {
     SCIP_NODE *leftChild;
     SCIP_NODE *rightChild;
-    SCIP_CONS *consWith;
-    SCIP_CONS *consWithout;
+    SCIP_CONS *consUpper;
+    SCIP_CONS *consLower;
 
-    //std::cout << "branchOnVertexDegree()\n";
+    std::cout << "branchOnVertexDegree()\n";
+    //cout << "number of candidates: " << nCands << endl;
 
-    // search the best candidate (criterion to be defined)
+    // search the best candidate
+    // the vertex with greatest sum of incoming arcs' weights among the candidates
+    double maximum = branchCandsFrac[0];
+    int bestCand = 0;
+    for (int i = 1; i < nCands; i++)
+    {
+        if(maximum < branchCandsFrac[i])
+        {
+            maximum = branchCandsFrac[i];
+            bestCand = i;
+        }
+    }
+
+   //cout << "best candidate: " << instance.nodeName[candidates[bestCand]] << ", value "<< branchCandsFrac[bestCand] << endl;
 
     // chosen vertex
-    DNode best;
+    //DNode vertex = candidates[bestCand];
 
-    /* SCIPinfoMessage(scip, NULL, "-> %d candidates, selected candidate: variable <%s> (frac=%g, factor=%g)\n",
-                    nCands, SCIPvarGetName(candidates[bestCand]),
-                    branchCandsFrac[bestCand], SCIPvarGetBranchFactor(candidates[bestCand])); */
+    cout << "branching on vertex " << instance.nodeName[candidates[bestCand]] 
+         << " with fractional degree sum = " << branchCandsFrac[bestCand] << endl;
 
     // perform the branching (If the sum is fractional, create two child nodes. Otherwise, create three child nodes)
     // create the branch-and-bound tree child nodes of the current node
@@ -85,19 +110,17 @@ SCIP_RETCODE branchOnVertexDegree(
 
     //std::cout << "creating the constraint handlers \n";
     // create corresponding constraints
-    SCIP_CALL(createConsArcMarker(scip, &consWith, "upper", candidates[bestCand],
-                                  best, UPPERBOUND, rightChild));
-    SCIP_CALL(createConsArcMarker(scip, &consWithout, "lower", candidates[bestCand],
-                                  best, LOWERBOUND, leftChild));
+    SCIP_CALL(createDegreeCons(scip, &consUpper, "upper", candidates[bestCand], UPPERBOUND, rightChild));
+    SCIP_CALL(createDegreeCons(scip, &consLower, "lower", candidates[bestCand], LOWERBOUND, leftChild));
 
     // add constraints to nodes
 
-    SCIP_CALL(SCIPaddConsNode(scip, rightChild, consWith, NULL));
-    SCIP_CALL(SCIPaddConsNode(scip, leftChild, consWithout, NULL));
+    SCIP_CALL(SCIPaddConsNode(scip, rightChild, consUpper, NULL));
+    SCIP_CALL(SCIPaddConsNode(scip, leftChild, consLower, NULL));
 
     // release constraints
-    SCIP_CALL(SCIPreleaseCons(scip, &consWithout));
-    SCIP_CALL(SCIPreleaseCons(scip, &consWith));
+    SCIP_CALL(SCIPreleaseCons(scip, &consUpper));
+    SCIP_CALL(SCIPreleaseCons(scip, &consLower));
 
     *result = SCIP_BRANCHED;
 
@@ -113,40 +136,29 @@ SCIP_RETCODE branchOnVertexDegree(
  */
 SCIP_DECL_BRANCHEXECLP(ObjBranchruleGLCIP::scip_execlp)
 {
-    /*     cout << "vars able to be branched" << endl;
-    for (ArcIt a(instance.g); a != INVALID; ++a)
-    {
-        if (isAble[a])
-        {
-            DNode u = instance.g.source(a);
-            DNode v = instance.g.target(a);
-            cout << "(" << instance.nodeName[u] << "," << instance.nodeName[v] << ")\n";
-        }
-    } */
-    //std::cout << "---------- BRANCHING ----------\n";
-    //SCIPinfoMessage(scip, NULL, "Start branching at node %" SCIP_LONGINT_FORMAT ", depth %d\n", SCIPgetNNodes(scip), SCIPgetDepth(scip));
-    SCIP_VAR **candidates;        // candidates for branching
+    std::cout << "---------- BRANCHING ----------\n";
+    printf("Start branching at node %" SCIP_LONGINT_FORMAT ", depth %d\n", SCIPgetNNodes(scip), SCIPgetDepth(scip));
+    DNode *candidates;        // candidates for branching
     double *fractionalitiesCands; // fractionalities of candidates
     int nCands = 0;               // length of array
-    ArcIt *arcCands;
 
-    SCIP_CALL(SCIPallocClearBufferArray(scip, &arcCands, instance.m));
-    SCIP_CALL(SCIPallocClearBufferArray(scip, &candidates, instance.m));
-    SCIP_CALL(SCIPallocClearBufferArray(scip, &fractionalitiesCands, instance.m));
+    SCIP_CALL(SCIPallocClearBufferArray(scip, &candidates, instance.n));
+    SCIP_CALL(SCIPallocClearBufferArray(scip, &fractionalitiesCands, instance.n));
+
     // get branching candidates
-    SCIP_CALL(getBranchCands(scip, instance, z, arcCands, candidates, fractionalitiesCands, &nCands, isAble));
+    SCIP_CALL(getBranchCands(scip, instance, x, z, candidates, fractionalitiesCands, &nCands));
     assert(nCands > 0);
+    
     *result = SCIP_DIDNOTRUN;
 
-    // perform the branching
-    //SCIP_CALL(branchOnArcVar2(scip, candidates, arcCands, fractionalitiesCands, nCands, result));
-    SCIP_CALL(branchOnArcVar(scip, candidates, fractionalitiesCands, nCands, result));
+    if (nCands > 0)
+        // perform the branching
+        SCIP_CALL(branchOnVertexDegree(scip, instance, candidates, fractionalitiesCands, nCands, result));
 
     // free memory
-    SCIPfreeBufferArray(scip, &arcCands);
     SCIPfreeBufferArray(scip, &candidates);
     SCIPfreeBufferArray(scip, &fractionalitiesCands);
 
-    //std::cout << "---------- BRANCHED SUCCESFULLY ----------\n\n";
+    std::cout << "---------- BRANCHED SUCCESFULLY ----------\n\n";
     return SCIP_OKAY;
 }
