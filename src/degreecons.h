@@ -82,6 +82,7 @@ SCIP_RETCODE createDegreeCons(
     SCIP_CONS **cons,
     const char *name,
     DNode& vertex,
+    int bound,
     CONSTYPE type,
     SCIP_NODE *node);
 

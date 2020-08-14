@@ -102,6 +102,9 @@ SCIP_RETCODE branchOnVertexDegree(
 
     cout << "branching on vertex " << instance.nodeName[candidates[bestCand]] 
          << " with fractional degree sum = " << branchCandsFrac[bestCand] << endl;
+    
+    double d = branchCandsFrac[bestCand];
+    cout << "d = " << d << endl;
 
     // perform the branching (If the sum is fractional, create two child nodes. Otherwise, create three child nodes)
     // create the branch-and-bound tree child nodes of the current node
@@ -110,8 +113,10 @@ SCIP_RETCODE branchOnVertexDegree(
 
     //std::cout << "creating the constraint handlers \n";
     // create corresponding constraints
-    SCIP_CALL(createDegreeCons(scip, &consUpper, "upper", candidates[bestCand], UPPERBOUND, rightChild));
-    SCIP_CALL(createDegreeCons(scip, &consLower, "lower", candidates[bestCand], LOWERBOUND, leftChild));
+    SCIP_CALL(createDegreeCons(scip, &consUpper, "upper", candidates[bestCand], 
+                                floor(d), UPPERBOUND, rightChild));
+    SCIP_CALL(createDegreeCons(scip, &consLower, "lower", candidates[bestCand], 
+                                ceil(d), LOWERBOUND, leftChild));
 
     // add constraints to nodes
 

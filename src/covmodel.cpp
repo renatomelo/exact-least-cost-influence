@@ -588,7 +588,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
 
-    DegreeCons *degCons = new DegreeCons(scip, instance, z, x);
+    DegreeCons *degCons = new DegreeCons(scip, instance, z, x, infSet);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, degCons, TRUE));
 
     //include branching rule

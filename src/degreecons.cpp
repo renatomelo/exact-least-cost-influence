@@ -6,6 +6,7 @@ using namespace degreecons;
 struct SCIP_ConsData
 {
     DNode vertex;
+    int bound;                   // the right-hand side of the constraint \sum_{a \in N} z[a] <= d
     int nPropagatedVars;         /* number of variables that existed, the last time,
                                   *  the related node was propagated, used to determine
                                   *  whether the constraint should be repropagated */
@@ -19,6 +20,7 @@ SCIP_RETCODE createConsData(
     SCIP *scip,
     SCIP_CONSDATA **consdata, //pointer to store the constraint data
     DNode &vertex,
+    int bound,
     CONSTYPE type,   //stores whether the arc have to be in the solution or not
     SCIP_NODE *node) //the node in the B&B-tree at which the cons is sticking
 {
@@ -29,6 +31,7 @@ SCIP_RETCODE createConsData(
 
     SCIP_CALL(SCIPallocBlockMemory(scip, consdata));
     (*consdata)->vertex = vertex;
+    (*consdata)->bound = bound;
     (*consdata)->type = type;
     (*consdata)->nPropagatedVars = 0;
     (*consdata)->nPropagations = 0;
@@ -55,41 +58,50 @@ void printConsData(SCIP_CONSDATA *consdata)
               << type << std::endl;
 }
 
-/**
- * fixes variables
- * TODO: probably in this function I need to create a copy of the graph and remove edges
+/** 
+ * fixes a variable to zero if the corresponding influencing-sets are not valid for this 
+ * constraint/node (due to branching) 
  */
 SCIP_RETCODE checkVariable(
     SCIP *scip,
     GLCIPInstance &instance,
-    DNodeSCIPVarMap &x,
     SCIP_CONSDATA *consdata, // constraint data
+    InfluencingSet &ifs,     // variables to check
     int *nFixedVars,         // pointer to store the number of fixed variables
     SCIP_Bool *cuttoff       // pointer to store if a cutoff was detected
 )
 {
-    //std::cout << "checkVariable() function\n";
-    /* SCIP_Bool fixed;
+    std::cout << "checkVariable() function\n";
+    SCIP_Bool fixed;
     SCIP_Bool infeasible;
 
+    assert(scip != NULL);
     assert(consdata != NULL);
+    assert(ifs != NULL);
     assert(nFixedVars != NULL);
     assert(cuttoff != NULL);
 
+    //cout << "checking variable " << SCIPvarGetName(ifs.getVar()) << endl;
     // if variables is locally fixed to zero continue
-    if (SCIPvarGetUbLocal(var) < 0.5)
+    if (SCIPvarGetUbLocal(ifs.getVar()) < 0.5)
         return SCIP_OKAY;
 
-    //check if the arc which corresponds to the varialbe is feasible for this constraint
-    if (consdata->type == WITHOUT)
+    //check if the influencing-set which corresponds to the varialbe is feasible for this constraint
+    int size = ifs.getNodes().size();
+    int bound = consdata->bound;
+    CONSTYPE type = consdata->type;
+
+    if ((type == LOWERBOUND && size < bound) ||
+        (type == UPPERBOUND && size > bound) ||
+        (type == FIXEDSIZE && size != bound))
     {
-        SCIP_CALL(SCIPfixVar(scip, var, 0.0, &infeasible, &fixed));
-        //std::cout << "both bounds of variable " << SCIPvarGetName(var) << " are set to 0\n";
+        SCIP_CALL(SCIPfixVar(scip, ifs.getVar(), 0.0, &infeasible, &fixed));
+        //std::cout << "variable " << SCIPvarGetName(ifs.getVar()) << " fixed in 0\n";
 
         if (infeasible)
         {
             std::cout << "IS INFEASIBLE\n";
-            assert(SCIPvarGetLbLocal(var) > 0.5);
+            assert(SCIPvarGetLbLocal(ifs.getVar()) > 0.5);
             SCIPinfoMessage(scip, NULL, "-> cutoff\n");
             (*cuttoff) = TRUE;
         }
@@ -99,25 +111,6 @@ SCIP_RETCODE checkVariable(
             (*nFixedVars)++;
         }
     }
-    // otherwise the variable is in the solution
-    else
-    {
-        SCIP_CALL(SCIPfixVar(scip, var, 1.0, &infeasible, &fixed));
-        // fix the variable x_i to 1 meaning that the source(arc) is active
-
-        if (infeasible)
-        {
-            std::cout << "IS INFEASIBLE\n";
-            assert(SCIPvarGetLbLocal(var) < 0.5);
-            SCIPinfoMessage(scip, NULL, "-> cutoff\n");
-            (*cuttoff) = TRUE;
-        }
-        else
-        {
-            assert(fixed);
-            (*nFixedVars)++;
-        }
-    } */
 
     return SCIP_OKAY;
 }
@@ -129,23 +122,22 @@ SCIP_RETCODE checkVariable(
 SCIP_RETCODE fixVariables(
     SCIP *scip,
     GLCIPInstance &instance,
-    DNodeSCIPVarMap &x,
     DNodeInfSetsMap &infSet,
     SCIP_CONSDATA *consdata,
+    int nVars,
     SCIP_RESULT *result)
 {
     int nFixedVars = 0;
     SCIP_Bool cutoff = FALSE;
-    int nvars;
-    cout << "HERE\n";
-    cout << infSet[consdata->vertex].size() << endl;
-    //nvars = infSet[].size();
-    cout << "TESTE\n";
-    printf("check variables %d to %d\n", consdata->nPropagatedVars, nvars);
-    SCIP_CALL(checkVariable(scip, instance, x, consdata, &nFixedVars, &cutoff));
-    exit(0);
 
-    //SCIPinfoMessage(scip, NULL, "variable locally fixed\n");
+    DNode v = consdata->vertex;
+
+    printf("check variables %d to %d\n", consdata->nPropagatedVars, nVars);
+
+    for (int i = consdata->nPropagatedVars; i < nVars; i++)
+        SCIP_CALL(checkVariable(scip, instance, consdata, infSet[v][i], &nFixedVars, &cutoff));
+
+    printf("fixed %d variables locally\n", nFixedVars);
 
     if (cutoff)
         *result = SCIP_CUTOFF;
@@ -223,7 +215,8 @@ SCIP_DECL_CONSTRANS(DegreeCons::scip_trans)
 
     //create constraint data for the target constraint
     SCIP_CALL(
-        createConsData(scip, &targetdata, sourcedata->vertex, sourcedata->type, sourcedata->node));
+        createConsData(scip, &targetdata, sourcedata->vertex, sourcedata->bound,
+                       sourcedata->type, sourcedata->node));
 
     //create target constraint
     SCIP_CALL(
@@ -245,7 +238,7 @@ SCIP_DECL_CONSPROP(DegreeCons::scip_prop)
 {
     cout << "SCIP_DECL_CONSPROP" << endl;
     SCIP_CONSDATA *consdata;
-    //int nVars = instance.m;
+    int nVars = 0;
 
     assert(scip != NULL);
     assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
@@ -272,11 +265,16 @@ SCIP_DECL_CONSPROP(DegreeCons::scip_prop)
             std::cout << "propagate constraint <" << SCIPconsGetName(conss[i]) << ">:";
             printConsData(consdata);
 
-            SCIP_CALL(fixVariables(scip, instance, x, infSet, consdata, result));
+            nVars = infSet[consdata->vertex].size();
+
+            SCIP_CALL(fixVariables(scip, instance, infSet, consdata, nVars, result));
             consdata->nPropagations++;
 
             if (*result != SCIP_CUTOFF)
+            {
                 consdata->propagated = TRUE;
+                consdata->nPropagatedVars = nVars;
+            }
             else
                 break;
         }
@@ -304,20 +302,21 @@ SCIP_DECL_CONSACTIVE(DegreeCons::scip_active)
 
     consdata = SCIPconsGetData(cons);
     assert(consdata != NULL);
-    //assert(consdata->nPropagatedVars <= instance.m);
+    assert(consdata->nPropagatedVars <= infSet[consdata->vertex].size());
 
-    std::cout << "activate constraint <" << SCIPconsGetName(cons) << "> at node <"
+    std::cout << "activate constraint <" << SCIPconsGetName(cons) << "> on vertex <"
+              << instance.nodeName[consdata->vertex] << "> at node <"
               << SCIPnodeGetNumber(consdata->node) << "> in depth <"
               << SCIPnodeGetDepth(consdata->node) << ">: ";
     printConsData(consdata);
 
     //std::cout << "number of propagated variables: " << consdata->nPropagatedVars << std::endl;
-    /*  if (consdata->nPropagatedVars != instance.m)
-    { */
-    /*  SCIPinfoMessage(scip, NULL, "-> mark constraint to be repropagated\n");
-     consdata->propagated = FALSE;
-     SCIP_CALL(SCIPrepropagateNode(scip, consdata->node)); */
-    //}
+    if (consdata->nPropagatedVars != (int) infSet[consdata->vertex].size())
+    {
+        SCIPinfoMessage(scip, NULL, "-> mark constraint to be repropagated\n");
+        consdata->propagated = FALSE;
+        SCIP_CALL(SCIPrepropagateNode(scip, consdata->node));
+    }
 
     return SCIP_OKAY;
 }
@@ -344,6 +343,9 @@ SCIP_DECL_CONSDEACTIVE(DegreeCons::scip_deactive)
               << SCIPnodeGetNumber(consdata->node) << "> in depth <"
               << SCIPnodeGetDepth(consdata->node) << ">: ";
     printConsData(consdata);
+
+    /* set the number of propagated variables to current number of variables in SCIP */
+    consdata->nPropagatedVars = infSet[consdata->vertex].size();
 
     return SCIP_OKAY;
 }
@@ -377,6 +379,7 @@ SCIP_RETCODE degreecons::createDegreeCons(
     SCIP_CONS **cons,
     const char *name,
     DNode &vertex,
+    int bound,
     CONSTYPE type,
     SCIP_NODE *node)
 {
@@ -392,8 +395,9 @@ SCIP_RETCODE degreecons::createDegreeCons(
         SCIPerrorMessage("degree constraint handler not found\n");
         return SCIP_PLUGINNOTFOUND;
     }
+
     // create constraint data
-    SCIP_CALL(createConsData(scip, &consdata, vertex, type, node));
+    SCIP_CALL(createConsData(scip, &consdata, vertex, bound, type, node));
 
     //create constraint
     SCIP_CALL(
