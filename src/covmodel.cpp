@@ -470,7 +470,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // create empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP_Column_Generation", 0, 0, 0, 0, 0, 0, 0));
 
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 0));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
 
     // to show the branch and bound tree
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
@@ -590,6 +590,11 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     DegreeCons *degCons = new DegreeCons(scip, instance, z, x, infSet);
     SCIP_CALL(SCIPincludeObjConshdlr(scip, degCons, TRUE));
+
+    /* SCIP_CONS *cons2;
+    SCIP_CALL(createDegreeCons2(scip, &cons2, "degree-constraint-handler"));
+    SCIP_CALL(SCIPaddCons(scip, cons2));
+    SCIP_CALL(SCIPreleaseCons(scip, &cons2)); */
 
     //include branching rule
     static const char *BRANCH_NAME = "branching-rule";

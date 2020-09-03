@@ -14,6 +14,7 @@ struct SCIP_ConsData
     int nPropagations;           // stores the number propagations runs of this constraint
     unsigned int propagated : 1; // is constraint already propagated?
     SCIP_NODE *node;             // the node in the B&B-tree at which the cons is sticking
+    SCIP_Bool added;
 };
 
 SCIP_RETCODE createConsData(
@@ -37,6 +38,7 @@ SCIP_RETCODE createConsData(
     (*consdata)->nPropagations = 0;
     (*consdata)->propagated = FALSE;
     (*consdata)->node = node;
+    (*consdata)->added = FALSE;
 
     return SCIP_OKAY;
 }
@@ -71,7 +73,7 @@ SCIP_RETCODE checkVariable(
     SCIP_Bool *cuttoff       // pointer to store if a cutoff was detected
 )
 {
-    std::cout << "checkVariable() function\n";
+    //std::cout << "checkVariable() function\n";
     SCIP_Bool fixed;
     SCIP_Bool infeasible;
 
@@ -166,6 +168,171 @@ SCIP_Bool checkConsData(
     return TRUE;
 }
 
+/* Local methods */
+/**
+ * get the set of candidate vertices viable for multinode branching based on the constraint
+ */
+SCIP_RETCODE getBranchCands(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    DNodeSCIPVarMap &x,
+    ArcSCIPVarMap &z,
+    DNode *branchCands, //the address of branching candidates
+    SCIP_Real *branchCandsFrac,
+    int *nCands //number of branching candidates
+)
+{
+    std::cout << "getBranchCands() FUNCTION \n";
+    // all the vertices in which the sum of incoming arcs' weights is fractional in the LP solution are viable candidates
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        //skip the vertex variables fixed in zero
+        if (SCIPisEQ(scip, SCIPvarGetUbLocal(x[v]), 0))
+            continue;
+
+        double sum = 0;
+        for (InArcIt a(instance.g, v); a != INVALID; ++a)
+        {
+            sum += SCIPvarGetLPSol(z[a]);
+        }
+
+        if (!SCIPisFeasIntegral(scip, sum))
+        {
+            //cout << "sum of " << instance.nodeName[v] << ": " << sum << endl;
+            (branchCands)[*nCands] = v;
+            (branchCandsFrac)[*nCands] = MAX(1 - sum, sum);
+            (*nCands)++;
+        }
+    }
+
+    return SCIP_OKAY;
+}
+
+/**
+ * branch on a selected vertex based on its incoming arcs
+ */
+SCIP_RETCODE branchOnVertexDegree(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    ArcSCIPVarMap &z,
+    DNode *candidates,
+    SCIP_Real *branchCandsFrac,
+    int nCands,
+    SCIP_RESULT *result //pointer to store result of branching
+)
+{
+    SCIP_NODE *leftChild;
+    SCIP_NODE *rightChild;
+    SCIP_CONS *consUpper;
+    SCIP_CONS *consLower;
+
+    std::cout << "branchOnVertexDegree()\n";
+    //cout << "number of candidates: " << nCands << endl;
+
+    // search the best candidate
+    // the vertex with greatest sum of incoming arcs' weights among the candidates
+    double maximum = branchCandsFrac[0];
+    int bestCand = 0;
+    for (int i = 1; i < nCands; i++)
+    {
+        if (maximum < branchCandsFrac[i])
+        {
+            maximum = branchCandsFrac[i];
+            bestCand = i;
+        }
+    }
+
+    //cout << "best candidate: " << instance.nodeName[candidates[bestCand]] << ", value "<< branchCandsFrac[bestCand] << endl;
+
+    // chosen vertex
+    DNode v = candidates[bestCand];
+
+    /* cout << "branching on vertex " << instance.nodeName[candidates[bestCand]]
+         << " with fractional degree sum = " << branchCandsFrac[bestCand] << endl; */
+
+    double d = branchCandsFrac[bestCand];
+    //cout << "d = " << d << endl;
+
+    // perform the branching (If the sum is fractional, create two child nodes. Otherwise, create three child nodes)
+    // create the branch-and-bound tree child nodes of the current node
+    SCIP_CALL(SCIPcreateChild(scip, &leftChild, 0, SCIPgetLocalTransEstimate(scip)));
+    SCIP_CALL(SCIPcreateChild(scip, &rightChild, 0, SCIPgetLocalTransEstimate(scip)));
+
+    cout << "add the constraints here\n";
+
+    //std::cout << "creating the constraint handlers \n";
+    // create corresponding constraints
+    /* SCIP_CALL(createDegreeCons(scip, &consUpper, "upper", candidates[bestCand], 
+                                floor(d), UPPERBOUND, rightChild)); */
+    SCIP_CALL(SCIPcreateConsLinear(scip, &consUpper, "upper-degree-cons", 0, NULL, NULL, 0, floor(d),
+                                   TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE));
+
+    //add the variables to the new constraint
+    int inDegree = 0; // count the number of incoming arcs
+    for (InArcIt a(instance.g, v); a != INVALID; ++a)
+    {
+        SCIPaddCoefLinear(scip, consUpper, z[a], 1);
+        inDegree++;
+    }
+    //SCIPaddCons(scip, consUpper);
+
+    SCIPprintCons(scip, consUpper, NULL);
+    SCIPinfoMessage(scip, NULL, "\n");
+
+    /* SCIP_CALL(createDegreeCons(scip, &consLower, "lower", candidates[bestCand], 
+                                ceil(d), LOWERBOUND, leftChild)); */
+
+    SCIP_CALL(SCIPcreateConsLinear(scip, &consLower, "lower-degree-cons", 0, NULL, NULL, ceil(d),
+                                   inDegree, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE));
+
+    //add the variables to the new constraint
+    for (InArcIt a(instance.g, v); a != INVALID; ++a)
+    {
+        SCIPaddCoefLinear(scip, consLower, z[a], 1);
+    }
+    //SCIPaddCons(scip, consLower);
+
+    SCIPprintCons(scip, consLower, NULL);
+    SCIPinfoMessage(scip, NULL, "\n");
+    //exit(0);
+
+    // add constraints to nodes
+    SCIP_CALL(SCIPaddConsNode(scip, rightChild, consUpper, NULL));
+    SCIP_CALL(SCIPaddConsNode(scip, leftChild, consLower, NULL));
+
+    // release constraints
+    SCIP_CALL(SCIPreleaseCons(scip, &consUpper));
+    SCIP_CALL(SCIPreleaseCons(scip, &consLower));
+
+    *result = SCIP_BRANCHED;
+
+    return SCIP_OKAY;
+}
+
+SCIP_RETCODE printDegreeRows(SCIP *scip)
+{
+    /* get data */
+    SCIP_ROW **rows;
+    int nrows;
+
+    SCIP_CALL(SCIPgetLPRowsData(scip, &rows, &nrows));
+    assert(nrows > 0);
+    assert(rows != NULL);
+    cout << "number of rows at node " << SCIPnodeGetNumber(SCIPgetFocusNode(scip)) << ": " << nrows << endl;
+
+    string ub = "upper-degree-cons";
+    string lb = "lower-degree-cons";
+    for (int i = 0; i < nrows; i++)
+    {
+        if (SCIProwGetName(rows[i]) == ub || SCIProwGetName(rows[i]) == lb)
+        {
+            SCIPprintRow(scip, rows[i], NULL);
+        }
+    }
+
+    return SCIP_OKAY;
+}
+
 /**
  * Frees all data of a constraint
  */
@@ -178,14 +345,111 @@ SCIP_DECL_CONSDELETE(DegreeCons::scip_delete)
     return SCIP_OKAY;
 }
 
+/* SCIP_DECL_CONSENFOLP(DegreeCons::scip_enfolp)
+{
+    std::cout << "---------- BRANCHING ON CONSENFOLP ----------\n";
+
+    printf("Start branching at node %" SCIP_LONGINT_FORMAT ", depth %d\n", 
+            SCIPnodeGetNumber(SCIPgetFocusNode(scip)), SCIPgetFocusDepth(scip));
+
+    DNode *candidates;            // candidates for branching
+    double *fractionalitiesCands; // fractionalities of candidates
+    int nCands = 0;               // length of array
+
+    SCIP_CALL(SCIPallocClearBufferArray(scip, &candidates, instance.n));
+    SCIP_CALL(SCIPallocClearBufferArray(scip, &fractionalitiesCands, instance.n));
+
+    // get branching candidates
+    SCIP_CALL(getBranchCands(scip, instance, x, z, candidates, fractionalitiesCands, &nCands));
+    assert(nCands > 0);
+
+    // *result = SCIP_DIDNOTRUN;
+    *result = SCIP_FEASIBLE;
+
+    if (nCands > 0)
+        // perform the branching
+        SCIP_CALL(branchOnVertexDegree(scip, instance, z, candidates, fractionalitiesCands, nCands, result));
+
+    // free memory
+    SCIPfreeBufferArray(scip, &candidates);
+    SCIPfreeBufferArray(scip, &fractionalitiesCands);
+
+    printDegreeRows(scip);
+    std::cout << "---------- BRANCHED SUCCESFULLY ----------\n\n";
+    return SCIP_OKAY;
+} */
+
 SCIP_DECL_CONSENFOLP(DegreeCons::scip_enfolp)
 {
-    *result = SCIP_FEASIBLE;
+    std::cout << "---------- CONSENFOLP ----------\n";
+
+    cout << "Focus node: " << SCIPnodeGetNumber(SCIPgetFocusNode(scip)) << endl;
+
+    assert(scip != NULL);
+    assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
+    assert(result != NULL);
+
+    SCIP_CONS *cons;
+    double ub = SCIPinfinity(scip);
+    double lb = 0;
+
+    cout << "nconss = " << nconss << endl;
+
+    SCIP_CONSDATA *consdata;
+    consdata = SCIPconsGetData(conss[nconss - 1]);
+
+    if (consdata->added == TRUE)
+    {
+        cout << "constraint already added!!" << endl;
+
+        //printDegreeRows(scip);
+
+        *result = SCIP_FEASIBLE;
+        return SCIP_OKAY;
+    }
+
+    string name = "";
+    if (consdata->type == UPPERBOUND)
+    {
+        name = "upper-degree-cons";
+        ub = consdata->bound;
+        //cout << name << endl;
+    }
+    else if (consdata->type == LOWERBOUND)
+    {
+        name = "lower-degree-cons";
+        lb = consdata->bound;
+        //cout << name << endl;
+    }
+    else
+        name = "fixedsize-degree-cons";
+
+    SCIP_CALL(SCIPcreateConsLinear(scip, &cons, name.c_str(), 0, NULL, NULL, lb, ub,
+                                   TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE));
+
+    DNode v = consdata->vertex;
+    //add the variables to the new constraint
+    for (InArcIt a(instance.g, v); a != INVALID; ++a)
+        SCIPaddCoefLinear(scip, cons, z[a], 1);
+
+    SCIPprintCons(scip, cons, NULL);
+    SCIPinfoMessage(scip, NULL, "\n");
+
+    consdata->added = TRUE;
+
+    SCIPaddCons(scip, cons);
+    SCIPreleaseCons(scip, &cons);
+
+    *result = SCIP_CONSADDED;
+
+    printDegreeRows(scip);
+    std::cout << "---------- CONSTRAINT ADDED SUCCESFULLY ----------\n\n";
     return SCIP_OKAY;
 }
 
 SCIP_DECL_CONSENFOPS(DegreeCons::scip_enfops)
 {
+    cout << "SCIP_DECL_CONSENFOPS" << endl;
     *result = SCIP_FEASIBLE;
     return SCIP_OKAY;
 }
@@ -197,6 +461,7 @@ SCIP_DECL_CONSLOCK(DegreeCons::scip_lock)
 
 SCIP_DECL_CONSCHECK(DegreeCons::scip_check)
 {
+    cout << "SCIP_DECL_CONSCHECK" << endl;
     *result = SCIP_FEASIBLE;
     return SCIP_OKAY;
 }
@@ -244,7 +509,7 @@ SCIP_DECL_CONSPROP(DegreeCons::scip_prop)
     assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
     assert(result != NULL);
 
-    std::cout << "propagation of constraint handler <" << CONSHDLR_NAME << ">\n";
+    //std::cout << "propagation of constraint handler <" << CONSHDLR_NAME << ">\n";
 
     //get vars and number of vars
 
@@ -253,17 +518,15 @@ SCIP_DECL_CONSPROP(DegreeCons::scip_prop)
     for (int i = 0; i < nconss; i++)
     {
         consdata = SCIPconsGetData(conss[i]);
-        std::cout << "number of propagated variables: " << consdata->nPropagatedVars
-                  << std::endl;
+        //cout << "number of propagated variables: " << consdata->nPropagatedVars << endl;
 
         // chech if all previously generated variables are valid for this constraint
         assert(checkConsData(scip, instance, consdata, TRUE));
 
-        // remember of verify about the NDEBUG flag of SCIP
         if (!consdata->propagated)
         {
-            std::cout << "propagate constraint <" << SCIPconsGetName(conss[i]) << ">:";
-            printConsData(consdata);
+            //std::cout << "propagate constraint <" << SCIPconsGetName(conss[i]) << ">:";
+            //printConsData(consdata);
 
             nVars = infSet[consdata->vertex].size();
 
@@ -272,6 +535,7 @@ SCIP_DECL_CONSPROP(DegreeCons::scip_prop)
 
             if (*result != SCIP_CUTOFF)
             {
+                cout << "SCIP_CUTOFF" << endl;
                 consdata->propagated = TRUE;
                 consdata->nPropagatedVars = nVars;
             }
@@ -282,7 +546,6 @@ SCIP_DECL_CONSPROP(DegreeCons::scip_prop)
         //check if constraint is completely propagated
         assert(checkConsData(scip, instance, consdata, FALSE));
     }
-
     return SCIP_OKAY;
 }
 
@@ -304,11 +567,11 @@ SCIP_DECL_CONSACTIVE(DegreeCons::scip_active)
     assert(consdata != NULL);
     assert(consdata->nPropagatedVars <= infSet[consdata->vertex].size());
 
-    std::cout << "activate constraint <" << SCIPconsGetName(cons) << "> on vertex <"
+    /* std::cout << "activate constraint <" << SCIPconsGetName(cons) << "> on vertex <"
               << instance.nodeName[consdata->vertex] << "> at node <"
               << SCIPnodeGetNumber(consdata->node) << "> in depth <"
               << SCIPnodeGetDepth(consdata->node) << ">: ";
-    printConsData(consdata);
+    printConsData(consdata); */
 
     //std::cout << "number of propagated variables: " << consdata->nPropagatedVars << std::endl;
     if (consdata->nPropagatedVars != (int) infSet[consdata->vertex].size())
@@ -339,12 +602,12 @@ SCIP_DECL_CONSDEACTIVE(DegreeCons::scip_deactive)
     assert(consdata != NULL);
     assert(consdata->propagated || SCIPgetNChildren(scip) == 0);
 
-    std::cout << "deactivate constraint <" << SCIPconsGetName(cons) << "> at node <"
+    /* std::cout << "deactivate constraint <" << SCIPconsGetName(cons) << "> at node <"
               << SCIPnodeGetNumber(consdata->node) << "> in depth <"
               << SCIPnodeGetDepth(consdata->node) << ">: ";
-    printConsData(consdata);
+    printConsData(consdata); */
 
-    /* set the number of propagated variables to current number of variables in SCIP */
+    //set the number of propagated variables to current number of variables in SCIP
     consdata->nPropagatedVars = infSet[consdata->vertex].size();
 
     return SCIP_OKAY;
@@ -401,8 +664,37 @@ SCIP_RETCODE degreecons::createDegreeCons(
 
     //create constraint
     SCIP_CALL(
-        SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, FALSE, FALSE, FALSE,
+        SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, FALSE, TRUE, FALSE,
                        TRUE, TRUE, FALSE, FALSE, FALSE, TRUE));
+
+    //std::cout << "created constraint: ";
+    //printConsData(consdata);
+
+    return SCIP_OKAY;
+}
+
+SCIP_RETCODE degreecons::createDegreeCons2(
+    SCIP *scip,
+    SCIP_CONS **cons,
+    const char *name)
+{
+    std::cout << "Entenring in createDegreeCons2()\n";
+
+    SCIP_CONSHDLR *conshdlr;
+    SCIP_CONSDATA *consdata;
+
+    // find the degree constraint handler
+    conshdlr = SCIPfindConshdlr(scip, "degree-constraint-handler");
+    if (conshdlr == NULL)
+    {
+        SCIPerrorMessage("degree constraint handler not found\n");
+        return SCIP_PLUGINNOTFOUND;
+    }
+
+    //create constraint
+    SCIP_CALL(
+        SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, FALSE, TRUE, FALSE,
+                       FALSE, TRUE, FALSE, FALSE, FALSE, FALSE));
 
     //std::cout << "created constraint: ";
     //printConsData(consdata);

@@ -35,6 +35,9 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         double EpsForIntegrality;
         int vizCount;
 
+        CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
+        ~CycleCutsGenerator();
+
         virtual SCIP_DECL_CONSTRANS(scip_trans);
         virtual SCIP_DECL_CONSSEPALP(scip_sepalp);
         virtual SCIP_DECL_CONSSEPASOL(scip_sepasol);
@@ -43,8 +46,6 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         virtual SCIP_DECL_CONSCHECK(scip_check);
         virtual SCIP_DECL_CONSLOCK(scip_lock);
 
-        CycleCutsGenerator(SCIP *scip, GLCIPInstance &instance, DNodeSCIPVarMap &x, ArcSCIPVarMap &z);
-        ~CycleCutsGenerator();
 
         SCIP_RETCODE createCycleCuts(
            SCIP*                 scip,               /**< SCIP data structure */
@@ -65,6 +66,6 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         double getXValue(SCIP* scip, SCIP_SOL* sol, DNode v);
         bool isValid(SCIP* scip, SCIP_SOL* sol);
         SCIP_RETCODE addCycleInequality(SCIP* scip, SCIP_RESULT* result, SCIP_SOL* sol, SCIP_CONSHDLR* conshdlr, vector<DNode> &cycle);
-        SCIP_RETCODE findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshdlr, SCIP_SOL* sol, SCIP_RESULT* result, bool feasible);
+        SCIP_RETCODE findCycleCuts(SCIP* scip, SCIP_CONSHDLR* conshdlr, SCIP_SOL* sol, SCIP_RESULT* result);
 };
 #endif // CUTGENERATOR_H
