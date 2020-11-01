@@ -216,11 +216,11 @@ StringTable::StringTable(int nr, ifstream &file)
     while ((std::getline(file, h)) && is_comment(h, "#"))
       ;
     replace(h.begin(), h.end(), '\t', ' ');
-    istringstream token(h); // Declare an input string stream.
+    istringstream token2(h); // Declare an input string stream.
     int c = 0;
     this->line[i].reserve(this->ncols);
     this->line[i].resize(this->ncols);
-    while (getline(token, word, ' '))
+    while (getline(token2, word, ' '))
     {
       trim(word);
       if (word.length() == 0)
@@ -232,7 +232,7 @@ StringTable::StringTable(int nr, ifstream &file)
         exit(1);
       }
       this->line[i][c] = word;
-      if (word.length() > this->columnsize[c])
+      if ((int) word.length() > this->columnsize[c])
         this->columnsize[c] = word.length();
       c++;
     }
@@ -244,19 +244,19 @@ StringTable::StringTable(int nr, ifstream &file)
   }
   return;
 }
-StringTable::StringTable(int nrows, int ncols)
+StringTable::StringTable(int _nrows, int _ncols)
 {
   string word, h;
-  this->nrows = nrows;
-  this->ncols = ncols;
-  this->header.reserve(ncols);
-  this->header.resize(ncols);
-  this->line.reserve(nrows);
-  line.resize(nrows);
-  for (int i = 0; i < nrows; i++)
+  this->nrows = _nrows;
+  this->ncols = _ncols;
+  this->header.reserve(_ncols);
+  this->header.resize(_ncols);
+  this->line.reserve(_nrows);
+  line.resize(_nrows);
+  for (int i = 0; i < _nrows; i++)
   {
-    this->line[i].reserve(ncols);
-    this->line[i].resize(ncols);
+    this->line[i].reserve(_ncols);
+    this->line[i].resize(_ncols);
   }
   return;
 }

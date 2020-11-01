@@ -35,7 +35,7 @@ namespace degreecons
             DNodeInfSetsMap &p_infSet) : ObjConshdlr(scip,
                                                      CONSHDLR_NAME,                         //name
                                                      "stores the local branching decision", //description
-                                                     0,                                     //separation priority
+                                                     1,                                     //separation priority
                                                      1,                                     //enforce priority
                                                      -1,                                     //checking feasibility priority
                                                      -1,                                    //separation frequency

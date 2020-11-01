@@ -1,4 +1,5 @@
 #include "heur_dualbound.h"
+#include <lemon/hao_orlin.h>
 
 HeurDualBound::HeurDualBound(
     SCIP *scip,
@@ -10,7 +11,7 @@ HeurDualBound::HeurDualBound(
                  "heuristic-dual-bound",
                  "Heuristic dual bound for GLCIP",
                  -1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
-                 10,     //frequency for calling relaxator
+                 1,     //frequency for calling relaxator
                  FALSE), //Does the relaxator contain all cuts in the LP?
         instance(p_instance),
         x(p_x),
@@ -363,6 +364,38 @@ void getSubGraph(
     //GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Sub-graph", nodeRef);
 }
 
+void getMinimumCut(
+    SCIP *scip,
+    GLCIPInstance &instance,
+    Digraph &graph,
+    DNodeDNodeMap &nodeRef,
+    ArcArcMap &arcRef,
+    ArcSCIPVarMap &z)
+{
+    //https://157.181.227.195/trac/lemon/browser/lemon-1.1/test/hao_orlin_test.cc?rev=30d5f950aa5f4347b3bef4e9ab7c01c3eb8f05c7
+    //https://www.mail-archive.com/lemon-user@lemon.cs.elte.hu/msg00681.html
+
+    ArcIntMap weights(graph);
+    DNodeBoolMap cut(graph);
+
+    for (ArcIt a(graph); a != INVALID; ++a)
+        weights[a] = 1;
+
+    //TODO test this
+    HaoOrlin<Digraph, ArcIntMap> minimumCut(graph, weights);
+    minimumCut.run();
+    cout << "cut.minCutValue() = " << minimumCut.minCutValue() << endl;
+    minimumCut.minCutMap(cut);
+
+    for (ArcIt a(graph); a != INVALID; ++a)
+    {
+        if (cut[graph.source(a)] && !cut[graph.target(a)])
+            cout << instance.nodeName[nodeRef[graph.source(a)]] << "->" << instance.nodeName[nodeRef[graph.target(a)]] << endl;
+    }
+
+    exit(0);
+}
+
 /**
  * propagate in the topological ordering of condensed graphfor each condensed node, 
  * if the total of influence incident on it is less than the threshold, 
@@ -434,7 +467,7 @@ SCIP_RETCODE setRelaxedSol(
     GLCIPInstance &instance,
     DNodeSCIPVarMap &x,
     ArcSCIPVarMap &z,
- //   DNodeSCIPVarsMap &xip,
+    //   DNodeSCIPVarsMap &xip,
     set<DNode> seeds)
 {
     //cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
@@ -484,6 +517,8 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
     ArcArcMap arcRef(graph);      //save the reference to the original arc
     getSubGraph(scip, instance, graph, nodeRef, arcRef, z);
 
+    //getMinimumCut(scip, instance, graph, nodeRef, arcRef, z);
+
     if (stronglyConnected(graph) || instance.alpha < 1)
     {
         //cout << "assossiated subgraph is strongly connected\n";
@@ -505,8 +540,8 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
     else
     {
         int nComponents = countStronglyConnectedComponents(graph);
-        //cout << "assossiated subgraph isn't strongly connected: ";
-        //cout << nComponents << " components\n";
+        cout << "assossiated subgraph isn't strongly connected: ";
+        cout << nComponents << " components\n";
 
         Digraph condensed;
         vector<vector<DNode>> listOfComponents(nComponents);
@@ -521,6 +556,33 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
 
         //linear time algorithm to solve the problem in DAGs
         relaxval = getCostInTopologicalOrdering(condensed, nComponents, thr, arcWeight);
+
+        //add the cut arc as external branching candidate
+        //show the current external candidates
+        //add the candidates
+        //cout << "[before] SCIPgetNExternBranchCands(scip) = " << SCIPgetNExternBranchCands(scip) << endl;
+
+        //get the cut arcs of the strongly connected components
+        /* Digraph::ArcMap<bool> cutArcs(graph, FALSE);
+        stronglyConnectedCutArcs(graph, cutArcs);
+
+        for (ArcIt a(graph); a != INVALID; ++a)
+        {
+            if (cutArcs[a])
+            {
+                SCIP_VAR *var = z[arcRef[a]];
+                //double solval = SCIPgetRelaxSolVal(scip, var);
+                double solval = SCIPvarGetLPSol(var);
+                if (SCIPvarIsIntegral(var) && !SCIPisFeasIntegral(scip, solval) &&
+                    !SCIPisEQ(scip, SCIPvarGetLbLocal(var), SCIPvarGetUbLocal(var)))
+                {
+                    // we don't set a true score, we will just let the branching rule decide
+                    SCIPaddExternBranchCand(scip, var, 10000, solval);
+                    cout << "variable " << SCIPvarGetName(var) << endl;
+                }
+            }
+        }
+        cout << "[after] SCIPgetNExternBranchCands(scip) = " << SCIPgetNExternBranchCands(scip) << endl; */
 
         //printf("Heuristic lower bound = %g\n", relaxval);
         *lowerbound = relaxval;

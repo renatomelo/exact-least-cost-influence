@@ -574,7 +574,7 @@ SCIP_DECL_CONSACTIVE(DegreeCons::scip_active)
     printConsData(consdata); */
 
     //std::cout << "number of propagated variables: " << consdata->nPropagatedVars << std::endl;
-    if (consdata->nPropagatedVars != (int) infSet[consdata->vertex].size())
+    if (consdata->nPropagatedVars != (int)infSet[consdata->vertex].size())
     {
         SCIPinfoMessage(scip, NULL, "-> mark constraint to be repropagated\n");
         consdata->propagated = FALSE;

@@ -1598,7 +1598,7 @@ void points_hull_2d ( int node_num, double node_xy[], int *hull_num,
   int q;
   double q_xy[2];
   int r;
-  double r_xy[2];
+  double r_xy[2] = {0};
 
   *hull_num = 0;
 

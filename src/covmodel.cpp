@@ -2,11 +2,13 @@
 #include <map>
 #include "pricer_glcip.h"
 #include "branch_glcip.h"
+#include "binary_branch.h"
 #include "event_glcip.h"
 #include "degreecons.h"
 #include "generalizedpropagationcons.h"
 #include "heur_mininfluence.h"
 #include "heur_dualbound.h"
+#include "presolver_glcip.h"
 
 using namespace degreecons;
 
@@ -478,7 +480,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPsetBoolParam(scip, "visual/realtime", FALSE));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
 
     DNodeSCIPVarMap x(graph);      // active-vertex variables
     ArcSCIPVarMap z(graph);        // arc-influence variables
@@ -588,19 +590,29 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPactivatePricer(scip, SCIPfindPricer(scip, PRICER_NAME)));
     //end of pricing
 
-    DegreeCons *degCons = new DegreeCons(scip, instance, z, x, infSet);
-    SCIP_CALL(SCIPincludeObjConshdlr(scip, degCons, TRUE));
+    /* DegreeCons *degCons = new DegreeCons(scip, instance, z, x, infSet);
+    SCIP_CALL(SCIPincludeObjConshdlr(scip, degCons, TRUE)); */
 
     /* SCIP_CONS *cons2;
     SCIP_CALL(createDegreeCons2(scip, &cons2, "degree-constraint-handler"));
     SCIP_CALL(SCIPaddCons(scip, cons2));
     SCIP_CALL(SCIPreleaseCons(scip, &cons2)); */
 
+    static const char *PRESOL_NAME = "preprocessing-rule";
+    PresolverGLCIP *presol = new PresolverGLCIP(scip, PRESOL_NAME, instance, x, z, infSet);
+
+    SCIP_CALL(SCIPincludeObjPresol(scip, presol, TRUE));
+
+    /* static const char *BRANCH_NAME = "branching-rule";
+    BinaryBranch *branch = new BinaryBranch(scip, BRANCH_NAME, instance, x, z, infSet);
+
+    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE)); */
+
     //include branching rule
-    static const char *BRANCH_NAME = "branching-rule";
+    /* static const char *BRANCH_NAME = "branching-rule";
     ObjBranchruleGLCIP *branch = new ObjBranchruleGLCIP(scip, BRANCH_NAME, instance, x, z);
 
-    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE));
+    SCIP_CALL(SCIPincludeObjBranchrule(scip, branch, TRUE)); */
     //end of branching rule
 
     // include event handler pluging
