@@ -2,6 +2,8 @@
 #include "heur_dualbound.h"
 #include "heur_ordering.h"
 #include "heur_greedy_construction.h"
+#include "presolver_glcip.h"
+#include "binary_branch.h"
 
 bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
@@ -15,10 +17,11 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 1));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
 
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
 
     // add variables to the model
     DNodeSCIPVarMap x(instance.g);
@@ -109,6 +112,8 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
 
     //include combinatorial relaxation
     SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
+    //SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
+    //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

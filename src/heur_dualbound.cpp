@@ -354,8 +354,16 @@ void getSubGraph(
 
     for (ArcIt a(graph); a != INVALID; ++a)
     {
+        /* cout << SCIPvarGetName(z[arcRef[a]]) << " status: " << SCIPvarGetStatus(SCIPvarGetTransVar(z[arcRef[a]])) << endl;
+        if (SCIPvarGetUbLocal(z[arcRef[a]]) != SCIPvarGetUbLocal(SCIPvarGetTransVar(z[arcRef[a]])))
+        {
+            cout << "different bounds for the transformed var\n";
+            exit(0);
+        } */
+        
         if (SCIPisEQ(scip, SCIPvarGetUbLocal(z[arcRef[a]]), 0))
         {
+            
             //removing arc variables fixed in zero
             graph.erase(a);
         }
@@ -584,7 +592,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
         }
         cout << "[after] SCIPgetNExternBranchCands(scip) = " << SCIPgetNExternBranchCands(scip) << endl; */
 
-        //printf("Heuristic lower bound = %g\n", relaxval);
+        printf("Heuristic lower bound = %g\n", relaxval);
         *lowerbound = relaxval;
         *result = SCIP_SUCCESS;
     }

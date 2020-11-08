@@ -10,17 +10,16 @@ private:
     GLCIPInstance&          instance;
     DNodeSCIPVarMap&        x;
     ArcSCIPVarMap&          z;
-    DNodeInfSetsMap&        infSet;
+    //DNodeInfSetsMap&        infSet;
 
 public:
     /** Constructs the branching rule object with the data needed */
     BinaryBranch(
         SCIP*               scip,
-        const char*         p_name,         // name of branching rule
         GLCIPInstance&      p_instance,     // problem data
         DNodeSCIPVarMap&    p_x,
-        ArcSCIPVarMap&      p_z,
-        DNodeInfSetsMap&    p_inf_set       // influencing set data structure 
+        ArcSCIPVarMap&      p_z
+        //DNodeInfSetsMap&    p_inf_set       // influencing set data structure 
     );
 
     // Destructs the branching rule object

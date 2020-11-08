@@ -14,11 +14,11 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 0));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
 
     // add variables to the model
     DNodeSCIPVarMap x(instance.g);
@@ -102,8 +102,8 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
 
     //primal heuristic
-    HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
-    SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE));
+    /* HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
+    SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE)); */
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

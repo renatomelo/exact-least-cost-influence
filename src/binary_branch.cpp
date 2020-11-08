@@ -5,15 +5,15 @@
 
 BinaryBranch::BinaryBranch(
     SCIP *scip,
-    const char *p_name,
     GLCIPInstance &p_instance,
     DNodeSCIPVarMap &p_x,
-    ArcSCIPVarMap &p_z,
-    DNodeInfSetsMap &p_inf_set) : ObjBranchrule(scip, p_name, "Defines the branching rule", 50000, -1, 1.0),
-                                  instance(p_instance),
-                                  x(p_x),
-                                  z(p_z),
-                                  infSet(p_inf_set)
+    ArcSCIPVarMap &p_z
+    //DNodeInfSetsMap &p_inf_set
+    ) : ObjBranchrule(scip, "branching-rule", "Defines the branching rule", 50000, -1, 1.0),
+        instance(p_instance),
+        x(p_x),
+        z(p_z)
+//infSet(p_inf_set)
 {
 }
 
@@ -137,8 +137,10 @@ SCIP_VAR *thereIsUniqueSeparator(
             graph.erase(a);
         //getting fractional arc-variables
         else if (!SCIPisFeasIntegral(scip, SCIPvarGetLPSol(z[arcRef[a]])))
+        {
             //cout << SCIPvarGetName(z[arcRef[a]]) << " has value = " << SCIPvarGetLPSol(z[arcRef[a]]) << endl;
             arcs.push_back(a);
+        }
     }
 
     n = countStronglyConnectedComponents(graph);
@@ -242,6 +244,9 @@ SCIP_RETCODE branchOnArcVar(
     SCIP_VAR *var = thereIsUniqueSeparator(scip, instance, z, x);
     if (!var)
     {
+        //cout << "there is no unique separator\n";
+        if (!nCands)
+            return SCIP_OKAY;
         //if we don't find a arc or vertex cut we choose the least fractional variable
         int best = leastFractional(scip, candidates, branchCandsFrac, nCands);
         var = candidates[best];

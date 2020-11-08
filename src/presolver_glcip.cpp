@@ -2,12 +2,12 @@
 
 PresolverGLCIP::PresolverGLCIP(
     SCIP *scip,
-    const char *p_name,        // name of branching rule
     GLCIPInstance &p_instance, // problem data
     DNodeSCIPVarMap &p_x,
-    ArcSCIPVarMap &p_z,
-    DNodeInfSetsMap &p_inf_set // influencing set data structure
-    ) : ObjPresol(scip, p_name,
+    ArcSCIPVarMap &p_z
+    //DNodeInfSetsMap &p_inf_set // influencing set data structure
+    ) : ObjPresol(scip, 
+                  "preprocessing-rule",
                   "Preprocessing rules",
                   10,                    //priority of the presolver
                   1,                     //maximal number of presolving rounds the presolver participates in (-1: no limit)
@@ -15,12 +15,19 @@ PresolverGLCIP::PresolverGLCIP(
                   ),
         instance(p_instance),
         x(p_x),
-        z(p_z),
-        infSet(p_inf_set)
+        z(p_z)
+        //infSet(p_inf_set)
 {
 }
 
 PresolverGLCIP::~PresolverGLCIP() {}
+
+void printArc(GLCIPInstance &instance, Arc a)
+{
+    cout << "(" << instance.nodeName[instance.g.source(a)] << ", " 
+         << instance.nodeName[instance.g.target(a)] << ")" << endl;
+}
+
 // see later: https://www.scipopt.org/doc/html/presol__trivial_8c_source.php#l00067
 SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
 {
@@ -61,17 +68,20 @@ SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
             toRemove.push_back(v);
         else if (inDegree[v] == 0)
         {
-            for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+            for (OutArcIt a(graph, v); a != INVALID; ++a)
             {
                 fixedInOne.push_back(arcRef[a]);
 
                 DNode w = graph.target(a);
                 thr[w] -= instance.influence[arcRef[a]];
+                cout << "to fix arc: ";
+                printArc(instance, arcRef[a]);
             }
             count++;
             //TODO fix the inf_set var too
 
             toRemove.push_back(v);
+            //cout << "to remove vertex " << instance.nodeName[nodeRef[v]] << endl;
         }
         else if (outDegree[v] == 0)
         {
@@ -79,16 +89,22 @@ SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
             for (InArcIt a(graph, v); a != INVALID; ++a)
             {
                 fixedInOne.push_back(arcRef[a]);
+                cout << "to fix arc: ";
+                printArc(instance, arcRef[a]);
             }
             count++;
             //TODO fix the inf_set var too
 
             toRemove.push_back(v);
+            //cout << "to remove vertex " << instance.nodeName[nodeRef[v]] << endl;
         }
     }
 
     for (DNode v : toRemove)
+    {
+        cout << "removing vertex " << instance.nodeName[nodeRef[v]] << endl;
         graph.erase(v);
+    }
 
     do
     {
@@ -99,18 +115,24 @@ SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
             if (thr[v] <= 0)
             {
                 for (InArcIt a(graph, v); a != INVALID; ++a)
-                    fixedInZero.push_back(a);
-
-                for (OutArcIt a(instance.g, v); a != INVALID; ++a)
+                {
+                    fixedInZero.push_back(arcRef[a]);
+                    cout << "to fix arc in zero: ";
+                    printArc(instance, arcRef[a]);
+                }
+                for (OutArcIt a(graph, v); a != INVALID; ++a)
                 {
                     fixedInOne.push_back(arcRef[a]);
 
                     DNode w = graph.target(a);
                     thr[w] -= instance.influence[arcRef[a]];
+
+                    cout << "to fix arc: ";
+                    printArc(instance, arcRef[a]);
                 }
                 count++;
                 //TODO fix the inf_set var too
-
+                //cout << "to remove vertex " << instance.nodeName[nodeRef[v]] << endl;
                 toRemove.push_back(v);
                 break;
             }
@@ -120,21 +142,27 @@ SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
                 for (InArcIt a(graph, v); a != INVALID; ++a)
                 {
                     fixedInOne.push_back(arcRef[a]);
+                    cout << "to fix arc: ";
+                    printArc(instance, arcRef[a]);
                 }
                 count++;
                 //TODO fix the inf_set var too
 
+                //cout << "to remove vertex " << instance.nodeName[nodeRef[v]] << endl;
                 toRemove.push_back(v);
             }
         }
 
         for (DNode v : toRemove)
+        {
+            cout << "removing vertex " << instance.nodeName[nodeRef[v]] << endl;
             graph.erase(v);
+        }
 
     } while (!toRemove.empty());
 
     //fix variables
-    for(Arc a : fixedInOne)
+    for (Arc a : fixedInOne)
     {
         cout << "fixing variable in one " << SCIPvarGetName(z[a]) << endl;
         SCIP_CALL(SCIPfixVar(scip, z[a], 1, &infeasible, &fixed));
@@ -148,7 +176,7 @@ SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
         (*nfixedvars)++;
         *result = SCIP_SUCCESS;
     }
-    for(Arc a : fixedInZero)
+    for (Arc a : fixedInZero)
     {
         cout << "fixing variable in zero " << SCIPvarGetName(z[a]) << endl;
         SCIP_CALL(SCIPfixVar(scip, z[a], 0, &infeasible, &fixed));
@@ -163,7 +191,6 @@ SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
         *result = SCIP_SUCCESS;
     }
 
-    
     cout << "count = " << count << endl;
 
     //exit(0);

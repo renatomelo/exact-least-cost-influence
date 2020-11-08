@@ -598,10 +598,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPaddCons(scip, cons2));
     SCIP_CALL(SCIPreleaseCons(scip, &cons2)); */
 
-    static const char *PRESOL_NAME = "preprocessing-rule";
-    PresolverGLCIP *presol = new PresolverGLCIP(scip, PRESOL_NAME, instance, x, z, infSet);
-
-    SCIP_CALL(SCIPincludeObjPresol(scip, presol, TRUE));
+    SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
 
     /* static const char *BRANCH_NAME = "branching-rule";
     BinaryBranch *branch = new BinaryBranch(scip, BRANCH_NAME, instance, x, z, infSet);
