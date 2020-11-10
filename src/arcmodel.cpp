@@ -19,6 +19,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
     //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
 
     // add variables to the model
     DNodeSCIPVarMap x(instance.g);

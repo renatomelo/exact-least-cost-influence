@@ -82,28 +82,6 @@ int leastFractional(
     return bestCand;
 }
 
-void getSubGraphLocally(
-    SCIP *scip,
-    GLCIPInstance &instance,
-    Digraph &graph,
-    DNodeDNodeMap &nodeRef,
-    ArcArcMap &arcRef,
-    ArcSCIPVarMap &z)
-{
-    digraphCopy(instance.g, graph).nodeCrossRef(nodeRef).arcCrossRef(arcRef).run();
-
-    for (ArcIt a(graph); a != INVALID; ++a)
-    {
-        if (SCIPisEQ(scip, SCIPvarGetUbLocal(z[arcRef[a]]), 0))
-        {
-            //removing arc variables fixed in zero
-            graph.erase(a);
-        }
-    }
-
-    //GraphViewer::ViewGLCIPSupportGraph(instance, graph, "Sub-graph", nodeRef);
-}
-
 /**
  * Based in a fractional solution, look for some unique arc or vertice that separates the graph in more strongly connected components
  */
@@ -157,7 +135,7 @@ SCIP_VAR *thereIsUniqueSeparator(
         int tmp = countStronglyConnectedComponents(graph);
         if (tmp > n)
         {
-            cout << "n = " << n << ", number of new components (arc) = " << tmp << endl;
+            //cout << "n = " << n << ", number of new components (arc) = " << tmp << endl;
 
             //save the variable associated to the most separator arc
             n = tmp;
@@ -244,6 +222,7 @@ SCIP_RETCODE branchOnArcVar(
     SCIP_VAR *var = thereIsUniqueSeparator(scip, instance, z, x);
     if (!var)
     {
+        //SCIPgetLPBranchCands(scip, candidates, NULL, branchCandsFrac, nCands, NULL, NULL);
         //cout << "there is no unique separator\n";
         if (!nCands)
             return SCIP_OKAY;
@@ -251,8 +230,8 @@ SCIP_RETCODE branchOnArcVar(
         int best = leastFractional(scip, candidates, branchCandsFrac, nCands);
         var = candidates[best];
     }
-    else
-        cout << SCIPvarGetName(var) << endl;
+    /* else
+        cout << SCIPvarGetName(var) << endl; */
     /* SCIPinfoMessage(scip, NULL, " -> %d candidates, selected candidate %d: variable <%s> (frac=%g, factor=%g)\n",
                     nCands, bestCand, SCIPvarGetName(candidates[bestCand]), branchCandsFrac[bestCand],
                     SCIPvarGetBranchFactor(candidates[bestCand])); */
@@ -273,29 +252,48 @@ SCIP_RETCODE branchOnArcVar(
  */
 SCIP_DECL_BRANCHEXECLP(BinaryBranch::scip_execlp)
 {
-    std::cout << "---------- BRANCHING ----------\n";
+    //std::cout << "---------- BRANCHING ----------\n";
     //SCIPinfoMessage(scip, NULL, "Start branching at node %" SCIP_LONGINT_FORMAT ", depth %d\n", SCIPgetNNodes(scip), SCIPgetDepth(scip));
-    SCIP_VAR **candidates;        // candidates for branching
-    double *fractionalitiesCands; // fractionalities of candidates
-    int nCands = 0;               // length of array
-    ArcIt *arcCands;
+    SCIP_VAR **candidates;   // candidates for branching
+    double *fractionalities; // fractionalities of candidates
+    int nCands = 0;          // length of array
+    //ArcIt *arcCands;
+    double nvars = SCIPgetNBinVars(scip);
 
-    SCIP_CALL(SCIPallocClearBufferArray(scip, &arcCands, instance.m));
-    SCIP_CALL(SCIPallocClearBufferArray(scip, &candidates, instance.m));
-    SCIP_CALL(SCIPallocClearBufferArray(scip, &fractionalitiesCands, instance.m));
     // get branching candidates
-    SCIP_CALL(getBranchCands(scip, instance, z, arcCands, candidates, fractionalitiesCands, &nCands));
-    assert(nCands > 0);
+
     *result = SCIP_DIDNOTRUN;
 
-    // perform the branching
-    //SCIP_CALL(branchOnArcVar2(scip, candidates, arcCands, fractionalitiesCands, nCands, result));
-    SCIP_CALL(branchOnArcVar(scip, instance, z, x, arcCands, candidates, fractionalitiesCands, nCands, result));
+    SCIP_VAR *var = thereIsUniqueSeparator(scip, instance, z, x);
 
-    // free memory
-    SCIPfreeBufferArray(scip, &arcCands);
-    SCIPfreeBufferArray(scip, &candidates);
-    SCIPfreeBufferArray(scip, &fractionalitiesCands);
+    if (!var) //there is no unique separator
+    {
+        SCIP_CALL(SCIPallocClearBufferArray(scip, &candidates, nvars));
+        SCIP_CALL(SCIPallocClearBufferArray(scip, &fractionalities, nvars));
+
+        SCIPgetLPBranchCands(scip, &candidates, NULL, &fractionalities, &nCands, NULL, NULL);
+        assert(nCands > 0);
+        //cout << "there is no unique separator\n";
+        /* if (!nCands)
+            return SCIP_OKAY; */
+
+        //if we don't find a arc or vertex cut we choose the least fractional variable
+        int best = leastFractional(scip, candidates, fractionalities, nCands);
+        var = candidates[best];
+
+        // free memory
+        SCIPfreeBufferArray(scip, &candidates);
+        SCIPfreeBufferArray(scip, &fractionalities);
+    }
+    /* else
+        cout << SCIPvarGetName(var) << endl; */
+
+    // perform the branching
+    SCIP_CALL(SCIPbranchVar(scip, var, NULL, NULL, NULL));
+    *result = SCIP_BRANCHED;
+
+    // perform the branching
+    //SCIP_CALL(branchOnArcVar(scip, instance, z, x, arcCands, candidates, fractionalitiesCands, nCands, result));
 
     //std::cout << "---------- BRANCHED SUCCESFULLY ----------\n\n";
     return SCIP_OKAY;

@@ -20,8 +20,12 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
 
-    SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, FALSE);
+    SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
+    /* SCIPincludeConshdlrLinear(scip);
+    SCIPincludeNodeselBfs(scip);
+    SCIPincludeConshdlrIntegral(scip); */
 
     // add variables to the model
     DNodeSCIPVarMap x(instance.g);
@@ -36,7 +40,8 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
 
         for (unsigned int p = 0; p < instance.incentives[v].size(); p++)
         {
-            var = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
+            var = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," 
+                                            + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
             xip[v].push_back(var->var);
             //std::cout << "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]) << endl;
         }
@@ -113,7 +118,8 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //include combinatorial relaxation
     SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
     //SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
-    //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
+    
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

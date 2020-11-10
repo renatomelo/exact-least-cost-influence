@@ -548,8 +548,8 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
     else
     {
         int nComponents = countStronglyConnectedComponents(graph);
-        cout << "assossiated subgraph isn't strongly connected: ";
-        cout << nComponents << " components\n";
+        /* cout << "assossiated subgraph isn't strongly connected: ";
+        cout << nComponents << " components\n"; */
 
         Digraph condensed;
         vector<vector<DNode>> listOfComponents(nComponents);
@@ -592,7 +592,7 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
         }
         cout << "[after] SCIPgetNExternBranchCands(scip) = " << SCIPgetNExternBranchCands(scip) << endl; */
 
-        printf("Heuristic lower bound = %g\n", relaxval);
+        //printf("Heuristic lower bound = %g\n", relaxval);
         *lowerbound = relaxval;
         *result = SCIP_SUCCESS;
     }
