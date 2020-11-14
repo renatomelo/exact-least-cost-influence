@@ -515,7 +515,7 @@ typedef Digraph::NodeMap<GRBVar> DNodeGRBVarMap;
 typedef Digraph::NodeMap<vector<GRBInfluencingSet>> GRBInfSetsMap;
 
 /**
- * Integer linear program to find the maximally violated inequality using SUBSCIP as solver
+ * Integer linear program to find the maximally violated inequality using Gurobi as solver
  */
 SCIP_RETCODE GeneralizedPropagation::exactSeparationGrbModel(
     SCIP *scip,

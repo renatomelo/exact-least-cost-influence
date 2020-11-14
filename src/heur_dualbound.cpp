@@ -11,7 +11,7 @@ HeurDualBound::HeurDualBound(
                  "heuristic-dual-bound",
                  "Heuristic dual bound for GLCIP",
                  -1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
-                 1,     //frequency for calling relaxator
+                 1,      //frequency for calling relaxator
                  FALSE), //Does the relaxator contain all cuts in the LP?
         instance(p_instance),
         x(p_x),
@@ -360,10 +360,10 @@ void getSubGraph(
             cout << "different bounds for the transformed var\n";
             exit(0);
         } */
-        
+
         if (SCIPisEQ(scip, SCIPvarGetUbLocal(z[arcRef[a]]), 0))
         {
-            
+
             //removing arc variables fixed in zero
             graph.erase(a);
         }
@@ -414,13 +414,11 @@ double getCostInTopologicalOrdering(
     Digraph &condensed,
     int nComponents,
     vector<double> thr,
-    ArcValueMap &arcWeight)
+    ArcValueMap &arcWeight,
+    vector<double> condIncentives)
 {
-    // start wiht empty solution
-    set<DNode> actives;
 
     //linear time algorithm to solve the problem in DAGs
-    vector<double> incentives(nComponents);
     double total = 0;
     for (int i = 0; i < nComponents; i++)
     {
@@ -434,18 +432,21 @@ double getCostInTopologicalOrdering(
         //cout << "condensed node id = " << condensed.id(condensed.nodeFromId(i)) << ", index = " << i << endl;
 
         //cout << "sum = " << sum << " thr = " << thr[i] << endl;
-        if (sum >= thr[i])
+        if (sum < thr[i])
         {
-            actives.insert(condensed.nodeFromId(i));
-            incentives[i] = 0;
+            double p = 0;
+            for (double j : condIncentives)
+            {
+                if (sum + j >= thr[i])
+                {
+                    p = j;
+                    break;
+                }
+            }
+
+            total += p;
+            //cout << "paying incentive of: " << p << " to " << i << endl;
         }
-        else
-        {
-            incentives[i] = thr[i] - sum;
-            actives.insert(condensed.nodeFromId(i));
-            //cout << "paying incentive of: " << incentives[i] << " to " << i << endl;
-        }
-        total += incentives[i];
     }
 
     return total;
@@ -562,8 +563,20 @@ SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
         thr = getCondensedThresholds(instance, listOfComponents, nComponents);
         //printCondensedArcs(condensed, arcWeight);
 
+        //just to record the possible incentives (assuming that they are the same for every vertex)
+        vector<double> condIncentives;
+        for (DNodeIt v(instance.g); v != INVALID; ++v)
+        {
+            condIncentives = instance.incentives[v];
+            break; // only one arbitrary vertex is needed
+        }
+        /* cout << "incentives: ";
+        for (double i : condIncentives)
+            cout << " " << i;
+        cout << endl; */
+
         //linear time algorithm to solve the problem in DAGs
-        relaxval = getCostInTopologicalOrdering(condensed, nComponents, thr, arcWeight);
+        relaxval = getCostInTopologicalOrdering(condensed, nComponents, thr, arcWeight, condIncentives);
 
         //add the cut arc as external branching candidate
         //show the current external candidates

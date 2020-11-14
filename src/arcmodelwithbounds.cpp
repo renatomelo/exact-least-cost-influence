@@ -4,6 +4,7 @@
 #include "heur_greedy_construction.h"
 #include "presolver_glcip.h"
 #include "binary_branch.h"
+#include "extended_dualbound.h"
 
 bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
@@ -116,9 +117,10 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //SCIP_CALL(SCIPincludeObjHeur(scip, greedy, TRUE));
 
     //include combinatorial relaxation
-    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
+    //SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
     //SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z), TRUE));
     
 
     // bound the execution time
