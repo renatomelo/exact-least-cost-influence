@@ -9,3 +9,4 @@
 *.creator
 *.includes
 packages.microsoft.gpg
+src/lemon/
