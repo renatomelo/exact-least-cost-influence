@@ -236,7 +236,7 @@ double ExtendedDualBound::getCostInTopologicalOrdering(
     int nComponents,
     DNodeValueMap &thr,
     ArcValueMap &arcWeight,
-    vector<double> condIncentives)
+    vector<double> incentives)
 {
 
     //linear time algorithm to solve the problem in DAGs
@@ -257,7 +257,7 @@ double ExtendedDualBound::getCostInTopologicalOrdering(
         if (sum < thr[v])
         {
             double p = 0;
-            for (double j : condIncentives)
+            for (double j : incentives)
             {
                 if (sum + j >= thr[v])
                 {
@@ -272,25 +272,6 @@ double ExtendedDualBound::getCostInTopologicalOrdering(
     }
 
     return total;
-}
-
-bool ExtendedDualBound::isIntegral(SCIP *scip)
-{
-    bool integral = TRUE;
-    for (ArcIt a(instance.g); a != INVALID; ++a)
-    {
-        if (!SCIPisIntegral(scip, SCIPgetVarSol(scip, z[a])))
-        {
-            integral = FALSE;
-            //cout << SCIPvarGetName(z[a]) << " = " << SCIPgetVarSol(scip, z[a]) << endl;
-        }
-    }
-
-    if (!integral)
-    {
-        cout << "fractional solution\n";
-    }
-    return integral;
 }
 
 //maps of gurobi variables
@@ -339,17 +320,15 @@ double ExtendedDualBound::exactWLCIPonDAG(
         //its threshold minus the incentive
         for (DNodeIt v(graph); v != INVALID; ++v)
         {
+            GRBLinExpr lhs;
+
             for (size_t i = 0; i < incentives.size(); i++)
-            {
-                GRBLinExpr lhs;
-
-                for (InArcIt a(graph, v); a != INVALID; ++a)
-                    lhs += arcWeight[a] * active[graph.source(a)];
-
                 lhs += incentives[i] * xvp[v][i];
 
-                model.addConstr(lhs, GRB_GREATER_EQUAL, thr[v] * active[v], "thr-constraint");
-            }
+            for (InArcIt a(graph, v); a != INVALID; ++a)
+                lhs += arcWeight[a] * active[graph.source(a)];
+
+            model.addConstr(lhs, GRB_GREATER_EQUAL, thr[v] * active[v], "thr-constraint");
         }
 
         //linking constraints
@@ -375,7 +354,7 @@ double ExtendedDualBound::exactWLCIPonDAG(
         obj = model.get(GRB_DoubleAttr_ObjVal);
 
         //getting the active vertices of "graph"
-        cout << "active vertices:";
+        /* cout << "active vertices:";
         for (DNodeIt v(graph); v != INVALID; ++v)
         {
             if (SCIPisPositive(scip, active[v].get(GRB_DoubleAttr_X)))
@@ -397,7 +376,7 @@ double ExtendedDualBound::exactWLCIPonDAG(
         }
 
         cout << "obj = " << obj << endl;
-        cout << endl;
+        cout << endl; */
     }
     catch (GRBException e)
     {
@@ -522,24 +501,41 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
     ArcArcMap arcRef(graph);      //save the reference to the original arc
     getSubGraph(scip, graph, nodeRef, arcRef);
 
-    //getMinimumCut(scip, instance, graph, nodeRef, arcRef, z);
+    vector<double> incentives;
+    for (DNodeIt v(instance.g); v != INVALID; ++v)
+    {
+        incentives = instance.incentives[v];
+        break; // only one arbitrary vertex is needed
+    }
 
     if (stronglyConnected(graph))
     {
-        //cout << "assossiated subgraph is strongly connected\n";
+        cout << "assossiated subgraph is strongly connected\n";
         //find minimum threshold vertex
         DNode node = INVALID;
-        relaxval = getMinimumThreshold(node);
+        double minThr = getMinimumThreshold(node);
+
+        relaxval = minThr;
+        for (double j : incentives)
+        {
+            if (j >= minThr)
+            {
+                relaxval = j;
+                break;
+            }
+        }
 
         //printf("Heuristic lower bound = %g\n", relaxval);
-        *lowerbound = relaxval;
-        *result = SCIP_SUCCESS;
+        /* *lowerbound = relaxval;
+        *result = SCIP_SUCCESS; */
     }
     else
     {
         int nComponents = countStronglyConnectedComponents(graph);
-        cout << "assossiated subgraph isn't strongly connected: ";
+        /* cout << "assossiated subgraph isn't strongly connected: ";
         cout << nComponents << " components\n";
+
+        cout << "current node of the three: " << SCIPnodeGetNumber(SCIPgetCurrentNode(scip)) << endl; */
 
         Digraph condensed;
         vector<vector<DNode>> listOfComponents(nComponents);
@@ -551,13 +547,6 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
         getCondensedArcWeights(condensed, graph, arcRef, arcWeight, components);
         getCondensedThresholds(condensed, listOfComponents, nComponents, thr);
         //printCondensedArcs(condensed, arcWeight);
-
-        vector<double> incentives;
-        for (DNodeIt v(instance.g); v != INVALID; ++v)
-        {
-            incentives = instance.incentives[v];
-            break; // only one arbitrary vertex is needed
-        }
 
         if (instance.alpha < 1)
         {
@@ -572,24 +561,38 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
                 //cout << condensed.id(v) << "'s weight: " << w[v] << endl;
             }
 
-            //count the number of vertices in the subgraph associated to the BnB node
-            /* int n = 0;
-            for (DNodeIt v(graph); v != INVALID; ++v)
-                n++; */
-            //TODO implement the ILP model in gurobi to solve the subproblem
+            //implement the ILP model in gurobi to solve the subproblem
             //relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w);
             relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w, incentives);
+
+            //TODO compare this relaxval with the obtained by the minimum threshold
+            DNode node = INVALID;
+            double minThr = getMinimumThreshold(node);
+
+            double m = minThr;
+            for (double j : incentives)
+            {
+                if (j >= minThr)
+                {
+                    m = j;
+                    break;
+                }
+            }
+
+            /* if (relaxval > m)
+                cout << "the solution of the ILP model is greater than the incentive to the minimum threshol vertex\n"; */
+            
         }
         else
         {
             //linear time algorithm to solve the problem in DAGs for alpha = 1
             relaxval = getCostInTopologicalOrdering(condensed, nComponents, thr, arcWeight, incentives);
         }
-
-        //printf("Heuristic lower bound = %g\n", relaxval);
-        *lowerbound = relaxval;
-        *result = SCIP_SUCCESS;
     }
+
+    //printf("Heuristic lower bound = %g\n", relaxval);
+    *lowerbound = relaxval;
+    *result = SCIP_SUCCESS;
 
     return SCIP_OKAY;
 }

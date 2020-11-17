@@ -119,7 +119,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //include combinatorial relaxation
     //SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
     //SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
-    SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
+    //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z), TRUE));
     
 

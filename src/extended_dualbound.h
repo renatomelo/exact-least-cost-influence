@@ -67,8 +67,6 @@ public:
         ArcValueMap &arcWeight,
         vector<double> condIncentives);
 
-    bool isIntegral(SCIP *scip);
-
     double exactWLCIPonDAG(
         SCIP *scip,
         Digraph &graph,
