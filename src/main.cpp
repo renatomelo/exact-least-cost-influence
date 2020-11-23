@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     readCheckParams(params, argc, argv);
 
     // read instance from file
-    readInstance(g, nodeName, posx, posy, influence, threshold, incentives, n, m, "../in/" + params.inputFile);
+    readInstance(g, nodeName, posx, posy, influence, threshold, incentives, n, m, params.inputFile);
     GLCIPInstance instance(g, nodeName, posx, posy, influence, threshold, incentives, params.alpha, n, m);
 
     // solve it
