@@ -3,7 +3,8 @@ import networkx as nx
 import random
 import math
 
-H = snap.GenForestFire(100, 0.5, 0.5)
+#H = snap.GenForestFire(200, 0.9, 0.1)
+H = snap.GenCopyModel(200, .5)
 
 #for v in SG.Nodes():
     #print(v.GetId())
@@ -22,13 +23,20 @@ for e in H.Edges():
     #G.add_edge(e.GetSrcNId(), e.GetDstNId())
 
 #removing selfloops of G
-for u,v in list(G.edges()):
+""" for u,v in list(G.edges()):
     if(u==v):
         G.remove_edge(u,v)
-        print("removing selfloop from ", u)
+        print("removing selfloop from ", u) """
 
 print("nnodes narcs type")
 print(len(G.nodes()), len(G.edges()), "digraph")
+
+#TODO verify if G is acyclic
+if(nx.is_directed_acyclic_graph(G)):
+    print("Is DAG")
+else:
+    print("NOT a DAG")
+exit(0)
 
 #setting the thresholds on vertices
 thr = list()

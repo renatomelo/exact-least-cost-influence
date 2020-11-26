@@ -6,6 +6,46 @@
 #include "binary_branch.h"
 #include "extended_dualbound.h"
 
+//desabling SCIP's default presolvers
+SCIP_RETCODE disableDefaultPresol(SCIP *scip)
+{
+    SCIP_PRESOL **presolvers = SCIPgetPresols(scip);
+    for (int i = 0; i < SCIPgetNPresols(scip); i++)
+    {
+        //cout << "disabling presolver: " << SCIPpresolGetName(presolvers[i]) << endl;
+        string name = SCIPpresolGetName(presolvers[i]);
+        string str = "presolving/" + name + "/maxrounds";
+        SCIP_CALL(SCIPsetIntParam(scip, str.c_str(), 0));
+    }
+
+     //desabling presolvers of default constraint handlers
+    SCIP_CONSHDLR **conshdlrs = SCIPgetConshdlrs(scip);
+    for (int i = 0; i < SCIPgetNConshdlrs(scip); i++)
+    {
+        if (SCIPconshdlrDoesPresolve(conshdlrs[i]))
+        {
+            //cout << "disabling conshdlr presolver: " << SCIPconshdlrGetName(conshdlrs[i]) << endl;
+            string name = SCIPconshdlrGetName(conshdlrs[i]);
+            string str = "constraints/" + name + "/maxprerounds";
+            SCIP_CALL(SCIPsetIntParam(scip, str.c_str(), 0));
+        }
+    }
+
+    SCIP_PROP** propagators = SCIPgetProps(scip);
+    for (int i = 0; i < SCIPgetNProps(scip); i++)
+    {
+        if (SCIPpropDoesPresolve(propagators[i]))
+        {
+            //cout << "disabling propagator presolver: " << SCIPpropGetName(propagators[i]) << endl;
+            string name = SCIPpropGetName(propagators[i]);
+            string str = "propagating/" + name + "/maxprerounds";
+            SCIP_CALL(SCIPsetIntParam(scip, str.c_str(), 0));
+        }
+    }
+
+    return SCIP_OKAY;
+}
+
 bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     //SCIP variables and initialization
@@ -19,11 +59,16 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
     SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
-    SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
+    SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "../bnb_viewer/bnb.vbc"));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
     //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, FALSE);
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
+    if (instance.alpha < 1)
+        SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    else
+        disableDefaultPresol(scip);
+
     /* SCIPincludeConshdlrLinear(scip);
     SCIPincludeNodeselBfs(scip);
     SCIPincludeConshdlrIntegral(scip); */
@@ -41,8 +86,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
 
         for (unsigned int p = 0; p < instance.incentives[v].size(); p++)
         {
-            var = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," 
-                                            + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
+            var = new ScipBinVar(scip, "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]), instance.incentives[v][p]);
             xip[v].push_back(var->var);
             //std::cout << "x_" + instance.nodeName[v] + "," + to_string(instance.incentives[v][p]) << endl;
         }
@@ -118,10 +162,9 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
 
     //include combinatorial relaxation
     //SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
-    //SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
     //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z), TRUE));
-    
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

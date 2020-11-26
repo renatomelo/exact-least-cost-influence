@@ -487,7 +487,7 @@ double ExtendedDualBound::exactWLCIPonDAG(
 
 SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
 {
-    //cout << "RELAXEXEC()" << endl;
+    cout << "RELAXEXEC()" << endl;
 
     SCIP_Real relaxval;
 
@@ -525,17 +525,17 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
             }
         }
 
-        //printf("Heuristic lower bound = %g\n", relaxval);
+        //printf("lower bound = %g\n", relaxval);
         /* *lowerbound = relaxval;
         *result = SCIP_SUCCESS; */
     }
     else
     {
         int nComponents = countStronglyConnectedComponents(graph);
-        /* cout << "assossiated subgraph isn't strongly connected: ";
+        cout << "assossiated subgraph isn't strongly connected: ";
         cout << nComponents << " components\n";
 
-        cout << "current node of the three: " << SCIPnodeGetNumber(SCIPgetCurrentNode(scip)) << endl; */
+        //cout << "current node of the three: " << SCIPnodeGetNumber(SCIPgetCurrentNode(scip)) << endl;
 
         Digraph condensed;
         vector<vector<DNode>> listOfComponents(nComponents);
@@ -563,7 +563,7 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
 
             //implement the ILP model in gurobi to solve the subproblem
             //relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w);
-            relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w, incentives);
+            //relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w, incentives);
 
             //TODO compare this relaxval with the obtained by the minimum threshold
             DNode node = INVALID;
@@ -579,9 +579,10 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
                 }
             }
 
+            relaxval = m;
+
             /* if (relaxval > m)
                 cout << "the solution of the ILP model is greater than the incentive to the minimum threshol vertex\n"; */
-            
         }
         else
         {
@@ -590,7 +591,12 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
         }
     }
 
-    //printf("Heuristic lower bound = %g\n", relaxval);
+    if (dag(instance.g))
+        cout << "instance.g is a DAG" << endl;
+    if (dag(graph))
+        cout << "subgraph is a DAG" << endl;
+
+    printf("lower bound = %g\n", relaxval);
     *lowerbound = relaxval;
     *result = SCIP_SUCCESS;
 
