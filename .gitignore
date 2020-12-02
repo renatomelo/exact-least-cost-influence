@@ -7,3 +7,4 @@ packages.microsoft.gpg
 src/lemon/
 .vscode/
 bin/
+*.vbc

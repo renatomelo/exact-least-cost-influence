@@ -1,5 +1,5 @@
 #include "GLCIPBase.h"
-#include "heur_dualbound.h"
+#include "dualbound.h"
 #include "heur_ordering.h"
 
 bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)

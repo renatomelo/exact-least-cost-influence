@@ -7,7 +7,7 @@
 #include "degreecons.h"
 #include "generalizedpropagationcons.h"
 #include "heur_mininfluence.h"
-#include "heur_dualbound.h"
+#include "dualbound.h"
 #include "presolver_glcip.h"
 
 using namespace degreecons;
@@ -629,7 +629,7 @@ bool CovModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPincludeObjHeur(scip, primalHeur, TRUE));
 
     //include combinatorial relaxation
-    SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjRelax(scip, new DualBound(scip, instance, x, z), TRUE));
 
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));
     SCIP_CALL(SCIPsolve(scip));

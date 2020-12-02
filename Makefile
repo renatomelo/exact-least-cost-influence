@@ -64,7 +64,7 @@ MAINOBJ		=	mycolor.o \
 				event_glcip.o \
 				generalizedpropagationcons.o \
 				heur_mininfluence.o \
-				heur_dualbound.o \
+				dualbound.o \
 				heur_ordering.o \
 				heur_greedy_construction.o \
 				binary_branch.o \

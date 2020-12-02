@@ -1,9 +1,9 @@
-#ifndef __HEURDUALBOUND_H__
-#define __HEURDUALBOUND_H__
+#ifndef __DUALBOUND_H__
+#define __DUALBOUND_H__
 
 #include "GLCIPBase.h"
 
-class HeurDualBound : public scip::ObjRelax
+class DualBound : public scip::ObjRelax
 {
     GLCIPInstance &instance; /**< the instance for GLCIP */
     DNodeSCIPVarMap &x;
@@ -13,7 +13,7 @@ class HeurDualBound : public scip::ObjRelax
 
 public:
     // default constructor
-    HeurDualBound(
+    DualBound(
         SCIP *scip,
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
@@ -21,7 +21,7 @@ public:
     //    DNodeSCIPVarsMap &p_xip
     );
     //destructor
-    virtual ~HeurDualBound() {}
+    virtual ~DualBound() {}
 
     virtual SCIP_DECL_RELAXFREE(scip_free);
     virtual SCIP_DECL_RELAXINIT(scip_init);

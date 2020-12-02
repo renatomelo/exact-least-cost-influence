@@ -71,13 +71,14 @@ SCIP_DECL_CONSSEPALP(CycleCutsGenerator::scip_sepalp)
     //cout << "(GCC) consepalp\n";
     //bool feasible = true;
     SCIP_CALL(findCycleCuts(scip, conshdlr, NULL, result));
+    //cout << "result = " << *result << endl;
     return SCIP_OKAY;
 }
 
 // separation method of constraint handler for arbitrary primal solution
 SCIP_DECL_CONSSEPASOL(CycleCutsGenerator::scip_sepasol)
 {
-    //cout << "consepasol\n";
+    cout << "consepasol\n";
     //bool feasible = true;
     SCIP_CALL(findCycleCuts(scip, conshdlr, sol, result));
     return SCIP_OKAY;
@@ -121,6 +122,7 @@ SCIP_DECL_CONSCHECK(CycleCutsGenerator::scip_check)
 {
     //cout << "conscheck\n";
     bool check = isValid(scip, sol);
+    //if(!check) cout << "isn't valid" << endl;
     if (check)
         *result = SCIP_FEASIBLE;
     else

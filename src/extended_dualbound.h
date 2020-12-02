@@ -3,7 +3,7 @@
 
 #include "GLCIPBase.h"
 #include "/opt/gurobi810/linux64/include/gurobi_c++.h"
-//If the linking process causes "undefined reference", the solution is here: 
+//If the linking process causes "undefined reference", the solution is here:
 //https://support.gurobi.com/hc/en-us/articles/360039093112-How-do-I-resolve-undefined-reference-errors-while-linking-Gurobi-in-C-
 
 class ExtendedDualBound : public scip::ObjRelax
@@ -11,7 +11,7 @@ class ExtendedDualBound : public scip::ObjRelax
     GLCIPInstance &instance; /**< the instance for GLCIP */
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
-    //  DNodeSCIPVarsMap &xip;
+    DNodeSCIPVarsMap &xip;
     SCIP_SOL *sol_; /**< current solution */
     GRBEnv *env;
 
@@ -21,9 +21,8 @@ public:
         SCIP *scip,
         GLCIPInstance &p_instance,
         DNodeSCIPVarMap &p_x,
-        ArcSCIPVarMap &p_z
-        //    DNodeSCIPVarsMap &p_xip
-    );
+        ArcSCIPVarMap &p_z,
+        DNodeSCIPVarsMap &p_xip);
     //destructor
     virtual ~ExtendedDualBound() { delete env; }
 
@@ -83,6 +82,18 @@ public:
         ArcValueMap &arcWeight,
         DNodeValueMap &thr,
         DNodeIntMap &w);
+
+    SCIP_RETCODE setRelaxedSol(
+        SCIP *scip,
+        set<DNode> seeds);
+
+    SCIP_RETCODE setRelaxedSol2(
+        SCIP *scip,
+        set<DNode> seeds);
+
+    double getMinIncentiveNode(
+        set<DNode> actives,
+        DNode &node);
 
     /** execution method of relaxator
      *

@@ -1,5 +1,5 @@
 #include "GLCIPBase.h"
-#include "heur_dualbound.h"
+#include "dualbound.h"
 #include "heur_ordering.h"
 #include "heur_greedy_construction.h"
 #include "presolver_glcip.h"
@@ -62,12 +62,12 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "../bnb_viewer/bnb.vbc"));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, FALSE);
+    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     //SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
-    if (instance.alpha < 1)
+    /* if (instance.alpha < 1)
         SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     else
-        disableDefaultPresol(scip);
+        disableDefaultPresol(scip); */
 
     /* SCIPincludeConshdlrLinear(scip);
     SCIPincludeNodeselBfs(scip);
@@ -164,7 +164,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
     //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
-    SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z, xip), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

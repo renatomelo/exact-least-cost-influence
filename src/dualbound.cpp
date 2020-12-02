@@ -1,7 +1,7 @@
-#include "heur_dualbound.h"
+#include "dualbound.h"
 #include <lemon/hao_orlin.h>
 
-HeurDualBound::HeurDualBound(
+DualBound::DualBound(
     SCIP *scip,
     GLCIPInstance &p_instance,
     DNodeSCIPVarMap &p_x,
@@ -21,31 +21,31 @@ HeurDualBound::HeurDualBound(
 {
 }
 
-SCIP_DECL_RELAXFREE(HeurDualBound::scip_free)
+SCIP_DECL_RELAXFREE(DualBound::scip_free)
 {
     //cout << "RELAXFREE()" << endl;
     return SCIP_OKAY;
 }
 
-SCIP_DECL_RELAXINIT(HeurDualBound::scip_init)
+SCIP_DECL_RELAXINIT(DualBound::scip_init)
 {
     //cout << "RELAXEINIT()" << endl;
     return SCIP_OKAY;
 }
 
-SCIP_DECL_RELAXEXIT(HeurDualBound::scip_exit)
+SCIP_DECL_RELAXEXIT(DualBound::scip_exit)
 {
     //cout << "RELAXEXIT()" << endl;
     return SCIP_OKAY;
 }
 
-SCIP_DECL_RELAXINITSOL(HeurDualBound::scip_initsol)
+SCIP_DECL_RELAXINITSOL(DualBound::scip_initsol)
 {
     //cout << "RELAXINITSOL()" << endl;
     return SCIP_OKAY;
 }
 
-SCIP_DECL_RELAXEXITSOL(HeurDualBound::scip_exitsol)
+SCIP_DECL_RELAXEXITSOL(DualBound::scip_exitsol)
 {
     //cout << "RELAXEXITSOL()" << endl;
     return SCIP_OKAY;
@@ -510,7 +510,7 @@ SCIP_RETCODE setRelaxedSol(
     return SCIP_OKAY;
 }
 
-SCIP_DECL_RELAXEXEC(HeurDualBound::scip_exec)
+SCIP_DECL_RELAXEXEC(DualBound::scip_exec)
 {
     //cout << "RELAXEXEC()" << endl;
 
