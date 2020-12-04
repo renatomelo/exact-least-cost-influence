@@ -63,7 +63,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 5));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 0));
     //SCIP_CALL(SCIPsetIntParam(scip, "display/dualbound/active", 2));
     //SCIP_CALL(SCIPsetBoolParam(scip, "display/lpinfo", true));
     //SCIP_CALL(SCIPsetIntParam(scip, "display/freq", 10));
@@ -71,12 +71,12 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "../bnb_viewer/bnb.vbc"));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     //SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
-    /* if (instance.alpha < 1)
+    if (instance.alpha < 1)
         SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     else
-        disableDefaultPresol(scip); */
+        disableDefaultPresol(scip);
 
     /* SCIPincludeConshdlrLinear(scip);
     SCIPincludeNodeselBfs(scip);
@@ -171,8 +171,8 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
 
     //include combinatorial relaxation
     //SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
-    //SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
-    //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z, xip), TRUE));
 
     // bound the execution time
@@ -186,9 +186,8 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //reached time limit
     if (SCIPgetStatus(scip) == SCIP_STATUS_TIMELIMIT)
     {
-        printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip),
+        printf("%.2lf\t%lld\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip),
                SCIPgetNNodes(scip),
-               SCIPgetNContVars(scip),
                SCIPgetDualbound(scip),
                SCIPgetPrimalbound(scip),
                SCIPgetGap(scip));
@@ -196,9 +195,8 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     }
 
     //cout << "time \tnodes \tdualbound \tprimalbound \tgap" << endl;
-    printf("%.2lf\t%lld\t%d\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip),
+    printf("%.2lf\t%lld\t%lf\t%lf\t%.2lf\n", SCIPgetSolvingTime(scip),
            SCIPgetNNodes(scip),
-           SCIPgetNContVars(scip),
            SCIPgetDualbound(scip),
            SCIPgetPrimalbound(scip),
            SCIPgetGap(scip));

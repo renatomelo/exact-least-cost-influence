@@ -31,7 +31,7 @@ void printArc(GLCIPInstance &instance, Arc a)
 // see later: https://www.scipopt.org/doc/html/presol__trivial_8c_source.php#l00067
 SCIP_DECL_PRESOLEXEC(PresolverGLCIP::scip_exec)
 {
-    cout << "--------- PRESOLVER -----------------\n";
+    //cout << "--------- PRESOLVER -----------------\n";
     int count = 0;
     SCIP_Bool infeasible;
     SCIP_Bool fixed;
