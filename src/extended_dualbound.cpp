@@ -649,18 +649,18 @@ SCIP_RETCODE ExtendedDualBound::setRelaxedSol2(
 
 SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
 {
-    //cout << "RELAXEXEC()" << endl;
+    //cout << "RELAXEXEC " << ", Focus Depth: " << SCIPgetFocusDepth(scip) << endl;
 
     SCIP_Real relaxval;
 
     *result = SCIP_DIDNOTRUN;
-    /* if (dag(instance.g))
+    *lowerbound = -SCIPinfinity(scip);
+
+    /* if (SCIPgetFocusDepth(scip) == 0)
     {
-        //the input graph is a DAG, so we don't need a lower bound because the problem is trivial in this case
+        cout << "skiping the root node\n";
         return SCIP_OKAY;
     } */
-
-    *lowerbound = -SCIPinfinity(scip);
 
     //get the support graph of the current feasible solution
     Digraph graph;
@@ -711,8 +711,8 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
     else
     {
         int nComponents = countStronglyConnectedComponents(graph);
-        cout << "assossiated subgraph isn't strongly connected: ";
-        cout << nComponents << " components\n";
+        /* cout << "assossiated subgraph isn't strongly connected: ";
+        cout << nComponents << " components\n"; */
 
         //cout << "current node of the three: " << SCIPnodeGetNumber(SCIPgetCurrentNode(scip)) << endl;
 

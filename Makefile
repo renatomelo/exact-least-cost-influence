@@ -59,9 +59,6 @@ MAINOBJ		=	mycolor.o \
 				covmodelallvariables.o \
 				pricer_glcip.o \
 				covmodel.o \
-				degreecons.o \
-				branch_glcip.o \
-				event_glcip.o \
 				generalizedpropagationcons.o \
 				heur_mininfluence.o \
 				dualbound.o \

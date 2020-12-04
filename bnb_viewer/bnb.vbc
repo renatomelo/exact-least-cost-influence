@@ -3,927 +3,927 @@
 #BOUNDS: SET
 #INFORMATION: STANDARD
 #NODE_NUMBER: NONE
-00:00:00.07 N 0 1 3
-00:00:00.07 I 1 \inode:\t1 (0x7f81a9d94968)\idepth:\t0\nvar:\t-\nbound:\t-100000000000000000000.000000
-00:00:00.08 P 1 11
-00:00:00.18 P 1 15
-00:00:00.28 U 339.750000
-00:00:01.47 I 1 \inode:\t1 (0x7f81a9d94968)\idepth:\t0\nvar:\t-\nbound:\t5.062500
-00:00:01.47 N 1 2 3
-00:00:01.47 I 2 \inode:\t2 (0x7f81a8cfe728)\idepth:\t1\nvar:\t-\nbound:\t5.062500
-00:00:01.47 I 2 \inode:\t2 (0x7f81a8cfe728)\idepth:\t1\nvar:\tt_z_21,18 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.47 N 1 3 3
-00:00:01.47 I 3 \inode:\t3 (0x7f81a8cfe128)\idepth:\t1\nvar:\t-\nbound:\t5.062500
-00:00:01.47 I 3 \inode:\t3 (0x7f81a8cfe128)\idepth:\t1\nvar:\tt_z_21,18 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.47 I 1 \inode:\t1 (0x7f81a9d94968)\idepth:\t0\nvar:\t-\nbound:\t5.062500\nnr:\t1
-00:00:01.47 P 1 2
-00:00:01.52 I 3 \inode:\t3 (0x7f81a8cfe128)\idepth:\t1\nvar:\tt_z_21,18 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.52 N 3 4 3
-00:00:01.52 I 4 \inode:\t4 (0x7f81a8d012e8)\idepth:\t2\nvar:\t-\nbound:\t5.062500
-00:00:01.52 I 4 \inode:\t4 (0x7f81a8d012e8)\idepth:\t2\nvar:\tt_z_18,6 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.52 N 3 5 3
-00:00:01.52 I 5 \inode:\t5 (0x7f81a8cfe928)\idepth:\t2\nvar:\t-\nbound:\t5.062500
-00:00:01.52 I 5 \inode:\t5 (0x7f81a8cfe928)\idepth:\t2\nvar:\tt_z_18,6 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.52 I 3 \inode:\t3 (0x7f81a8cfe128)\idepth:\t1\nvar:\tt_z_21,18 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t2
-00:00:01.52 P 3 2
-00:00:01.57 I 5 \inode:\t5 (0x7f81a8cfe928)\idepth:\t2\nvar:\tt_z_18,6 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.57 N 5 6 3
-00:00:01.57 I 6 \inode:\t6 (0x7f81a8d012a8)\idepth:\t3\nvar:\t-\nbound:\t5.062500
-00:00:01.57 I 6 \inode:\t6 (0x7f81a8d012a8)\idepth:\t3\nvar:\tt_z_25,21 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.57 N 5 7 3
-00:00:01.57 I 7 \inode:\t7 (0x7f81a8d01228)\idepth:\t3\nvar:\t-\nbound:\t5.062500
-00:00:01.57 I 7 \inode:\t7 (0x7f81a8d01228)\idepth:\t3\nvar:\tt_z_25,21 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.57 I 5 \inode:\t5 (0x7f81a8cfe928)\idepth:\t2\nvar:\tt_z_18,6 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t3
-00:00:01.57 P 5 2
-00:00:01.60 I 7 \inode:\t7 (0x7f81a8d01228)\idepth:\t3\nvar:\tt_z_25,21 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.60 N 7 8 3
-00:00:01.60 I 8 \inode:\t8 (0x7f81a8d03468)\idepth:\t4\nvar:\t-\nbound:\t5.062500
-00:00:01.60 I 8 \inode:\t8 (0x7f81a8d03468)\idepth:\t4\nvar:\tt_z_50,29 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.60 N 7 9 3
-00:00:01.60 I 9 \inode:\t9 (0x7f81a8d00ee8)\idepth:\t4\nvar:\t-\nbound:\t5.062500
-00:00:01.60 I 9 \inode:\t9 (0x7f81a8d00ee8)\idepth:\t4\nvar:\tt_z_50,29 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.60 I 7 \inode:\t7 (0x7f81a8d01228)\idepth:\t3\nvar:\tt_z_25,21 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t4
-00:00:01.60 P 7 2
-00:00:01.61 I 9 \inode:\t9 (0x7f81a8d00ee8)\idepth:\t4\nvar:\tt_z_50,29 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.61 N 9 10 3
-00:00:01.61 I 10 \inode:\t10 (0x7f81a8d011e8)\idepth:\t5\nvar:\t-\nbound:\t5.062500
-00:00:01.61 I 10 \inode:\t10 (0x7f81a8d011e8)\idepth:\t5\nvar:\tt_z_13,25 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.61 N 9 11 3
-00:00:01.61 I 11 \inode:\t11 (0x7f81a8d02ce8)\idepth:\t5\nvar:\t-\nbound:\t5.062500
-00:00:01.61 I 11 \inode:\t11 (0x7f81a8d02ce8)\idepth:\t5\nvar:\tt_z_13,25 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.61 I 9 \inode:\t9 (0x7f81a8d00ee8)\idepth:\t4\nvar:\tt_z_50,29 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t5
-00:00:01.61 P 9 2
-00:00:01.64 I 11 \inode:\t11 (0x7f81a8d02ce8)\idepth:\t5\nvar:\tt_z_13,25 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.64 N 11 12 3
-00:00:01.64 I 12 \inode:\t12 (0x7f81a8d03828)\idepth:\t6\nvar:\t-\nbound:\t5.062500
-00:00:01.64 I 12 \inode:\t12 (0x7f81a8d03828)\idepth:\t6\nvar:\tt_z_39,13 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.64 N 11 13 3
-00:00:01.64 I 13 \inode:\t13 (0x7f81a8d00f28)\idepth:\t6\nvar:\t-\nbound:\t5.062500
-00:00:01.64 I 13 \inode:\t13 (0x7f81a8d00f28)\idepth:\t6\nvar:\tt_z_39,13 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.64 I 11 \inode:\t11 (0x7f81a8d02ce8)\idepth:\t5\nvar:\tt_z_13,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t6
-00:00:01.64 P 11 2
-00:00:01.71 I 13 \inode:\t13 (0x7f81a8d00f28)\idepth:\t6\nvar:\tt_z_39,13 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.71 N 13 14 3
-00:00:01.71 I 14 \inode:\t14 (0x7f81a8d013a8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
-00:00:01.71 I 14 \inode:\t14 (0x7f81a8d013a8)\idepth:\t7\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.71 N 13 15 3
-00:00:01.71 I 15 \inode:\t15 (0x7f81a8d00ae8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
-00:00:01.71 I 15 \inode:\t15 (0x7f81a8d00ae8)\idepth:\t7\nvar:\tt_z_37,35 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.71 I 13 \inode:\t13 (0x7f81a8d00f28)\idepth:\t6\nvar:\tt_z_39,13 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t7
-00:00:01.71 P 13 2
-00:00:01.75 I 15 \inode:\t15 (0x7f81a8d00ae8)\idepth:\t7\nvar:\tt_z_37,35 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.75 N 15 16 3
-00:00:01.75 I 16 \inode:\t16 (0x7f81a8d011a8)\idepth:\t8\nvar:\t-\nbound:\t5.062500
-00:00:01.75 I 16 \inode:\t16 (0x7f81a8d011a8)\idepth:\t8\nvar:\tt_z_38,39 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.75 N 15 17 3
-00:00:01.75 I 17 \inode:\t17 (0x7f81a8d006e8)\idepth:\t8\nvar:\t-\nbound:\t5.062500
-00:00:01.75 I 17 \inode:\t17 (0x7f81a8d006e8)\idepth:\t8\nvar:\tt_z_38,39 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.75 I 15 \inode:\t15 (0x7f81a8d00ae8)\idepth:\t7\nvar:\tt_z_37,35 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t8
-00:00:01.75 P 15 2
-00:00:01.77 I 17 \inode:\t17 (0x7f81a8d006e8)\idepth:\t8\nvar:\tt_z_38,39 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.77 N 17 18 3
-00:00:01.77 I 18 \inode:\t18 (0x7f81a8d02f28)\idepth:\t9\nvar:\t-\nbound:\t5.062500
-00:00:01.77 I 18 \inode:\t18 (0x7f81a8d02f28)\idepth:\t9\nvar:\tt_z_47,50 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.77 N 17 19 3
-00:00:01.77 I 19 \inode:\t19 (0x7f81a8d03fa8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
-00:00:01.77 I 19 \inode:\t19 (0x7f81a8d03fa8)\idepth:\t9\nvar:\tt_z_47,50 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.77 I 17 \inode:\t17 (0x7f81a8d006e8)\idepth:\t8\nvar:\tt_z_38,39 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t9
-00:00:01.77 P 17 2
-00:00:01.81 I 19 \inode:\t19 (0x7f81a8d03fa8)\idepth:\t9\nvar:\tt_z_47,50 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:01.81 N 19 20 3
-00:00:01.81 I 20 \inode:\t20 (0x7f81a8d030e8)\idepth:\t10\nvar:\t-\nbound:\t5.062500
-00:00:01.81 I 20 \inode:\t20 (0x7f81a8d030e8)\idepth:\t10\nvar:\tt_z_1,47 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:01.81 N 19 21 3
-00:00:01.81 I 21 \inode:\t21 (0x7f81a8d013e8)\idepth:\t10\nvar:\t-\nbound:\t5.062500
-00:00:01.81 I 21 \inode:\t21 (0x7f81a8d013e8)\idepth:\t10\nvar:\tt_z_1,47 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:01.81 I 19 \inode:\t19 (0x7f81a8d03fa8)\idepth:\t9\nvar:\tt_z_47,50 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t10
-00:00:01.81 P 19 2
-00:00:02.01 I 21 \inode:\t21 (0x7f81a8d013e8)\idepth:\t10\nvar:\tt_z_1,47 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.01 N 21 22 3
-00:00:02.01 I 22 \inode:\t22 (0x7f81a8cfe1e8)\idepth:\t11\nvar:\t-\nbound:\t5.062500
-00:00:02.01 I 22 \inode:\t22 (0x7f81a8cfe1e8)\idepth:\t11\nvar:\tt_z_36,3 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.01 N 21 23 3
-00:00:02.01 I 23 \inode:\t23 (0x7f81a8cfe228)\idepth:\t11\nvar:\t-\nbound:\t5.062500
-00:00:02.01 I 23 \inode:\t23 (0x7f81a8cfe228)\idepth:\t11\nvar:\tt_z_36,3 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.01 I 21 \inode:\t21 (0x7f81a8d013e8)\idepth:\t10\nvar:\tt_z_1,47 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t11
-00:00:02.01 P 21 2
-00:00:02.04 I 23 \inode:\t23 (0x7f81a8cfe228)\idepth:\t11\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.04 N 23 24 3
-00:00:02.04 I 24 \inode:\t24 (0x7f81a8cfeda8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
-00:00:02.04 I 24 \inode:\t24 (0x7f81a8cfeda8)\idepth:\t12\nvar:\tt_z_4,1 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.04 N 23 25 3
-00:00:02.04 I 25 \inode:\t25 (0x7f81a8d01728)\idepth:\t12\nvar:\t-\nbound:\t5.062500
-00:00:02.04 I 25 \inode:\t25 (0x7f81a8d01728)\idepth:\t12\nvar:\tt_z_4,1 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.04 I 23 \inode:\t23 (0x7f81a8cfe228)\idepth:\t11\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t12
-00:00:02.04 P 23 2
-00:00:02.11 I 25 \inode:\t25 (0x7f81a8d01728)\idepth:\t12\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.11 N 25 26 3
-00:00:02.11 I 26 \inode:\t26 (0x7f81a8d01768)\idepth:\t13\nvar:\t-\nbound:\t5.062500
-00:00:02.11 I 26 \inode:\t26 (0x7f81a8d01768)\idepth:\t13\nvar:\tt_z_27,4 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.11 N 25 27 3
-00:00:02.11 I 27 \inode:\t27 (0x7f81a8d017a8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
-00:00:02.11 I 27 \inode:\t27 (0x7f81a8d017a8)\idepth:\t13\nvar:\tt_z_27,4 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.11 I 25 \inode:\t25 (0x7f81a8d01728)\idepth:\t12\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t13
-00:00:02.11 P 25 2
-00:00:02.16 I 27 \inode:\t27 (0x7f81a8d017a8)\idepth:\t13\nvar:\tt_z_27,4 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.16 N 27 28 3
-00:00:02.16 I 28 \inode:\t28 (0x7f81a8d005e8)\idepth:\t14\nvar:\t-\nbound:\t5.062500
-00:00:02.16 I 28 \inode:\t28 (0x7f81a8d005e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.16 N 27 29 3
-00:00:02.16 I 29 \inode:\t29 (0x7f81a8d017e8)\idepth:\t14\nvar:\t-\nbound:\t5.062500
-00:00:02.16 I 29 \inode:\t29 (0x7f81a8d017e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.16 I 27 \inode:\t27 (0x7f81a8d017a8)\idepth:\t13\nvar:\tt_z_27,4 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t14
-00:00:02.16 P 27 2
-00:00:02.23 I 10 \inode:\t10 (0x7f81a8d011e8)\idepth:\t5\nvar:\tt_z_13,25 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:02.23 N 10 30 3
-00:00:02.23 I 30 \inode:\t30 (0x7f81a8d09328)\idepth:\t6\nvar:\t-\nbound:\t5.062500
-00:00:02.23 I 30 \inode:\t30 (0x7f81a8d09328)\idepth:\t6\nvar:\tt_z_18,14 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.23 N 10 31 3
-00:00:02.23 I 31 \inode:\t31 (0x7f81a8d09368)\idepth:\t6\nvar:\t-\nbound:\t5.062500
-00:00:02.23 I 31 \inode:\t31 (0x7f81a8d09368)\idepth:\t6\nvar:\tt_z_18,14 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.23 I 10 \inode:\t10 (0x7f81a8d011e8)\idepth:\t5\nvar:\tt_z_13,25 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t15
-00:00:02.23 P 10 2
-00:00:02.24 I 31 \inode:\t31 (0x7f81a8d09368)\idepth:\t6\nvar:\tt_z_18,14 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.24 N 31 32 3
-00:00:02.24 I 32 \inode:\t32 (0x7f81a8d093a8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
-00:00:02.24 I 32 \inode:\t32 (0x7f81a8d093a8)\idepth:\t7\nvar:\tt_z_28,25 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.24 N 31 33 3
-00:00:02.24 I 33 \inode:\t33 (0x7f81a8d093e8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
-00:00:02.24 I 33 \inode:\t33 (0x7f81a8d093e8)\idepth:\t7\nvar:\tt_z_28,25 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.24 I 31 \inode:\t31 (0x7f81a8d09368)\idepth:\t6\nvar:\tt_z_18,14 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t16
-00:00:02.24 P 31 2
-00:00:02.27 I 33 \inode:\t33 (0x7f81a8d093e8)\idepth:\t7\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.27 N 33 34 3
-00:00:02.27 I 34 \inode:\t34 (0x7f81a8d09428)\idepth:\t8\nvar:\t-\nbound:\t5.062500
-00:00:02.27 I 34 \inode:\t34 (0x7f81a8d09428)\idepth:\t8\nvar:\tt_z_24,28 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.27 N 33 35 3
-00:00:02.27 I 35 \inode:\t35 (0x7f81a8d09468)\idepth:\t8\nvar:\t-\nbound:\t5.062500
-00:00:02.27 I 35 \inode:\t35 (0x7f81a8d09468)\idepth:\t8\nvar:\tt_z_24,28 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.27 I 33 \inode:\t33 (0x7f81a8d093e8)\idepth:\t7\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t17
-00:00:02.27 P 33 2
-00:00:02.28 I 35 \inode:\t35 (0x7f81a8d09468)\idepth:\t8\nvar:\tt_z_24,28 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.28 N 35 36 3
-00:00:02.28 I 36 \inode:\t36 (0x7f81a8d094a8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
-00:00:02.28 I 36 \inode:\t36 (0x7f81a8d094a8)\idepth:\t9\nvar:\tt_z_5,4 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.28 N 35 37 3
-00:00:02.28 I 37 \inode:\t37 (0x7f81a8d094e8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
-00:00:02.28 I 37 \inode:\t37 (0x7f81a8d094e8)\idepth:\t9\nvar:\tt_z_5,4 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.28 I 35 \inode:\t35 (0x7f81a8d09468)\idepth:\t8\nvar:\tt_z_24,28 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t18
-00:00:02.28 P 35 2
-00:00:02.35 I 37 \inode:\t37 (0x7f81a8d094e8)\idepth:\t9\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.35 N 37 38 3
-00:00:02.35 I 38 \inode:\t38 (0x7f81a8d09568)\idepth:\t10\nvar:\t-\nbound:\t5.062500
-00:00:02.35 I 38 \inode:\t38 (0x7f81a8d09568)\idepth:\t10\nvar:\tt_z_24,47 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.35 N 37 39 3
-00:00:02.35 I 39 \inode:\t39 (0x7f81a8d09528)\idepth:\t10\nvar:\t-\nbound:\t5.062500
-00:00:02.35 I 39 \inode:\t39 (0x7f81a8d09528)\idepth:\t10\nvar:\tt_z_24,47 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.35 I 37 \inode:\t37 (0x7f81a8d094e8)\idepth:\t9\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t19
-00:00:02.35 P 37 2
-00:00:02.52 I 38 \inode:\t38 (0x7f81a8d09568)\idepth:\t10\nvar:\tt_z_24,47 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:02.52 N 38 40 3
-00:00:02.52 I 40 \inode:\t40 (0x7f81a8cff328)\idepth:\t11\nvar:\t-\nbound:\t5.062500
-00:00:02.52 I 40 \inode:\t40 (0x7f81a8cff328)\idepth:\t11\nvar:\tt_z_39,35 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.52 N 38 41 3
-00:00:02.52 I 41 \inode:\t41 (0x7f81a8cfec68)\idepth:\t11\nvar:\t-\nbound:\t5.062500
-00:00:02.52 I 41 \inode:\t41 (0x7f81a8cfec68)\idepth:\t11\nvar:\tt_z_39,35 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.52 I 38 \inode:\t38 (0x7f81a8d09568)\idepth:\t10\nvar:\tt_z_24,47 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t20
-00:00:02.52 P 38 2
-00:00:02.55 I 41 \inode:\t41 (0x7f81a8cfec68)\idepth:\t11\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.55 N 41 42 3
-00:00:02.55 I 42 \inode:\t42 (0x7f81a8cfeca8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
-00:00:02.55 I 42 \inode:\t42 (0x7f81a8cfeca8)\idepth:\t12\nvar:\tt_z_36,39 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.55 N 41 43 3
-00:00:02.55 I 43 \inode:\t43 (0x7f81a8cfe9e8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
-00:00:02.55 I 43 \inode:\t43 (0x7f81a8cfe9e8)\idepth:\t12\nvar:\tt_z_36,39 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.55 I 41 \inode:\t41 (0x7f81a8cfec68)\idepth:\t11\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t21
-00:00:02.55 P 41 2
-00:00:02.58 I 43 \inode:\t43 (0x7f81a8cfe9e8)\idepth:\t12\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.58 N 43 44 3
-00:00:02.58 I 44 \inode:\t44 (0x7f81a8cfe1a8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
-00:00:02.58 I 44 \inode:\t44 (0x7f81a8cfe1a8)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.58 N 43 45 3
-00:00:02.58 I 45 \inode:\t45 (0x7f81a8cfe168)\idepth:\t13\nvar:\t-\nbound:\t5.062500
-00:00:02.58 I 45 \inode:\t45 (0x7f81a8cfe168)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.58 I 43 \inode:\t43 (0x7f81a8cfe9e8)\idepth:\t12\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t22
-00:00:02.58 P 43 2
-00:00:02.59 I 12 \inode:\t12 (0x7f81a8d03828)\idepth:\t6\nvar:\tt_z_39,13 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:02.59 N 12 46 3
-00:00:02.59 I 46 \inode:\t46 (0x7f81a8cff068)\idepth:\t7\nvar:\t-\nbound:\t5.062500
-00:00:02.59 I 46 \inode:\t46 (0x7f81a8cff068)\idepth:\t7\nvar:\tt_z_10,13 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.59 N 12 47 3
-00:00:02.59 I 47 \inode:\t47 (0x7f81a8cff0a8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
-00:00:02.59 I 47 \inode:\t47 (0x7f81a8cff0a8)\idepth:\t7\nvar:\tt_z_10,13 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.59 I 12 \inode:\t12 (0x7f81a8d03828)\idepth:\t6\nvar:\tt_z_39,13 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t23
-00:00:02.59 P 12 2
-00:00:02.64 I 47 \inode:\t47 (0x7f81a8cff0a8)\idepth:\t7\nvar:\tt_z_10,13 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.64 N 47 48 3
-00:00:02.64 I 48 \inode:\t48 (0x7f81a8d0efa8)\idepth:\t8\nvar:\t-\nbound:\t5.062500
-00:00:02.64 I 48 \inode:\t48 (0x7f81a8d0efa8)\idepth:\t8\nvar:\tt_z_14,10 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.64 N 47 49 3
-00:00:02.64 I 49 \inode:\t49 (0x7f81a8d0ad28)\idepth:\t8\nvar:\t-\nbound:\t5.062500
-00:00:02.64 I 49 \inode:\t49 (0x7f81a8d0ad28)\idepth:\t8\nvar:\tt_z_14,10 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.64 I 47 \inode:\t47 (0x7f81a8cff0a8)\idepth:\t7\nvar:\tt_z_10,13 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t24
-00:00:02.64 P 47 2
-00:00:02.65 P 49 15
-00:00:02.65 P 49 11
-00:00:02.68 I 49 \inode:\t49 (0x7f81a8d0ad28)\idepth:\t8\nvar:\tt_z_14,10 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.68 N 49 50 3
-00:00:02.68 I 50 \inode:\t50 (0x7f81a8d095e8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
-00:00:02.68 I 50 \inode:\t50 (0x7f81a8d095e8)\idepth:\t9\nvar:\tt_z_30,36 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.68 N 49 51 3
-00:00:02.68 I 51 \inode:\t51 (0x7f81a8d0f928)\idepth:\t9\nvar:\t-\nbound:\t5.062500
-00:00:02.68 I 51 \inode:\t51 (0x7f81a8d0f928)\idepth:\t9\nvar:\tt_z_30,36 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.68 I 49 \inode:\t49 (0x7f81a8d0ad28)\idepth:\t8\nvar:\tt_z_14,10 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t25
-00:00:02.68 P 49 2
-00:00:02.70 I 51 \inode:\t51 (0x7f81a8d0f928)\idepth:\t9\nvar:\tt_z_30,36 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.70 N 51 52 3
-00:00:02.70 I 52 \inode:\t52 (0x7f81a8d0ec28)\idepth:\t10\nvar:\t-\nbound:\t5.062500
-00:00:02.70 I 52 \inode:\t52 (0x7f81a8d0ec28)\idepth:\t10\nvar:\tt_z_36,11 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.70 N 51 53 3
-00:00:02.70 I 53 \inode:\t53 (0x7f81a8d095a8)\idepth:\t10\nvar:\t-\nbound:\t5.062500
-00:00:02.70 I 53 \inode:\t53 (0x7f81a8d095a8)\idepth:\t10\nvar:\tt_z_36,11 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.70 I 51 \inode:\t51 (0x7f81a8d0f928)\idepth:\t9\nvar:\tt_z_30,36 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t26
-00:00:02.70 P 51 2
-00:00:02.76 I 52 \inode:\t52 (0x7f81a8d0ec28)\idepth:\t10\nvar:\tt_z_36,11 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:02.76 N 52 54 3
-00:00:02.76 I 54 \inode:\t54 (0x7f81a8d0e768)\idepth:\t11\nvar:\t-\nbound:\t5.062500
-00:00:02.76 I 54 \inode:\t54 (0x7f81a8d0e768)\idepth:\t11\nvar:\tt_z_42,17 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.76 N 52 55 3
-00:00:02.76 I 55 \inode:\t55 (0x7f81a8d0ef68)\idepth:\t11\nvar:\t-\nbound:\t5.062500
-00:00:02.76 I 55 \inode:\t55 (0x7f81a8d0ef68)\idepth:\t11\nvar:\tt_z_42,17 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.76 I 52 \inode:\t52 (0x7f81a8d0ec28)\idepth:\t10\nvar:\tt_z_36,11 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t27
-00:00:02.76 P 52 2
-00:00:02.79 I 55 \inode:\t55 (0x7f81a8d0ef68)\idepth:\t11\nvar:\tt_z_42,17 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.79 N 55 56 3
-00:00:02.79 I 56 \inode:\t56 (0x7f81a8d0d3e8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
-00:00:02.79 I 56 \inode:\t56 (0x7f81a8d0d3e8)\idepth:\t12\nvar:\tt_z_20,17 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.79 N 55 57 3
-00:00:02.79 I 57 \inode:\t57 (0x7f81a8d0f968)\idepth:\t12\nvar:\t-\nbound:\t5.062500
-00:00:02.79 I 57 \inode:\t57 (0x7f81a8d0f968)\idepth:\t12\nvar:\tt_z_20,17 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.79 I 55 \inode:\t55 (0x7f81a8d0ef68)\idepth:\t11\nvar:\tt_z_42,17 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t28
-00:00:02.79 P 55 2
-00:00:02.80 I 57 \inode:\t57 (0x7f81a8d0f968)\idepth:\t12\nvar:\tt_z_20,17 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.80 N 57 58 3
-00:00:02.80 I 58 \inode:\t58 (0x7f81a8d0ace8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
-00:00:02.80 I 58 \inode:\t58 (0x7f81a8d0ace8)\idepth:\t13\nvar:\tt_z_36,3 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.80 N 57 59 3
-00:00:02.80 I 59 \inode:\t59 (0x7f81a8d0f9a8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
-00:00:02.80 I 59 \inode:\t59 (0x7f81a8d0f9a8)\idepth:\t13\nvar:\tt_z_36,3 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.80 I 57 \inode:\t57 (0x7f81a8d0f968)\idepth:\t12\nvar:\tt_z_20,17 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t29
-00:00:02.80 P 57 2
-00:00:02.82 I 59 \inode:\t59 (0x7f81a8d0f9a8)\idepth:\t13\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.82 N 59 60 3
-00:00:02.82 I 60 \inode:\t60 (0x7f81a8d09968)\idepth:\t14\nvar:\t-\nbound:\t5.062500
-00:00:02.82 I 60 \inode:\t60 (0x7f81a8d09968)\idepth:\t14\nvar:\tt_z_1,11 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.82 N 59 61 3
-00:00:02.82 I 61 \inode:\t61 (0x7f81a8d09768)\idepth:\t14\nvar:\t-\nbound:\t5.062500
-00:00:02.82 I 61 \inode:\t61 (0x7f81a8d09768)\idepth:\t14\nvar:\tt_z_1,11 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.82 I 59 \inode:\t59 (0x7f81a8d0f9a8)\idepth:\t13\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t30
-00:00:02.82 P 59 2
-00:00:02.83 I 61 \inode:\t61 (0x7f81a8d09768)\idepth:\t14\nvar:\tt_z_1,11 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.83 N 61 62 3
-00:00:02.83 I 62 \inode:\t62 (0x7f81a8d09668)\idepth:\t15\nvar:\t-\nbound:\t5.062500
-00:00:02.83 I 62 \inode:\t62 (0x7f81a8d09668)\idepth:\t15\nvar:\tt_z_34,11 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.83 N 61 63 3
-00:00:02.83 I 63 \inode:\t63 (0x7f81a8d09628)\idepth:\t15\nvar:\t-\nbound:\t5.062500
-00:00:02.83 I 63 \inode:\t63 (0x7f81a8d09628)\idepth:\t15\nvar:\tt_z_34,11 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.83 I 61 \inode:\t61 (0x7f81a8d09768)\idepth:\t14\nvar:\tt_z_1,11 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t31
-00:00:02.83 P 61 2
-00:00:02.83 I 63 \inode:\t63 (0x7f81a8d09628)\idepth:\t15\nvar:\tt_z_34,11 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.83 N 63 64 3
-00:00:02.83 I 64 \inode:\t64 (0x7f81a8d0d268)\idepth:\t16\nvar:\t-\nbound:\t5.062500
-00:00:02.83 I 64 \inode:\t64 (0x7f81a8d0d268)\idepth:\t16\nvar:\tt_z_27,50 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.83 N 63 65 3
-00:00:02.83 I 65 \inode:\t65 (0x7f81a8d097a8)\idepth:\t16\nvar:\t-\nbound:\t5.062500
-00:00:02.83 I 65 \inode:\t65 (0x7f81a8d097a8)\idepth:\t16\nvar:\tt_z_27,50 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.83 I 63 \inode:\t63 (0x7f81a8d09628)\idepth:\t15\nvar:\tt_z_34,11 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t32
-00:00:02.83 P 63 2
-00:00:02.84 I 64 \inode:\t64 (0x7f81a8d0d268)\idepth:\t16\nvar:\tt_z_27,50 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:02.84 N 64 66 3
-00:00:02.84 I 66 \inode:\t66 (0x7f81a8d09c68)\idepth:\t17\nvar:\t-\nbound:\t5.062500
-00:00:02.84 I 66 \inode:\t66 (0x7f81a8d09c68)\idepth:\t17\nvar:\tt_z_5,4 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.84 N 64 67 3
-00:00:02.84 I 67 \inode:\t67 (0x7f81a8d09ca8)\idepth:\t17\nvar:\t-\nbound:\t5.062500
-00:00:02.84 I 67 \inode:\t67 (0x7f81a8d09ca8)\idepth:\t17\nvar:\tt_z_5,4 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.84 I 64 \inode:\t64 (0x7f81a8d0d268)\idepth:\t16\nvar:\tt_z_27,50 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t33
-00:00:02.84 P 64 2
-00:00:02.87 I 67 \inode:\t67 (0x7f81a8d09ca8)\idepth:\t17\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.87 N 67 68 3
-00:00:02.87 I 68 \inode:\t68 (0x7f81a8d09ce8)\idepth:\t18\nvar:\t-\nbound:\t5.062500
-00:00:02.87 I 68 \inode:\t68 (0x7f81a8d09ce8)\idepth:\t18\nvar:\tt_z_1,50 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.87 N 67 69 3
-00:00:02.87 I 69 \inode:\t69 (0x7f81a8d09d28)\idepth:\t18\nvar:\t-\nbound:\t5.062500
-00:00:02.87 I 69 \inode:\t69 (0x7f81a8d09d28)\idepth:\t18\nvar:\tt_z_1,50 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.87 I 67 \inode:\t67 (0x7f81a8d09ca8)\idepth:\t17\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t34
-00:00:02.87 P 67 2
-00:00:02.88 I 69 \inode:\t69 (0x7f81a8d09d28)\idepth:\t18\nvar:\tt_z_1,50 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.88 N 69 70 3
-00:00:02.88 I 70 \inode:\t70 (0x7f81a8d09d68)\idepth:\t19\nvar:\t-\nbound:\t5.062500
-00:00:02.88 I 70 \inode:\t70 (0x7f81a8d09d68)\idepth:\t19\nvar:\tt_z_36,32 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.88 N 69 71 3
-00:00:02.88 I 71 \inode:\t71 (0x7f81a8d09da8)\idepth:\t19\nvar:\t-\nbound:\t5.062500
-00:00:02.88 I 71 \inode:\t71 (0x7f81a8d09da8)\idepth:\t19\nvar:\tt_z_36,32 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.88 I 69 \inode:\t69 (0x7f81a8d09d28)\idepth:\t18\nvar:\tt_z_1,50 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t35
-00:00:02.88 P 69 2
-00:00:02.89 I 71 \inode:\t71 (0x7f81a8d09da8)\idepth:\t19\nvar:\tt_z_36,32 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.89 N 71 72 3
-00:00:02.89 I 72 \inode:\t72 (0x7f81a8d09de8)\idepth:\t20\nvar:\t-\nbound:\t5.062500
-00:00:02.89 I 72 \inode:\t72 (0x7f81a8d09de8)\idepth:\t20\nvar:\tt_z_37,48 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.89 N 71 73 3
-00:00:02.89 I 73 \inode:\t73 (0x7f81a8d09e28)\idepth:\t20\nvar:\t-\nbound:\t5.062500
-00:00:02.89 I 73 \inode:\t73 (0x7f81a8d09e28)\idepth:\t20\nvar:\tt_z_37,48 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.89 I 71 \inode:\t71 (0x7f81a8d09da8)\idepth:\t19\nvar:\tt_z_36,32 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t36
-00:00:02.89 P 71 2
-00:00:02.92 I 73 \inode:\t73 (0x7f81a8d09e28)\idepth:\t20\nvar:\tt_z_37,48 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.92 N 73 74 3
-00:00:02.92 I 74 \inode:\t74 (0x7f81a8d09e68)\idepth:\t21\nvar:\t-\nbound:\t5.062500
-00:00:02.92 I 74 \inode:\t74 (0x7f81a8d09e68)\idepth:\t21\nvar:\tt_z_47,48 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.92 N 73 75 3
-00:00:02.92 I 75 \inode:\t75 (0x7f81a8d09ea8)\idepth:\t21\nvar:\t-\nbound:\t5.062500
-00:00:02.92 I 75 \inode:\t75 (0x7f81a8d09ea8)\idepth:\t21\nvar:\tt_z_47,48 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.92 I 73 \inode:\t73 (0x7f81a8d09e28)\idepth:\t20\nvar:\tt_z_37,48 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t37
-00:00:02.92 P 73 2
-00:00:02.95 U 333.000000
-00:00:02.98 I 75 \inode:\t75 (0x7f81a8d09ea8)\idepth:\t21\nvar:\tt_z_47,48 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:02.98 N 75 76 3
-00:00:02.98 I 76 \inode:\t76 (0x7f81a8d09f28)\idepth:\t22\nvar:\t-\nbound:\t5.062500
-00:00:02.98 I 76 \inode:\t76 (0x7f81a8d09f28)\idepth:\t22\nvar:\tt_z_43,47 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:02.98 N 75 77 3
-00:00:02.98 I 77 \inode:\t77 (0x7f81a8d09ee8)\idepth:\t22\nvar:\t-\nbound:\t5.062500
-00:00:02.98 I 77 \inode:\t77 (0x7f81a8d09ee8)\idepth:\t22\nvar:\tt_z_43,47 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:02.98 I 75 \inode:\t75 (0x7f81a8d09ea8)\idepth:\t21\nvar:\tt_z_47,48 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t38
-00:00:02.98 P 75 2
-00:00:03.03 I 77 \inode:\t77 (0x7f81a8d09ee8)\idepth:\t22\nvar:\tt_z_43,47 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.03 N 77 78 3
-00:00:03.03 I 78 \inode:\t78 (0x7f81a8d09f68)\idepth:\t23\nvar:\t-\nbound:\t5.062500
-00:00:03.03 I 78 \inode:\t78 (0x7f81a8d09f68)\idepth:\t23\nvar:\tt_z_12,16 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.03 N 77 79 3
-00:00:03.03 I 79 \inode:\t79 (0x7f81a8d09fa8)\idepth:\t23\nvar:\t-\nbound:\t5.062500
-00:00:03.03 I 79 \inode:\t79 (0x7f81a8d09fa8)\idepth:\t23\nvar:\tt_z_12,16 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.03 I 77 \inode:\t77 (0x7f81a8d09ee8)\idepth:\t22\nvar:\tt_z_43,47 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t39
-00:00:03.03 P 77 2
-00:00:03.06 I 79 \inode:\t79 (0x7f81a8d09fa8)\idepth:\t23\nvar:\tt_z_12,16 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.06 N 79 80 3
-00:00:03.06 I 80 \inode:\t80 (0x7f81a8d09fe8)\idepth:\t24\nvar:\t-\nbound:\t5.062500
-00:00:03.06 I 80 \inode:\t80 (0x7f81a8d09fe8)\idepth:\t24\nvar:\tt_z_45,43 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.06 N 79 81 3
-00:00:03.06 I 81 \inode:\t81 (0x7f81a8d0a028)\idepth:\t24\nvar:\t-\nbound:\t5.062500
-00:00:03.06 I 81 \inode:\t81 (0x7f81a8d0a028)\idepth:\t24\nvar:\tt_z_45,43 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.06 I 79 \inode:\t79 (0x7f81a8d09fa8)\idepth:\t23\nvar:\tt_z_12,16 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t40
-00:00:03.06 P 79 2
-00:00:03.08 I 81 \inode:\t81 (0x7f81a8d0a028)\idepth:\t24\nvar:\tt_z_45,43 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.08 N 81 82 3
-00:00:03.08 I 82 \inode:\t82 (0x7f81a8d0a068)\idepth:\t25\nvar:\t-\nbound:\t5.062500
-00:00:03.08 I 82 \inode:\t82 (0x7f81a8d0a068)\idepth:\t25\nvar:\tt_z_34,38 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.08 N 81 83 3
-00:00:03.08 I 83 \inode:\t83 (0x7f81a8d0a0a8)\idepth:\t25\nvar:\t-\nbound:\t5.062500
-00:00:03.08 I 83 \inode:\t83 (0x7f81a8d0a0a8)\idepth:\t25\nvar:\tt_z_34,38 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.09 I 81 \inode:\t81 (0x7f81a8d0a028)\idepth:\t24\nvar:\tt_z_45,43 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t41
-00:00:03.09 P 81 2
-00:00:03.15 I 83 \inode:\t83 (0x7f81a8d0a0a8)\idepth:\t25\nvar:\tt_z_34,38 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.15 N 83 84 3
-00:00:03.15 I 84 \inode:\t84 (0x7f81a8cff1a8)\idepth:\t26\nvar:\t-\nbound:\t5.062500
-00:00:03.15 I 84 \inode:\t84 (0x7f81a8cff1a8)\idepth:\t26\nvar:\tt_z_26,46 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.15 N 83 85 3
-00:00:03.15 I 85 \inode:\t85 (0x7f81a8cff168)\idepth:\t26\nvar:\t-\nbound:\t5.062500
-00:00:03.15 I 85 \inode:\t85 (0x7f81a8cff168)\idepth:\t26\nvar:\tt_z_26,46 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.15 I 83 \inode:\t83 (0x7f81a8d0a0a8)\idepth:\t25\nvar:\tt_z_34,38 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t42
-00:00:03.15 P 83 2
-00:00:03.18 I 85 \inode:\t85 (0x7f81a8cff168)\idepth:\t26\nvar:\tt_z_26,46 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.18 N 85 86 3
-00:00:03.18 I 86 \inode:\t86 (0x7f81a8d0a128)\idepth:\t27\nvar:\t-\nbound:\t5.062500
-00:00:03.18 I 86 \inode:\t86 (0x7f81a8d0a128)\idepth:\t27\nvar:\tt_z_41,45 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.18 N 85 87 3
-00:00:03.18 I 87 \inode:\t87 (0x7f81a8d0a0e8)\idepth:\t27\nvar:\t-\nbound:\t5.062500
-00:00:03.18 I 87 \inode:\t87 (0x7f81a8d0a0e8)\idepth:\t27\nvar:\tt_z_41,45 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.18 I 85 \inode:\t85 (0x7f81a8cff168)\idepth:\t26\nvar:\tt_z_26,46 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t43
-00:00:03.18 P 85 2
-00:00:03.19 I 87 \inode:\t87 (0x7f81a8d0a0e8)\idepth:\t27\nvar:\tt_z_41,45 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.19 N 87 88 3
-00:00:03.19 I 88 \inode:\t88 (0x7f81a8d0a168)\idepth:\t28\nvar:\t-\nbound:\t5.062500
-00:00:03.19 I 88 \inode:\t88 (0x7f81a8d0a168)\idepth:\t28\nvar:\tt_z_38,42 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.19 N 87 89 3
-00:00:03.19 I 89 \inode:\t89 (0x7f81a8d0a1a8)\idepth:\t28\nvar:\t-\nbound:\t5.062500
-00:00:03.19 I 89 \inode:\t89 (0x7f81a8d0a1a8)\idepth:\t28\nvar:\tt_z_38,42 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.19 I 87 \inode:\t87 (0x7f81a8d0a0e8)\idepth:\t27\nvar:\tt_z_41,45 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t44
-00:00:03.19 P 87 2
-00:00:03.23 I 89 \inode:\t89 (0x7f81a8d0a1a8)\idepth:\t28\nvar:\tt_z_38,42 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.23 N 89 90 3
-00:00:03.23 I 90 \inode:\t90 (0x7f81a8d0a1e8)\idepth:\t29\nvar:\t-\nbound:\t5.062500
-00:00:03.23 I 90 \inode:\t90 (0x7f81a8d0a1e8)\idepth:\t29\nvar:\tt_z_33,37 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.23 N 89 91 3
-00:00:03.23 I 91 \inode:\t91 (0x7f81a8d0a228)\idepth:\t29\nvar:\t-\nbound:\t5.062500
-00:00:03.23 I 91 \inode:\t91 (0x7f81a8d0a228)\idepth:\t29\nvar:\tt_z_33,37 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.23 I 89 \inode:\t89 (0x7f81a8d0a1a8)\idepth:\t28\nvar:\tt_z_38,42 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t45
-00:00:03.23 P 89 2
-00:00:03.23 I 91 \inode:\t91 (0x7f81a8d0a228)\idepth:\t29\nvar:\tt_z_33,37 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.23 N 91 92 3
-00:00:03.23 I 92 \inode:\t92 (0x7f81a8d0a268)\idepth:\t30\nvar:\t-\nbound:\t5.062500
-00:00:03.23 I 92 \inode:\t92 (0x7f81a8d0a268)\idepth:\t30\nvar:\tt_z_39,35 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.23 N 91 93 3
-00:00:03.23 I 93 \inode:\t93 (0x7f81a8d0a2a8)\idepth:\t30\nvar:\t-\nbound:\t5.062500
-00:00:03.23 I 93 \inode:\t93 (0x7f81a8d0a2a8)\idepth:\t30\nvar:\tt_z_39,35 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.23 I 91 \inode:\t91 (0x7f81a8d0a228)\idepth:\t29\nvar:\tt_z_33,37 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t46
-00:00:03.23 P 91 2
-00:00:03.26 I 93 \inode:\t93 (0x7f81a8d0a2a8)\idepth:\t30\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.26 N 93 94 3
-00:00:03.26 I 94 \inode:\t94 (0x7f81a8d0a328)\idepth:\t31\nvar:\t-\nbound:\t5.062500
-00:00:03.26 I 94 \inode:\t94 (0x7f81a8d0a328)\idepth:\t31\nvar:\tt_z_42,41 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.26 N 93 95 3
-00:00:03.26 I 95 \inode:\t95 (0x7f81a8d0a2e8)\idepth:\t31\nvar:\t-\nbound:\t5.062500
-00:00:03.26 I 95 \inode:\t95 (0x7f81a8d0a2e8)\idepth:\t31\nvar:\tt_z_42,41 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.26 I 93 \inode:\t93 (0x7f81a8d0a2a8)\idepth:\t30\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t47
-00:00:03.26 P 93 2
-00:00:03.27 I 95 \inode:\t95 (0x7f81a8d0a2e8)\idepth:\t31\nvar:\tt_z_42,41 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.27 N 95 96 3
-00:00:03.27 I 96 \inode:\t96 (0x7f81a8d0a368)\idepth:\t32\nvar:\t-\nbound:\t5.062500
-00:00:03.27 I 96 \inode:\t96 (0x7f81a8d0a368)\idepth:\t32\nvar:\tt_z_36,39 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.27 N 95 97 3
-00:00:03.27 I 97 \inode:\t97 (0x7f81a8d0a3a8)\idepth:\t32\nvar:\t-\nbound:\t5.062500
-00:00:03.27 I 97 \inode:\t97 (0x7f81a8d0a3a8)\idepth:\t32\nvar:\tt_z_36,39 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.27 I 95 \inode:\t95 (0x7f81a8d0a2e8)\idepth:\t31\nvar:\tt_z_42,41 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t48
-00:00:03.27 P 95 2
-00:00:03.28 I 97 \inode:\t97 (0x7f81a8d0a3a8)\idepth:\t32\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.28 N 97 98 3
-00:00:03.28 I 98 \inode:\t98 (0x7f81a8d0a3e8)\idepth:\t33\nvar:\t-\nbound:\t5.062500
-00:00:03.28 I 98 \inode:\t98 (0x7f81a8d0a3e8)\idepth:\t33\nvar:\tt_z_33,34 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.28 N 97 99 3
-00:00:03.28 I 99 \inode:\t99 (0x7f81a8d0a428)\idepth:\t33\nvar:\t-\nbound:\t5.062500
-00:00:03.28 I 99 \inode:\t99 (0x7f81a8d0a428)\idepth:\t33\nvar:\tt_z_33,34 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.28 I 97 \inode:\t97 (0x7f81a8d0a3a8)\idepth:\t32\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t49
-00:00:03.28 P 97 2
-00:00:03.33 I 99 \inode:\t99 (0x7f81a8d0a428)\idepth:\t33\nvar:\tt_z_33,34 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.33 N 99 100 3
-00:00:03.33 I 100 \inode:\t100 (0x7f81a8d0a468)\idepth:\t34\nvar:\t-\nbound:\t5.062500
-00:00:03.33 I 100 \inode:\t100 (0x7f81a8d0a468)\idepth:\t34\nvar:\tt_z_32,33 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.33 N 99 101 3
-00:00:03.33 I 101 \inode:\t101 (0x7f81a8d0a4a8)\idepth:\t34\nvar:\t-\nbound:\t5.062500
-00:00:03.33 I 101 \inode:\t101 (0x7f81a8d0a4a8)\idepth:\t34\nvar:\tt_z_32,33 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.33 I 99 \inode:\t99 (0x7f81a8d0a428)\idepth:\t33\nvar:\tt_z_33,34 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t50
-00:00:03.33 P 99 2
-00:00:03.37 I 101 \inode:\t101 (0x7f81a8d0a4a8)\idepth:\t34\nvar:\tt_z_32,33 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.37 N 101 102 3
-00:00:03.37 I 102 \inode:\t102 (0x7f81a8d0a4e8)\idepth:\t35\nvar:\t-\nbound:\t5.062500
-00:00:03.37 I 102 \inode:\t102 (0x7f81a8d0a4e8)\idepth:\t35\nvar:\tt_z_31,34 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.37 N 101 103 3
-00:00:03.37 I 103 \inode:\t103 (0x7f81a8d0a528)\idepth:\t35\nvar:\t-\nbound:\t5.062500
-00:00:03.37 I 103 \inode:\t103 (0x7f81a8d0a528)\idepth:\t35\nvar:\tt_z_31,34 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.37 I 101 \inode:\t101 (0x7f81a8d0a4a8)\idepth:\t34\nvar:\tt_z_32,33 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t51
-00:00:03.37 P 101 2
-00:00:03.43 I 103 \inode:\t103 (0x7f81a8d0a528)\idepth:\t35\nvar:\tt_z_31,34 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.43 N 103 104 3
-00:00:03.43 I 104 \inode:\t104 (0x7f81a8d0a5a8)\idepth:\t36\nvar:\t-\nbound:\t5.062500
-00:00:03.43 I 104 \inode:\t104 (0x7f81a8d0a5a8)\idepth:\t36\nvar:\tt_z_49,1 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.43 N 103 105 3
-00:00:03.43 I 105 \inode:\t105 (0x7f81a8d0a568)\idepth:\t36\nvar:\t-\nbound:\t5.062500
-00:00:03.43 I 105 \inode:\t105 (0x7f81a8d0a568)\idepth:\t36\nvar:\tt_z_49,1 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.43 I 103 \inode:\t103 (0x7f81a8d0a528)\idepth:\t35\nvar:\tt_z_31,34 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t52
-00:00:03.43 P 103 2
-00:00:03.44 I 105 \inode:\t105 (0x7f81a8d0a568)\idepth:\t36\nvar:\tt_z_49,1 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.44 N 105 106 3
-00:00:03.44 I 106 \inode:\t106 (0x7f81a8d0a5e8)\idepth:\t37\nvar:\t-\nbound:\t5.062500
-00:00:03.44 I 106 \inode:\t106 (0x7f81a8d0a5e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.44 N 105 107 3
-00:00:03.44 I 107 \inode:\t107 (0x7f81a8d098e8)\idepth:\t37\nvar:\t-\nbound:\t5.062500
-00:00:03.44 I 107 \inode:\t107 (0x7f81a8d098e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.44 I 105 \inode:\t105 (0x7f81a8d0a568)\idepth:\t36\nvar:\tt_z_49,1 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t53
-00:00:03.44 P 105 2
-00:00:03.53 I 107 \inode:\t107 (0x7f81a8d098e8)\idepth:\t37\nvar:\tt_z_35,38 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.53 N 107 108 3
-00:00:03.53 I 108 \inode:\t108 (0x7f81a8d0a6a8)\idepth:\t38\nvar:\t-\nbound:\t5.062500
-00:00:03.53 I 108 \inode:\t108 (0x7f81a8d0a6a8)\idepth:\t38\nvar:\tt_z_35,31 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.53 N 107 109 3
-00:00:03.53 I 109 \inode:\t109 (0x7f81a8d0a668)\idepth:\t38\nvar:\t-\nbound:\t5.062500
-00:00:03.53 I 109 \inode:\t109 (0x7f81a8d0a668)\idepth:\t38\nvar:\tt_z_35,31 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.53 I 107 \inode:\t107 (0x7f81a8d098e8)\idepth:\t37\nvar:\tt_z_35,38 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t54
-00:00:03.53 P 107 2
-00:00:03.58 I 109 \inode:\t109 (0x7f81a8d0a668)\idepth:\t38\nvar:\tt_z_35,31 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.58 N 109 110 3
-00:00:03.58 I 110 \inode:\t110 (0x7f81a8d0a6e8)\idepth:\t39\nvar:\t-\nbound:\t5.062500
-00:00:03.58 I 110 \inode:\t110 (0x7f81a8d0a6e8)\idepth:\t39\nvar:\tt_z_14,18 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.58 N 109 111 3
-00:00:03.58 I 111 \inode:\t111 (0x7f81a8d0a728)\idepth:\t39\nvar:\t-\nbound:\t5.062500
-00:00:03.58 I 111 \inode:\t111 (0x7f81a8d0a728)\idepth:\t39\nvar:\tt_z_14,18 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.58 I 109 \inode:\t109 (0x7f81a8d0a668)\idepth:\t38\nvar:\tt_z_35,31 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t55
-00:00:03.58 P 109 2
-00:00:03.70 I 111 \inode:\t111 (0x7f81a8d0a728)\idepth:\t39\nvar:\tt_z_14,18 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.70 N 111 112 3
-00:00:03.70 I 112 \inode:\t112 (0x7f81a8d0a7a8)\idepth:\t40\nvar:\t-\nbound:\t5.062500
-00:00:03.70 I 112 \inode:\t112 (0x7f81a8d0a7a8)\idepth:\t40\nvar:\tt_z_21,24 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.70 N 111 113 3
-00:00:03.70 I 113 \inode:\t113 (0x7f81a8d0a768)\idepth:\t40\nvar:\t-\nbound:\t5.062500
-00:00:03.70 I 113 \inode:\t113 (0x7f81a8d0a768)\idepth:\t40\nvar:\tt_z_21,24 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.70 I 111 \inode:\t111 (0x7f81a8d0a728)\idepth:\t39\nvar:\tt_z_14,18 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t56
-00:00:03.70 P 111 2
-00:00:03.91 I 113 \inode:\t113 (0x7f81a8d0a768)\idepth:\t40\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.91 N 113 114 3
-00:00:03.91 I 114 \inode:\t114 (0x7f81a8d0ffa8)\idepth:\t41\nvar:\t-\nbound:\t5.062500
-00:00:03.91 I 114 \inode:\t114 (0x7f81a8d0ffa8)\idepth:\t41\nvar:\tt_z_28,26 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.91 N 113 115 3
-00:00:03.91 I 115 \inode:\t115 (0x7f81a8d19ee8)\idepth:\t41\nvar:\t-\nbound:\t5.062500
-00:00:03.91 I 115 \inode:\t115 (0x7f81a8d19ee8)\idepth:\t41\nvar:\tt_z_28,26 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.91 I 113 \inode:\t113 (0x7f81a8d0a768)\idepth:\t40\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t57
-00:00:03.91 P 113 2
-00:00:03.96 I 115 \inode:\t115 (0x7f81a8d19ee8)\idepth:\t41\nvar:\tt_z_28,26 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:03.96 N 115 116 3
-00:00:03.96 I 116 \inode:\t116 (0x7f81a8d18ce8)\idepth:\t42\nvar:\t-\nbound:\t5.062500
-00:00:03.96 I 116 \inode:\t116 (0x7f81a8d18ce8)\idepth:\t42\nvar:\tt_z_29,28 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:03.96 N 115 117 3
-00:00:03.96 I 117 \inode:\t117 (0x7f81a8d0e4e8)\idepth:\t42\nvar:\t-\nbound:\t5.062500
-00:00:03.96 I 117 \inode:\t117 (0x7f81a8d0e4e8)\idepth:\t42\nvar:\tt_z_29,28 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:03.96 I 115 \inode:\t115 (0x7f81a8d19ee8)\idepth:\t41\nvar:\tt_z_28,26 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t58
-00:00:03.96 P 115 2
-00:00:04.00 I 117 \inode:\t117 (0x7f81a8d0e4e8)\idepth:\t42\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.00 N 117 118 3
-00:00:04.00 I 118 \inode:\t118 (0x7f81a8d0aee8)\idepth:\t43\nvar:\t-\nbound:\t5.062500
-00:00:04.00 I 118 \inode:\t118 (0x7f81a8d0aee8)\idepth:\t43\nvar:\tt_z_30,29 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.00 N 117 119 3
-00:00:04.00 I 119 \inode:\t119 (0x7f81a8d0aea8)\idepth:\t43\nvar:\t-\nbound:\t5.062500
-00:00:04.00 I 119 \inode:\t119 (0x7f81a8d0aea8)\idepth:\t43\nvar:\tt_z_30,29 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.00 I 117 \inode:\t117 (0x7f81a8d0e4e8)\idepth:\t42\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t59
-00:00:04.00 P 117 2
-00:00:04.04 I 119 \inode:\t119 (0x7f81a8d0aea8)\idepth:\t43\nvar:\tt_z_30,29 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.04 N 119 120 3
-00:00:04.04 I 120 \inode:\t120 (0x7f81a8d0af28)\idepth:\t44\nvar:\t-\nbound:\t5.062500
-00:00:04.04 I 120 \inode:\t120 (0x7f81a8d0af28)\idepth:\t44\nvar:\tt_z_27,25 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.04 N 119 121 3
-00:00:04.04 I 121 \inode:\t121 (0x7f81a8d0af68)\idepth:\t44\nvar:\t-\nbound:\t5.062500
-00:00:04.04 I 121 \inode:\t121 (0x7f81a8d0af68)\idepth:\t44\nvar:\tt_z_27,25 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.04 I 119 \inode:\t119 (0x7f81a8d0aea8)\idepth:\t43\nvar:\tt_z_30,29 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t60
-00:00:04.04 P 119 2
-00:00:04.08 I 121 \inode:\t121 (0x7f81a8d0af68)\idepth:\t44\nvar:\tt_z_27,25 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.08 N 121 122 3
-00:00:04.08 I 122 \inode:\t122 (0x7f81a8d0afa8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
-00:00:04.08 I 122 \inode:\t122 (0x7f81a8d0afa8)\idepth:\t45\nvar:\tt_z_23,27 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.08 N 121 123 3
-00:00:04.08 I 123 \inode:\t123 (0x7f81a8d0afe8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
-00:00:04.08 I 123 \inode:\t123 (0x7f81a8d0afe8)\idepth:\t45\nvar:\tt_z_23,27 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.08 I 121 \inode:\t121 (0x7f81a8d0af68)\idepth:\t44\nvar:\tt_z_27,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t61
-00:00:04.08 P 121 2
-00:00:04.11 I 123 \inode:\t123 (0x7f81a8d0afe8)\idepth:\t45\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.11 N 123 124 3
-00:00:04.11 I 124 \inode:\t124 (0x7f81a8d0b028)\idepth:\t46\nvar:\t-\nbound:\t5.062500
-00:00:04.11 I 124 \inode:\t124 (0x7f81a8d0b028)\idepth:\t46\nvar:\tt_z_24,23 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.11 N 123 125 3
-00:00:04.11 I 125 \inode:\t125 (0x7f81a8d0b068)\idepth:\t46\nvar:\t-\nbound:\t5.062500
-00:00:04.11 I 125 \inode:\t125 (0x7f81a8d0b068)\idepth:\t46\nvar:\tt_z_24,23 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.11 I 123 \inode:\t123 (0x7f81a8d0afe8)\idepth:\t45\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t62
-00:00:04.11 P 123 2
-00:00:04.12 I 125 \inode:\t125 (0x7f81a8d0b068)\idepth:\t46\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t63
-00:00:04.12 P 125 2
-00:00:04.12 I 125 \inode:\t125 (0x7f81a8d0b068)\idepth:\t46\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t63
-00:00:04.12 P 125 4
-00:00:04.16 I 124 \inode:\t124 (0x7f81a8d0b028)\idepth:\t46\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:04.16 N 124 126 3
-00:00:04.16 I 126 \inode:\t126 (0x7f81a8d0b068)\idepth:\t47\nvar:\t-\nbound:\t5.062500
-00:00:04.16 I 126 \inode:\t126 (0x7f81a8d0b068)\idepth:\t47\nvar:\tt_z_20,23 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.16 N 124 127 3
-00:00:04.16 I 127 \inode:\t127 (0x7f81a8d0b0e8)\idepth:\t47\nvar:\t-\nbound:\t5.062500
-00:00:04.16 I 127 \inode:\t127 (0x7f81a8d0b0e8)\idepth:\t47\nvar:\tt_z_20,23 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.16 I 124 \inode:\t124 (0x7f81a8d0b028)\idepth:\t46\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t64
-00:00:04.16 P 124 2
-00:00:04.19 I 127 \inode:\t127 (0x7f81a8d0b0e8)\idepth:\t47\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.19 N 127 128 3
-00:00:04.19 I 128 \inode:\t128 (0x7f81a8d0b0a8)\idepth:\t48\nvar:\t-\nbound:\t5.062500
-00:00:04.19 I 128 \inode:\t128 (0x7f81a8d0b0a8)\idepth:\t48\nvar:\tt_z_41,23 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.19 N 127 129 3
-00:00:04.19 I 129 \inode:\t129 (0x7f81a8d0b128)\idepth:\t48\nvar:\t-\nbound:\t5.062500
-00:00:04.19 I 129 \inode:\t129 (0x7f81a8d0b128)\idepth:\t48\nvar:\tt_z_41,23 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.19 I 127 \inode:\t127 (0x7f81a8d0b0e8)\idepth:\t47\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t65
-00:00:04.19 P 127 2
-00:00:04.20 I 129 \inode:\t129 (0x7f81a8d0b128)\idepth:\t48\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.20 N 129 130 3
-00:00:04.20 I 130 \inode:\t130 (0x7f81a8d0b168)\idepth:\t49\nvar:\t-\nbound:\t5.062500
-00:00:04.20 I 130 \inode:\t130 (0x7f81a8d0b168)\idepth:\t49\nvar:\tt_z_21,20 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.20 N 129 131 3
-00:00:04.20 I 131 \inode:\t131 (0x7f81a8d0b1a8)\idepth:\t49\nvar:\t-\nbound:\t5.062500
-00:00:04.20 I 131 \inode:\t131 (0x7f81a8d0b1a8)\idepth:\t49\nvar:\tt_z_21,20 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.20 I 129 \inode:\t129 (0x7f81a8d0b128)\idepth:\t48\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t66
-00:00:04.20 P 129 2
-00:00:04.21 I 131 \inode:\t131 (0x7f81a8d0b1a8)\idepth:\t49\nvar:\tt_z_21,20 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.21 N 131 132 3
-00:00:04.21 I 132 \inode:\t132 (0x7f81a8d0b1e8)\idepth:\t50\nvar:\t-\nbound:\t5.062500
-00:00:04.21 I 132 \inode:\t132 (0x7f81a8d0b1e8)\idepth:\t50\nvar:\tt_z_17,19 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.21 N 131 133 3
-00:00:04.21 I 133 \inode:\t133 (0x7f81a8d0b228)\idepth:\t50\nvar:\t-\nbound:\t5.062500
-00:00:04.21 I 133 \inode:\t133 (0x7f81a8d0b228)\idepth:\t50\nvar:\tt_z_17,19 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.21 I 131 \inode:\t131 (0x7f81a8d0b1a8)\idepth:\t49\nvar:\tt_z_21,20 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t67
-00:00:04.21 P 131 2
-00:00:04.21 I 133 \inode:\t133 (0x7f81a8d0b228)\idepth:\t50\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t68
-00:00:04.21 P 133 2
-00:00:04.21 I 133 \inode:\t133 (0x7f81a8d0b228)\idepth:\t50\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t68
-00:00:04.21 P 133 4
-00:00:04.22 I 132 \inode:\t132 (0x7f81a8d0b1e8)\idepth:\t50\nvar:\tt_z_17,19 [-0,0] <= 0.000000\nbound:\t100000000000000000000.000000\nnr:\t69
-00:00:04.22 P 132 2
-00:00:04.22 I 132 \inode:\t132 (0x7f81a8d0b1e8)\idepth:\t50\nvar:\tt_z_17,19 [-0,0] <= 0.000000\nbound:\t100000000000000000000.000000\nnr:\t69
-00:00:04.22 P 132 4
-00:00:04.31 I 106 \inode:\t106 (0x7f81a8d0a5e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:04.31 N 106 134 3
-00:00:04.31 I 134 \inode:\t134 (0x7f81a8d0b1a8)\idepth:\t38\nvar:\t-\nbound:\t5.062500
-00:00:04.31 I 134 \inode:\t134 (0x7f81a8d0b1a8)\idepth:\t38\nvar:\tt_z_4,1 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.31 N 106 135 3
-00:00:04.31 I 135 \inode:\t135 (0x7f81a8d0b1e8)\idepth:\t38\nvar:\t-\nbound:\t5.062500
-00:00:04.31 I 135 \inode:\t135 (0x7f81a8d0b1e8)\idepth:\t38\nvar:\tt_z_4,1 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.31 I 106 \inode:\t106 (0x7f81a8d0a5e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t70
-00:00:04.31 P 106 2
-00:00:04.36 I 135 \inode:\t135 (0x7f81a8d0b1e8)\idepth:\t38\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.36 N 135 136 3
-00:00:04.36 I 136 \inode:\t136 (0x7f81a8d0b228)\idepth:\t39\nvar:\t-\nbound:\t5.062500
-00:00:04.36 I 136 \inode:\t136 (0x7f81a8d0b228)\idepth:\t39\nvar:\tt_z_32,34 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.36 N 135 137 3
-00:00:04.36 I 137 \inode:\t137 (0x7f81a8d0b2a8)\idepth:\t39\nvar:\t-\nbound:\t5.062500
-00:00:04.36 I 137 \inode:\t137 (0x7f81a8d0b2a8)\idepth:\t39\nvar:\tt_z_32,34 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.36 I 135 \inode:\t135 (0x7f81a8d0b1e8)\idepth:\t38\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t71
-00:00:04.36 P 135 2
-00:00:04.37 I 137 \inode:\t137 (0x7f81a8d0b2a8)\idepth:\t39\nvar:\tt_z_32,34 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.37 N 137 138 3
-00:00:04.37 I 138 \inode:\t138 (0x7f81a8d0b2e8)\idepth:\t40\nvar:\t-\nbound:\t5.062500
-00:00:04.37 I 138 \inode:\t138 (0x7f81a8d0b2e8)\idepth:\t40\nvar:\tt_z_39,38 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.37 N 137 139 3
-00:00:04.37 I 139 \inode:\t139 (0x7f81a8d0b268)\idepth:\t40\nvar:\t-\nbound:\t5.062500
-00:00:04.37 I 139 \inode:\t139 (0x7f81a8d0b268)\idepth:\t40\nvar:\tt_z_39,38 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.37 I 137 \inode:\t137 (0x7f81a8d0b2a8)\idepth:\t39\nvar:\tt_z_32,34 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t72
-00:00:04.37 P 137 2
-00:00:04.61 I 139 \inode:\t139 (0x7f81a8d0b268)\idepth:\t40\nvar:\tt_z_39,38 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.61 N 139 140 3
-00:00:04.61 I 140 \inode:\t140 (0x7f81a8d140a8)\idepth:\t41\nvar:\t-\nbound:\t5.062500
-00:00:04.61 I 140 \inode:\t140 (0x7f81a8d140a8)\idepth:\t41\nvar:\tt_z_23,26 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.61 N 139 141 3
-00:00:04.61 I 141 \inode:\t141 (0x7f81a8d13f28)\idepth:\t41\nvar:\t-\nbound:\t5.062500
-00:00:04.61 I 141 \inode:\t141 (0x7f81a8d13f28)\idepth:\t41\nvar:\tt_z_23,26 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.61 I 139 \inode:\t139 (0x7f81a8d0b268)\idepth:\t40\nvar:\tt_z_39,38 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t73
-00:00:04.61 P 139 2
-00:00:04.64 U 292.500000
-00:00:04.67 I 141 \inode:\t141 (0x7f81a8d13f28)\idepth:\t41\nvar:\tt_z_23,26 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.67 N 141 142 3
-00:00:04.67 I 142 \inode:\t142 (0x7f81a8d0b628)\idepth:\t42\nvar:\t-\nbound:\t5.062500
-00:00:04.67 I 142 \inode:\t142 (0x7f81a8d0b628)\idepth:\t42\nvar:\tt_z_21,24 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.67 N 141 143 3
-00:00:04.67 I 143 \inode:\t143 (0x7f81a8d13fa8)\idepth:\t42\nvar:\t-\nbound:\t5.062500
-00:00:04.67 I 143 \inode:\t143 (0x7f81a8d13fa8)\idepth:\t42\nvar:\tt_z_21,24 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.67 I 141 \inode:\t141 (0x7f81a8d13f28)\idepth:\t41\nvar:\tt_z_23,26 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t74
-00:00:04.67 P 141 2
-00:00:04.69 I 143 \inode:\t143 (0x7f81a8d13fa8)\idepth:\t42\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.69 N 143 144 3
-00:00:04.69 I 144 \inode:\t144 (0x7f81a8d10268)\idepth:\t43\nvar:\t-\nbound:\t5.062500
-00:00:04.69 I 144 \inode:\t144 (0x7f81a8d10268)\idepth:\t43\nvar:\tt_z_22,25 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.69 N 143 145 3
-00:00:04.69 I 145 \inode:\t145 (0x7f81a8d136e8)\idepth:\t43\nvar:\t-\nbound:\t5.062500
-00:00:04.69 I 145 \inode:\t145 (0x7f81a8d136e8)\idepth:\t43\nvar:\tt_z_22,25 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.69 I 143 \inode:\t143 (0x7f81a8d13fa8)\idepth:\t42\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t75
-00:00:04.69 P 143 2
-00:00:04.71 I 145 \inode:\t145 (0x7f81a8d136e8)\idepth:\t43\nvar:\tt_z_22,25 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.71 N 145 146 3
-00:00:04.71 I 146 \inode:\t146 (0x7f81a8d136a8)\idepth:\t44\nvar:\t-\nbound:\t5.062500
-00:00:04.71 I 146 \inode:\t146 (0x7f81a8d136a8)\idepth:\t44\nvar:\tt_z_28,25 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.71 N 145 147 3
-00:00:04.71 I 147 \inode:\t147 (0x7f81a8d135a8)\idepth:\t44\nvar:\t-\nbound:\t5.062500
-00:00:04.71 I 147 \inode:\t147 (0x7f81a8d135a8)\idepth:\t44\nvar:\tt_z_28,25 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.71 I 145 \inode:\t145 (0x7f81a8d136e8)\idepth:\t43\nvar:\tt_z_22,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t76
-00:00:04.71 P 145 2
-00:00:04.71 I 147 \inode:\t147 (0x7f81a8d135a8)\idepth:\t44\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.71 N 147 148 3
-00:00:04.71 I 148 \inode:\t148 (0x7f81a8d12ea8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
-00:00:04.71 I 148 \inode:\t148 (0x7f81a8d12ea8)\idepth:\t45\nvar:\tt_z_29,28 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.71 N 147 149 3
-00:00:04.71 I 149 \inode:\t149 (0x7f81a8d130e8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
-00:00:04.71 I 149 \inode:\t149 (0x7f81a8d130e8)\idepth:\t45\nvar:\tt_z_29,28 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.71 I 147 \inode:\t147 (0x7f81a8d135a8)\idepth:\t44\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t77
-00:00:04.71 P 147 2
-00:00:04.77 I 149 \inode:\t149 (0x7f81a8d130e8)\idepth:\t45\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.77 N 149 150 3
-00:00:04.77 I 150 \inode:\t150 (0x7f81a8d12f68)\idepth:\t46\nvar:\t-\nbound:\t5.062500
-00:00:04.77 I 150 \inode:\t150 (0x7f81a8d12f68)\idepth:\t46\nvar:\tt_z_14,11 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.77 N 149 151 3
-00:00:04.77 I 151 \inode:\t151 (0x7f81a8d12f28)\idepth:\t46\nvar:\t-\nbound:\t5.062500
-00:00:04.77 I 151 \inode:\t151 (0x7f81a8d12f28)\idepth:\t46\nvar:\tt_z_14,11 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.77 I 149 \inode:\t149 (0x7f81a8d130e8)\idepth:\t45\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t78
-00:00:04.77 P 149 2
-00:00:04.80 I 151 \inode:\t151 (0x7f81a8d12f28)\idepth:\t46\nvar:\tt_z_14,11 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.80 N 151 152 3
-00:00:04.80 I 152 \inode:\t152 (0x7f81a8d0b5e8)\idepth:\t47\nvar:\t-\nbound:\t5.062500
-00:00:04.80 I 152 \inode:\t152 (0x7f81a8d0b5e8)\idepth:\t47\nvar:\tt_z_25,26 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.80 N 151 153 3
-00:00:04.80 I 153 \inode:\t153 (0x7f81a8d12828)\idepth:\t47\nvar:\t-\nbound:\t5.062500
-00:00:04.80 I 153 \inode:\t153 (0x7f81a8d12828)\idepth:\t47\nvar:\tt_z_25,26 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.80 I 151 \inode:\t151 (0x7f81a8d12f28)\idepth:\t46\nvar:\tt_z_14,11 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t79
-00:00:04.80 P 151 2
-00:00:04.84 I 153 \inode:\t153 (0x7f81a8d12828)\idepth:\t47\nvar:\tt_z_25,26 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.84 N 153 154 3
-00:00:04.84 I 154 \inode:\t154 (0x7f81a8d124e8)\idepth:\t48\nvar:\t-\nbound:\t5.062500
-00:00:04.84 I 154 \inode:\t154 (0x7f81a8d124e8)\idepth:\t48\nvar:\tt_z_23,22 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.84 N 153 155 3
-00:00:04.84 I 155 \inode:\t155 (0x7f81a8d12ee8)\idepth:\t48\nvar:\t-\nbound:\t5.062500
-00:00:04.84 I 155 \inode:\t155 (0x7f81a8d12ee8)\idepth:\t48\nvar:\tt_z_23,22 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.84 I 153 \inode:\t153 (0x7f81a8d12828)\idepth:\t47\nvar:\tt_z_25,26 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t80
-00:00:04.84 P 153 2
-00:00:04.86 I 155 \inode:\t155 (0x7f81a8d12ee8)\idepth:\t48\nvar:\tt_z_23,22 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.86 N 155 156 3
-00:00:04.86 I 156 \inode:\t156 (0x7f81a8d133a8)\idepth:\t49\nvar:\t-\nbound:\t5.062500
-00:00:04.86 I 156 \inode:\t156 (0x7f81a8d133a8)\idepth:\t49\nvar:\tt_z_17,19 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.86 N 155 157 3
-00:00:04.86 I 157 \inode:\t157 (0x7f81a8d11ee8)\idepth:\t49\nvar:\t-\nbound:\t5.062500
-00:00:04.86 I 157 \inode:\t157 (0x7f81a8d11ee8)\idepth:\t49\nvar:\tt_z_17,19 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.86 I 155 \inode:\t155 (0x7f81a8d12ee8)\idepth:\t48\nvar:\tt_z_23,22 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t81
-00:00:04.86 P 155 2
-00:00:04.87 I 157 \inode:\t157 (0x7f81a8d11ee8)\idepth:\t49\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.87 N 157 158 3
-00:00:04.87 I 158 \inode:\t158 (0x7f81a8d0b668)\idepth:\t50\nvar:\t-\nbound:\t5.062500
-00:00:04.87 I 158 \inode:\t158 (0x7f81a8d0b668)\idepth:\t50\nvar:\tt_z_24,23 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.87 N 157 159 3
-00:00:04.87 I 159 \inode:\t159 (0x7f81a8d09868)\idepth:\t50\nvar:\t-\nbound:\t5.062500
-00:00:04.87 I 159 \inode:\t159 (0x7f81a8d09868)\idepth:\t50\nvar:\tt_z_24,23 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.87 I 157 \inode:\t157 (0x7f81a8d11ee8)\idepth:\t49\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t82
-00:00:04.87 P 157 2
-00:00:04.88 I 159 \inode:\t159 (0x7f81a8d09868)\idepth:\t50\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t83
-00:00:04.88 P 159 2
-00:00:04.88 I 159 \inode:\t159 (0x7f81a8d09868)\idepth:\t50\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t83
-00:00:04.88 P 159 4
-00:00:04.96 I 158 \inode:\t158 (0x7f81a8d0b668)\idepth:\t50\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500
-00:00:04.96 N 158 160 3
-00:00:04.96 I 160 \inode:\t160 (0x7f81a8d0b428)\idepth:\t51\nvar:\t-\nbound:\t5.062500
-00:00:04.96 I 160 \inode:\t160 (0x7f81a8d0b428)\idepth:\t51\nvar:\tt_z_23,27 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.96 N 158 161 3
-00:00:04.96 I 161 \inode:\t161 (0x7f81a8d09868)\idepth:\t51\nvar:\t-\nbound:\t5.062500
-00:00:04.96 I 161 \inode:\t161 (0x7f81a8d09868)\idepth:\t51\nvar:\tt_z_23,27 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.96 I 158 \inode:\t158 (0x7f81a8d0b668)\idepth:\t50\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t84
-00:00:04.96 P 158 2
-00:00:04.98 I 161 \inode:\t161 (0x7f81a8d09868)\idepth:\t51\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:04.98 N 161 162 3
-00:00:04.98 I 162 \inode:\t162 (0x7f81a8d13ee8)\idepth:\t52\nvar:\t-\nbound:\t5.062500
-00:00:04.98 I 162 \inode:\t162 (0x7f81a8d13ee8)\idepth:\t52\nvar:\tt_z_20,23 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:04.98 N 161 163 3
-00:00:04.98 I 163 \inode:\t163 (0x7f81a8d0b6e8)\idepth:\t52\nvar:\t-\nbound:\t5.062500
-00:00:04.98 I 163 \inode:\t163 (0x7f81a8d0b6e8)\idepth:\t52\nvar:\tt_z_20,23 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:04.98 I 161 \inode:\t161 (0x7f81a8d09868)\idepth:\t51\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t85
-00:00:04.98 P 161 2
-00:00:05.03 I 163 \inode:\t163 (0x7f81a8d0b6e8)\idepth:\t52\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500
-00:00:05.03 N 163 164 3
-00:00:05.03 I 164 \inode:\t164 (0x7f81a8d0b5a8)\idepth:\t53\nvar:\t-\nbound:\t5.062500
-00:00:05.03 I 164 \inode:\t164 (0x7f81a8d0b5a8)\idepth:\t53\nvar:\tt_z_41,23 [-0,1] <= 0.000000\nbound:\t5.062500
-00:00:05.03 N 163 165 3
-00:00:05.03 I 165 \inode:\t165 (0x7f81a8d0b528)\idepth:\t53\nvar:\t-\nbound:\t5.062500
-00:00:05.03 I 165 \inode:\t165 (0x7f81a8d0b528)\idepth:\t53\nvar:\tt_z_41,23 [-0,1] >= 1.000000\nbound:\t5.062500
-00:00:05.03 I 163 \inode:\t163 (0x7f81a8d0b6e8)\idepth:\t52\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t86
-00:00:05.03 P 163 2
-00:00:05.07 I 162 \inode:\t162 (0x7f81a8d13ee8)\idepth:\t52\nvar:\tt_z_20,23 [1,1] <= 0.000000\nbound:\t5.500000\nnr:\t87
-00:00:05.07 P 162 4
-00:00:05.07 I 160 \inode:\t160 (0x7f81a8d0b428)\idepth:\t51\nvar:\tt_z_23,27 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 160 4
-00:00:05.07 I 74 \inode:\t74 (0x7f81a8d09e68)\idepth:\t21\nvar:\tt_z_47,48 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 74 4
-00:00:05.07 I 154 \inode:\t154 (0x7f81a8d124e8)\idepth:\t48\nvar:\tt_z_23,22 [1,1] <= 0.000000\nbound:\t8.500000\nnr:\t87
-00:00:05.07 P 154 4
-00:00:05.07 I 16 \inode:\t16 (0x7f81a8d011a8)\idepth:\t8\nvar:\tt_z_38,39 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 16 4
-00:00:05.07 I 150 \inode:\t150 (0x7f81a8d12f68)\idepth:\t46\nvar:\tt_z_14,11 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 150 4
-00:00:05.07 I 142 \inode:\t142 (0x7f81a8d0b628)\idepth:\t42\nvar:\tt_z_21,24 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 142 4
-00:00:05.07 I 68 \inode:\t68 (0x7f81a8d09ce8)\idepth:\t18\nvar:\tt_z_1,50 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 68 4
-00:00:05.07 I 144 \inode:\t144 (0x7f81a8d10268)\idepth:\t43\nvar:\tt_z_22,25 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 144 4
-00:00:05.07 I 34 \inode:\t34 (0x7f81a8d09428)\idepth:\t8\nvar:\tt_z_24,28 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 34 4
-00:00:05.07 I 138 \inode:\t138 (0x7f81a8d0b2e8)\idepth:\t40\nvar:\tt_z_39,38 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 138 4
-00:00:05.07 I 32 \inode:\t32 (0x7f81a8d093a8)\idepth:\t7\nvar:\tt_z_28,25 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 32 4
-00:00:05.07 I 136 \inode:\t136 (0x7f81a8d0b228)\idepth:\t39\nvar:\tt_z_32,34 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 136 4
-00:00:05.07 I 134 \inode:\t134 (0x7f81a8d0b1a8)\idepth:\t38\nvar:\tt_z_4,1 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 134 4
-00:00:05.07 I 128 \inode:\t128 (0x7f81a8d0b0a8)\idepth:\t48\nvar:\tt_z_41,23 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 128 4
-00:00:05.07 I 126 \inode:\t126 (0x7f81a8d0b068)\idepth:\t47\nvar:\tt_z_20,23 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 126 4
-00:00:05.07 I 122 \inode:\t122 (0x7f81a8d0afa8)\idepth:\t45\nvar:\tt_z_23,27 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 122 4
-00:00:05.07 I 120 \inode:\t120 (0x7f81a8d0af28)\idepth:\t44\nvar:\tt_z_27,25 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 120 4
-00:00:05.07 I 118 \inode:\t118 (0x7f81a8d0aee8)\idepth:\t43\nvar:\tt_z_30,29 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 118 4
-00:00:05.07 I 116 \inode:\t116 (0x7f81a8d18ce8)\idepth:\t42\nvar:\tt_z_29,28 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 116 4
-00:00:05.07 I 114 \inode:\t114 (0x7f81a8d0ffa8)\idepth:\t41\nvar:\tt_z_28,26 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 114 4
-00:00:05.07 I 112 \inode:\t112 (0x7f81a8d0a7a8)\idepth:\t40\nvar:\tt_z_21,24 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 112 4
-00:00:05.07 I 54 \inode:\t54 (0x7f81a8d0e768)\idepth:\t11\nvar:\tt_z_42,17 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 54 4
-00:00:05.07 I 108 \inode:\t108 (0x7f81a8d0a6a8)\idepth:\t38\nvar:\tt_z_35,31 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 108 4
-00:00:05.07 I 2 \inode:\t2 (0x7f81a8cfe728)\idepth:\t1\nvar:\tt_z_21,18 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 2 4
-00:00:05.07 I 104 \inode:\t104 (0x7f81a8d0a5a8)\idepth:\t36\nvar:\tt_z_49,1 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 104 4
-00:00:05.07 I 50 \inode:\t50 (0x7f81a8d095e8)\idepth:\t9\nvar:\tt_z_30,36 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 50 4
-00:00:05.07 I 100 \inode:\t100 (0x7f81a8d0a468)\idepth:\t34\nvar:\tt_z_32,33 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 100 4
-00:00:05.07 I 98 \inode:\t98 (0x7f81a8d0a3e8)\idepth:\t33\nvar:\tt_z_33,34 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 98 4
-00:00:05.07 I 48 \inode:\t48 (0x7f81a8d0efa8)\idepth:\t8\nvar:\tt_z_14,10 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 48 4
-00:00:05.07 I 94 \inode:\t94 (0x7f81a8d0a328)\idepth:\t31\nvar:\tt_z_42,41 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 94 4
-00:00:05.07 I 46 \inode:\t46 (0x7f81a8cff068)\idepth:\t7\nvar:\tt_z_10,13 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 46 4
-00:00:05.07 I 90 \inode:\t90 (0x7f81a8d0a1e8)\idepth:\t29\nvar:\tt_z_33,37 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 90 4
-00:00:05.07 I 22 \inode:\t22 (0x7f81a8cfe1e8)\idepth:\t11\nvar:\tt_z_36,3 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 22 4
-00:00:05.07 I 42 \inode:\t42 (0x7f81a8cfeca8)\idepth:\t12\nvar:\tt_z_36,39 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 42 4
-00:00:05.07 I 84 \inode:\t84 (0x7f81a8cff1a8)\idepth:\t26\nvar:\tt_z_26,46 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 84 4
-00:00:05.07 I 82 \inode:\t82 (0x7f81a8d0a068)\idepth:\t25\nvar:\tt_z_34,38 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 82 4
-00:00:05.07 I 40 \inode:\t40 (0x7f81a8cff328)\idepth:\t11\nvar:\tt_z_39,35 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 40 4
-00:00:05.07 I 78 \inode:\t78 (0x7f81a8d09f68)\idepth:\t23\nvar:\tt_z_12,16 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 78 4
-00:00:05.07 I 39 \inode:\t39 (0x7f81a8d09528)\idepth:\t10\nvar:\tt_z_24,47 [-0,1] >= 1.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 39 4
-00:00:05.07 I 66 \inode:\t66 (0x7f81a8d09c68)\idepth:\t17\nvar:\tt_z_5,4 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 66 4
-00:00:05.07 I 4 \inode:\t4 (0x7f81a8d012e8)\idepth:\t2\nvar:\tt_z_18,6 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 4 4
-00:00:05.07 I 36 \inode:\t36 (0x7f81a8d094a8)\idepth:\t9\nvar:\tt_z_5,4 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 36 4
-00:00:05.07 I 70 \inode:\t70 (0x7f81a8d09d68)\idepth:\t19\nvar:\tt_z_36,32 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 70 4
-00:00:05.07 I 140 \inode:\t140 (0x7f81a8d140a8)\idepth:\t41\nvar:\tt_z_23,26 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 140 4
-00:00:05.07 I 65 \inode:\t65 (0x7f81a8d097a8)\idepth:\t16\nvar:\tt_z_27,50 [-0,0] >= 1.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 65 4
-00:00:05.07 I 60 \inode:\t60 (0x7f81a8d09968)\idepth:\t14\nvar:\tt_z_1,11 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 60 4
-00:00:05.07 I 30 \inode:\t30 (0x7f81a8d09328)\idepth:\t6\nvar:\tt_z_18,14 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 30 4
-00:00:05.07 I 28 \inode:\t28 (0x7f81a8d005e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 28 4
-00:00:05.07 I 56 \inode:\t56 (0x7f81a8d0d3e8)\idepth:\t12\nvar:\tt_z_20,17 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 56 4
-00:00:05.07 I 110 \inode:\t110 (0x7f81a8d0a6e8)\idepth:\t39\nvar:\tt_z_14,18 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 110 4
-00:00:05.07 I 29 \inode:\t29 (0x7f81a8d017e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] >= 1.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 29 4
-00:00:05.07 I 26 \inode:\t26 (0x7f81a8d01768)\idepth:\t13\nvar:\tt_z_27,4 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 26 4
-00:00:05.07 I 6 \inode:\t6 (0x7f81a8d012a8)\idepth:\t3\nvar:\tt_z_25,21 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 6 4
-00:00:05.07 I 92 \inode:\t92 (0x7f81a8d0a268)\idepth:\t30\nvar:\tt_z_39,35 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 92 4
-00:00:05.07 I 88 \inode:\t88 (0x7f81a8d0a168)\idepth:\t28\nvar:\tt_z_38,42 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 88 4
-00:00:05.07 I 80 \inode:\t80 (0x7f81a8d09fe8)\idepth:\t24\nvar:\tt_z_45,43 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 80 4
-00:00:05.07 I 8 \inode:\t8 (0x7f81a8d03468)\idepth:\t4\nvar:\tt_z_50,29 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 8 4
-00:00:05.07 I 76 \inode:\t76 (0x7f81a8d09f28)\idepth:\t22\nvar:\tt_z_43,47 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 76 4
-00:00:05.07 I 156 \inode:\t156 (0x7f81a8d133a8)\idepth:\t49\nvar:\tt_z_17,19 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 156 4
-00:00:05.07 I 148 \inode:\t148 (0x7f81a8d12ea8)\idepth:\t45\nvar:\tt_z_29,28 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 148 4
-00:00:05.07 I 18 \inode:\t18 (0x7f81a8d02f28)\idepth:\t9\nvar:\tt_z_47,50 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 18 4
-00:00:05.07 I 53 \inode:\t53 (0x7f81a8d095a8)\idepth:\t10\nvar:\tt_z_36,11 [-0,0] >= 1.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 53 4
-00:00:05.07 I 14 \inode:\t14 (0x7f81a8d013a8)\idepth:\t7\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 14 4
-00:00:05.07 I 20 \inode:\t20 (0x7f81a8d030e8)\idepth:\t10\nvar:\tt_z_1,47 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 20 4
-00:00:05.07 I 102 \inode:\t102 (0x7f81a8d0a4e8)\idepth:\t35\nvar:\tt_z_31,34 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 102 4
-00:00:05.07 I 45 \inode:\t45 (0x7f81a8cfe168)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] >= 1.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 45 4
-00:00:05.07 I 86 \inode:\t86 (0x7f81a8d0a128)\idepth:\t27\nvar:\tt_z_41,45 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 86 4
-00:00:05.07 I 152 \inode:\t152 (0x7f81a8d0b5e8)\idepth:\t47\nvar:\tt_z_25,26 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 152 4
-00:00:05.07 I 130 \inode:\t130 (0x7f81a8d0b168)\idepth:\t49\nvar:\tt_z_21,20 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.07 P 130 4
-00:00:05.08 I 62 \inode:\t62 (0x7f81a8d09668)\idepth:\t15\nvar:\tt_z_34,11 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.08 P 62 4
-00:00:05.08 I 24 \inode:\t24 (0x7f81a8cfeda8)\idepth:\t12\nvar:\tt_z_4,1 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.08 P 24 4
-00:00:05.08 I 44 \inode:\t44 (0x7f81a8cfe1a8)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.08 P 44 4
-00:00:05.08 I 146 \inode:\t146 (0x7f81a8d136a8)\idepth:\t44\nvar:\tt_z_28,25 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.08 P 146 4
-00:00:05.08 I 96 \inode:\t96 (0x7f81a8d0a368)\idepth:\t32\nvar:\tt_z_36,39 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.08 P 96 4
-00:00:05.08 I 58 \inode:\t58 (0x7f81a8d0ace8)\idepth:\t13\nvar:\tt_z_36,3 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.08 P 58 4
-00:00:05.08 I 72 \inode:\t72 (0x7f81a8d09de8)\idepth:\t20\nvar:\tt_z_37,48 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
-00:00:05.08 P 72 4
-00:00:05.08 I 164 \inode:\t164 (0x7f81a8d0b5a8)\idepth:\t53\nvar:\tt_z_41,23 [1,1] <= 0.000000\nbound:\t7.500000\nnr:\t87
-00:00:05.08 P 164 4
-00:00:05.08 U 6.750000
-00:00:05.11 I 165 \inode:\t165 (0x7f81a8d0b528)\idepth:\t53\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t87
-00:00:05.11 P 165 2
-00:00:05.11 I 165 \inode:\t165 (0x7f81a8d0b528)\idepth:\t53\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t87
-00:00:05.11 P 165 4
+00:00:00.17 N 0 1 3
+00:00:00.17 I 1 \inode:\t1 (0x7ffff5845968)\idepth:\t0\nvar:\t-\nbound:\t-100000000000000000000.000000
+00:00:00.18 P 1 11
+00:00:00.51 P 1 15
+00:00:00.55 U 339.750000
+00:00:18.86 I 1 \inode:\t1 (0x7ffff5845968)\idepth:\t0\nvar:\t-\nbound:\t5.062500
+00:00:18.86 N 1 2 3
+00:00:18.86 I 2 \inode:\t2 (0x7ffff481c728)\idepth:\t1\nvar:\t-\nbound:\t5.062500
+00:00:18.86 I 2 \inode:\t2 (0x7ffff481c728)\idepth:\t1\nvar:\tt_z_21,18 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:18.86 N 1 3 3
+00:00:18.86 I 3 \inode:\t3 (0x7ffff481c128)\idepth:\t1\nvar:\t-\nbound:\t5.062500
+00:00:18.86 I 3 \inode:\t3 (0x7ffff481c128)\idepth:\t1\nvar:\tt_z_21,18 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:18.86 I 1 \inode:\t1 (0x7ffff5845968)\idepth:\t0\nvar:\t-\nbound:\t5.062500\nnr:\t1
+00:00:18.86 P 1 2
+00:00:19.01 I 3 \inode:\t3 (0x7ffff481c128)\idepth:\t1\nvar:\tt_z_21,18 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.01 N 3 4 3
+00:00:19.01 I 4 \inode:\t4 (0x7ffff481f2e8)\idepth:\t2\nvar:\t-\nbound:\t5.062500
+00:00:19.01 I 4 \inode:\t4 (0x7ffff481f2e8)\idepth:\t2\nvar:\tt_z_18,6 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.01 N 3 5 3
+00:00:19.01 I 5 \inode:\t5 (0x7ffff481c928)\idepth:\t2\nvar:\t-\nbound:\t5.062500
+00:00:19.01 I 5 \inode:\t5 (0x7ffff481c928)\idepth:\t2\nvar:\tt_z_18,6 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.01 I 3 \inode:\t3 (0x7ffff481c128)\idepth:\t1\nvar:\tt_z_21,18 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t2
+00:00:19.01 P 3 2
+00:00:19.13 I 5 \inode:\t5 (0x7ffff481c928)\idepth:\t2\nvar:\tt_z_18,6 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.13 N 5 6 3
+00:00:19.13 I 6 \inode:\t6 (0x7ffff481f2a8)\idepth:\t3\nvar:\t-\nbound:\t5.062500
+00:00:19.13 I 6 \inode:\t6 (0x7ffff481f2a8)\idepth:\t3\nvar:\tt_z_25,21 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.13 N 5 7 3
+00:00:19.13 I 7 \inode:\t7 (0x7ffff481f228)\idepth:\t3\nvar:\t-\nbound:\t5.062500
+00:00:19.13 I 7 \inode:\t7 (0x7ffff481f228)\idepth:\t3\nvar:\tt_z_25,21 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.13 I 5 \inode:\t5 (0x7ffff481c928)\idepth:\t2\nvar:\tt_z_18,6 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t3
+00:00:19.13 P 5 2
+00:00:19.19 I 7 \inode:\t7 (0x7ffff481f228)\idepth:\t3\nvar:\tt_z_25,21 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.19 N 7 8 3
+00:00:19.19 I 8 \inode:\t8 (0x7ffff4821468)\idepth:\t4\nvar:\t-\nbound:\t5.062500
+00:00:19.19 I 8 \inode:\t8 (0x7ffff4821468)\idepth:\t4\nvar:\tt_z_50,29 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.19 N 7 9 3
+00:00:19.19 I 9 \inode:\t9 (0x7ffff481eee8)\idepth:\t4\nvar:\t-\nbound:\t5.062500
+00:00:19.19 I 9 \inode:\t9 (0x7ffff481eee8)\idepth:\t4\nvar:\tt_z_50,29 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.19 I 7 \inode:\t7 (0x7ffff481f228)\idepth:\t3\nvar:\tt_z_25,21 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t4
+00:00:19.19 P 7 2
+00:00:19.21 I 9 \inode:\t9 (0x7ffff481eee8)\idepth:\t4\nvar:\tt_z_50,29 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.21 N 9 10 3
+00:00:19.21 I 10 \inode:\t10 (0x7ffff481f1e8)\idepth:\t5\nvar:\t-\nbound:\t5.062500
+00:00:19.21 I 10 \inode:\t10 (0x7ffff481f1e8)\idepth:\t5\nvar:\tt_z_13,25 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.21 N 9 11 3
+00:00:19.21 I 11 \inode:\t11 (0x7ffff4820ce8)\idepth:\t5\nvar:\t-\nbound:\t5.062500
+00:00:19.21 I 11 \inode:\t11 (0x7ffff4820ce8)\idepth:\t5\nvar:\tt_z_13,25 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.21 I 9 \inode:\t9 (0x7ffff481eee8)\idepth:\t4\nvar:\tt_z_50,29 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t5
+00:00:19.21 P 9 2
+00:00:19.29 I 11 \inode:\t11 (0x7ffff4820ce8)\idepth:\t5\nvar:\tt_z_13,25 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.29 N 11 12 3
+00:00:19.29 I 12 \inode:\t12 (0x7ffff4821828)\idepth:\t6\nvar:\t-\nbound:\t5.062500
+00:00:19.29 I 12 \inode:\t12 (0x7ffff4821828)\idepth:\t6\nvar:\tt_z_39,13 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.29 N 11 13 3
+00:00:19.29 I 13 \inode:\t13 (0x7ffff481ef28)\idepth:\t6\nvar:\t-\nbound:\t5.062500
+00:00:19.29 I 13 \inode:\t13 (0x7ffff481ef28)\idepth:\t6\nvar:\tt_z_39,13 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.29 I 11 \inode:\t11 (0x7ffff4820ce8)\idepth:\t5\nvar:\tt_z_13,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t6
+00:00:19.29 P 11 2
+00:00:19.44 I 13 \inode:\t13 (0x7ffff481ef28)\idepth:\t6\nvar:\tt_z_39,13 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.44 N 13 14 3
+00:00:19.44 I 14 \inode:\t14 (0x7ffff481f3a8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
+00:00:19.44 I 14 \inode:\t14 (0x7ffff481f3a8)\idepth:\t7\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.44 N 13 15 3
+00:00:19.44 I 15 \inode:\t15 (0x7ffff481eae8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
+00:00:19.44 I 15 \inode:\t15 (0x7ffff481eae8)\idepth:\t7\nvar:\tt_z_37,35 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.44 I 13 \inode:\t13 (0x7ffff481ef28)\idepth:\t6\nvar:\tt_z_39,13 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t7
+00:00:19.44 P 13 2
+00:00:19.52 I 15 \inode:\t15 (0x7ffff481eae8)\idepth:\t7\nvar:\tt_z_37,35 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.52 N 15 16 3
+00:00:19.52 I 16 \inode:\t16 (0x7ffff481f1a8)\idepth:\t8\nvar:\t-\nbound:\t5.062500
+00:00:19.52 I 16 \inode:\t16 (0x7ffff481f1a8)\idepth:\t8\nvar:\tt_z_38,39 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.52 N 15 17 3
+00:00:19.52 I 17 \inode:\t17 (0x7ffff481e6e8)\idepth:\t8\nvar:\t-\nbound:\t5.062500
+00:00:19.52 I 17 \inode:\t17 (0x7ffff481e6e8)\idepth:\t8\nvar:\tt_z_38,39 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.52 I 15 \inode:\t15 (0x7ffff481eae8)\idepth:\t7\nvar:\tt_z_37,35 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t8
+00:00:19.52 P 15 2
+00:00:19.58 I 17 \inode:\t17 (0x7ffff481e6e8)\idepth:\t8\nvar:\tt_z_38,39 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.58 N 17 18 3
+00:00:19.58 I 18 \inode:\t18 (0x7ffff4820f28)\idepth:\t9\nvar:\t-\nbound:\t5.062500
+00:00:19.58 I 18 \inode:\t18 (0x7ffff4820f28)\idepth:\t9\nvar:\tt_z_47,50 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.58 N 17 19 3
+00:00:19.58 I 19 \inode:\t19 (0x7ffff4821fa8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
+00:00:19.58 I 19 \inode:\t19 (0x7ffff4821fa8)\idepth:\t9\nvar:\tt_z_47,50 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.58 I 17 \inode:\t17 (0x7ffff481e6e8)\idepth:\t8\nvar:\tt_z_38,39 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t9
+00:00:19.58 P 17 2
+00:00:19.68 I 19 \inode:\t19 (0x7ffff4821fa8)\idepth:\t9\nvar:\tt_z_47,50 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:19.68 N 19 20 3
+00:00:19.68 I 20 \inode:\t20 (0x7ffff48210e8)\idepth:\t10\nvar:\t-\nbound:\t5.062500
+00:00:19.68 I 20 \inode:\t20 (0x7ffff48210e8)\idepth:\t10\nvar:\tt_z_1,47 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:19.68 N 19 21 3
+00:00:19.68 I 21 \inode:\t21 (0x7ffff481f3e8)\idepth:\t10\nvar:\t-\nbound:\t5.062500
+00:00:19.68 I 21 \inode:\t21 (0x7ffff481f3e8)\idepth:\t10\nvar:\tt_z_1,47 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:19.68 I 19 \inode:\t19 (0x7ffff4821fa8)\idepth:\t9\nvar:\tt_z_47,50 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t10
+00:00:19.68 P 19 2
+00:00:21.35 I 21 \inode:\t21 (0x7ffff481f3e8)\idepth:\t10\nvar:\tt_z_1,47 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:21.35 N 21 22 3
+00:00:21.35 I 22 \inode:\t22 (0x7ffff481c1e8)\idepth:\t11\nvar:\t-\nbound:\t5.062500
+00:00:21.35 I 22 \inode:\t22 (0x7ffff481c1e8)\idepth:\t11\nvar:\tt_z_36,3 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.35 N 21 23 3
+00:00:21.35 I 23 \inode:\t23 (0x7ffff481c228)\idepth:\t11\nvar:\t-\nbound:\t5.062500
+00:00:21.35 I 23 \inode:\t23 (0x7ffff481c228)\idepth:\t11\nvar:\tt_z_36,3 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.35 I 21 \inode:\t21 (0x7ffff481f3e8)\idepth:\t10\nvar:\tt_z_1,47 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t11
+00:00:21.35 P 21 2
+00:00:21.42 I 23 \inode:\t23 (0x7ffff481c228)\idepth:\t11\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:21.42 N 23 24 3
+00:00:21.42 I 24 \inode:\t24 (0x7ffff481cda8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
+00:00:21.42 I 24 \inode:\t24 (0x7ffff481cda8)\idepth:\t12\nvar:\tt_z_4,1 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.42 N 23 25 3
+00:00:21.42 I 25 \inode:\t25 (0x7ffff481f728)\idepth:\t12\nvar:\t-\nbound:\t5.062500
+00:00:21.42 I 25 \inode:\t25 (0x7ffff481f728)\idepth:\t12\nvar:\tt_z_4,1 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.42 I 23 \inode:\t23 (0x7ffff481c228)\idepth:\t11\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t12
+00:00:21.42 P 23 2
+00:00:21.57 I 25 \inode:\t25 (0x7ffff481f728)\idepth:\t12\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:21.57 N 25 26 3
+00:00:21.57 I 26 \inode:\t26 (0x7ffff481f768)\idepth:\t13\nvar:\t-\nbound:\t5.062500
+00:00:21.57 I 26 \inode:\t26 (0x7ffff481f768)\idepth:\t13\nvar:\tt_z_27,4 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.57 N 25 27 3
+00:00:21.57 I 27 \inode:\t27 (0x7ffff481f7a8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
+00:00:21.57 I 27 \inode:\t27 (0x7ffff481f7a8)\idepth:\t13\nvar:\tt_z_27,4 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.57 I 25 \inode:\t25 (0x7ffff481f728)\idepth:\t12\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t13
+00:00:21.57 P 25 2
+00:00:21.68 I 27 \inode:\t27 (0x7ffff481f7a8)\idepth:\t13\nvar:\tt_z_27,4 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:21.68 N 27 28 3
+00:00:21.68 I 28 \inode:\t28 (0x7ffff481e5e8)\idepth:\t14\nvar:\t-\nbound:\t5.062500
+00:00:21.68 I 28 \inode:\t28 (0x7ffff481e5e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.68 N 27 29 3
+00:00:21.68 I 29 \inode:\t29 (0x7ffff481f7e8)\idepth:\t14\nvar:\t-\nbound:\t5.062500
+00:00:21.68 I 29 \inode:\t29 (0x7ffff481f7e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.68 I 27 \inode:\t27 (0x7ffff481f7a8)\idepth:\t13\nvar:\tt_z_27,4 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t14
+00:00:21.68 P 27 2
+00:00:21.84 I 10 \inode:\t10 (0x7ffff481f1e8)\idepth:\t5\nvar:\tt_z_13,25 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:21.84 N 10 30 3
+00:00:21.84 I 30 \inode:\t30 (0x7ffff4827328)\idepth:\t6\nvar:\t-\nbound:\t5.062500
+00:00:21.84 I 30 \inode:\t30 (0x7ffff4827328)\idepth:\t6\nvar:\tt_z_18,14 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.84 N 10 31 3
+00:00:21.84 I 31 \inode:\t31 (0x7ffff4827368)\idepth:\t6\nvar:\t-\nbound:\t5.062500
+00:00:21.84 I 31 \inode:\t31 (0x7ffff4827368)\idepth:\t6\nvar:\tt_z_18,14 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.84 I 10 \inode:\t10 (0x7ffff481f1e8)\idepth:\t5\nvar:\tt_z_13,25 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t15
+00:00:21.84 P 10 2
+00:00:21.86 I 31 \inode:\t31 (0x7ffff4827368)\idepth:\t6\nvar:\tt_z_18,14 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:21.86 N 31 32 3
+00:00:21.86 I 32 \inode:\t32 (0x7ffff48273a8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
+00:00:21.86 I 32 \inode:\t32 (0x7ffff48273a8)\idepth:\t7\nvar:\tt_z_28,25 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.86 N 31 33 3
+00:00:21.86 I 33 \inode:\t33 (0x7ffff48273e8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
+00:00:21.86 I 33 \inode:\t33 (0x7ffff48273e8)\idepth:\t7\nvar:\tt_z_28,25 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.86 I 31 \inode:\t31 (0x7ffff4827368)\idepth:\t6\nvar:\tt_z_18,14 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t16
+00:00:21.86 P 31 2
+00:00:21.95 I 33 \inode:\t33 (0x7ffff48273e8)\idepth:\t7\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:21.95 N 33 34 3
+00:00:21.95 I 34 \inode:\t34 (0x7ffff4827428)\idepth:\t8\nvar:\t-\nbound:\t5.062500
+00:00:21.95 I 34 \inode:\t34 (0x7ffff4827428)\idepth:\t8\nvar:\tt_z_24,28 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.95 N 33 35 3
+00:00:21.95 I 35 \inode:\t35 (0x7ffff4827468)\idepth:\t8\nvar:\t-\nbound:\t5.062500
+00:00:21.95 I 35 \inode:\t35 (0x7ffff4827468)\idepth:\t8\nvar:\tt_z_24,28 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.95 I 33 \inode:\t33 (0x7ffff48273e8)\idepth:\t7\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t17
+00:00:21.95 P 33 2
+00:00:21.98 I 35 \inode:\t35 (0x7ffff4827468)\idepth:\t8\nvar:\tt_z_24,28 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:21.99 N 35 36 3
+00:00:21.99 I 36 \inode:\t36 (0x7ffff48274a8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
+00:00:21.99 I 36 \inode:\t36 (0x7ffff48274a8)\idepth:\t9\nvar:\tt_z_5,4 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:21.99 N 35 37 3
+00:00:21.99 I 37 \inode:\t37 (0x7ffff48274e8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
+00:00:21.99 I 37 \inode:\t37 (0x7ffff48274e8)\idepth:\t9\nvar:\tt_z_5,4 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:21.99 I 35 \inode:\t35 (0x7ffff4827468)\idepth:\t8\nvar:\tt_z_24,28 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t18
+00:00:21.99 P 35 2
+00:00:22.15 I 37 \inode:\t37 (0x7ffff48274e8)\idepth:\t9\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:22.15 N 37 38 3
+00:00:22.15 I 38 \inode:\t38 (0x7ffff4827568)\idepth:\t10\nvar:\t-\nbound:\t5.062500
+00:00:22.15 I 38 \inode:\t38 (0x7ffff4827568)\idepth:\t10\nvar:\tt_z_24,47 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:22.15 N 37 39 3
+00:00:22.15 I 39 \inode:\t39 (0x7ffff4827528)\idepth:\t10\nvar:\t-\nbound:\t5.062500
+00:00:22.15 I 39 \inode:\t39 (0x7ffff4827528)\idepth:\t10\nvar:\tt_z_24,47 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:22.15 I 37 \inode:\t37 (0x7ffff48274e8)\idepth:\t9\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t19
+00:00:22.15 P 37 2
+00:00:23.46 I 38 \inode:\t38 (0x7ffff4827568)\idepth:\t10\nvar:\tt_z_24,47 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:23.46 N 38 40 3
+00:00:23.46 I 40 \inode:\t40 (0x7ffff481d328)\idepth:\t11\nvar:\t-\nbound:\t5.062500
+00:00:23.46 I 40 \inode:\t40 (0x7ffff481d328)\idepth:\t11\nvar:\tt_z_39,35 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:23.46 N 38 41 3
+00:00:23.46 I 41 \inode:\t41 (0x7ffff481cc68)\idepth:\t11\nvar:\t-\nbound:\t5.062500
+00:00:23.46 I 41 \inode:\t41 (0x7ffff481cc68)\idepth:\t11\nvar:\tt_z_39,35 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:23.46 I 38 \inode:\t38 (0x7ffff4827568)\idepth:\t10\nvar:\tt_z_24,47 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t20
+00:00:23.46 P 38 2
+00:00:23.52 I 41 \inode:\t41 (0x7ffff481cc68)\idepth:\t11\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:23.52 N 41 42 3
+00:00:23.52 I 42 \inode:\t42 (0x7ffff481cca8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
+00:00:23.52 I 42 \inode:\t42 (0x7ffff481cca8)\idepth:\t12\nvar:\tt_z_36,39 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:23.52 N 41 43 3
+00:00:23.52 I 43 \inode:\t43 (0x7ffff481c9e8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
+00:00:23.52 I 43 \inode:\t43 (0x7ffff481c9e8)\idepth:\t12\nvar:\tt_z_36,39 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:23.52 I 41 \inode:\t41 (0x7ffff481cc68)\idepth:\t11\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t21
+00:00:23.52 P 41 2
+00:00:23.59 I 43 \inode:\t43 (0x7ffff481c9e8)\idepth:\t12\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:23.59 N 43 44 3
+00:00:23.59 I 44 \inode:\t44 (0x7ffff481c1a8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
+00:00:23.59 I 44 \inode:\t44 (0x7ffff481c1a8)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:23.59 N 43 45 3
+00:00:23.59 I 45 \inode:\t45 (0x7ffff481c168)\idepth:\t13\nvar:\t-\nbound:\t5.062500
+00:00:23.59 I 45 \inode:\t45 (0x7ffff481c168)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:23.59 I 43 \inode:\t43 (0x7ffff481c9e8)\idepth:\t12\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t22
+00:00:23.59 P 43 2
+00:00:23.62 I 12 \inode:\t12 (0x7ffff4821828)\idepth:\t6\nvar:\tt_z_39,13 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:23.62 N 12 46 3
+00:00:23.62 I 46 \inode:\t46 (0x7ffff481d068)\idepth:\t7\nvar:\t-\nbound:\t5.062500
+00:00:23.62 I 46 \inode:\t46 (0x7ffff481d068)\idepth:\t7\nvar:\tt_z_10,13 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:23.62 N 12 47 3
+00:00:23.62 I 47 \inode:\t47 (0x7ffff481d0a8)\idepth:\t7\nvar:\t-\nbound:\t5.062500
+00:00:23.62 I 47 \inode:\t47 (0x7ffff481d0a8)\idepth:\t7\nvar:\tt_z_10,13 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:23.62 I 12 \inode:\t12 (0x7ffff4821828)\idepth:\t6\nvar:\tt_z_39,13 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t23
+00:00:23.62 P 12 2
+00:00:23.74 I 47 \inode:\t47 (0x7ffff481d0a8)\idepth:\t7\nvar:\tt_z_10,13 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:23.74 N 47 48 3
+00:00:23.74 I 48 \inode:\t48 (0x7ffff482cfa8)\idepth:\t8\nvar:\t-\nbound:\t5.062500
+00:00:23.74 I 48 \inode:\t48 (0x7ffff482cfa8)\idepth:\t8\nvar:\tt_z_14,10 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:23.74 N 47 49 3
+00:00:23.74 I 49 \inode:\t49 (0x7ffff4828d28)\idepth:\t8\nvar:\t-\nbound:\t5.062500
+00:00:23.74 I 49 \inode:\t49 (0x7ffff4828d28)\idepth:\t8\nvar:\tt_z_14,10 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:23.74 I 47 \inode:\t47 (0x7ffff481d0a8)\idepth:\t7\nvar:\tt_z_10,13 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t24
+00:00:23.74 P 47 2
+00:00:23.77 P 49 15
+00:00:23.77 P 49 11
+00:00:23.86 I 49 \inode:\t49 (0x7ffff4828d28)\idepth:\t8\nvar:\tt_z_14,10 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:23.86 N 49 50 3
+00:00:23.86 I 50 \inode:\t50 (0x7ffff48275e8)\idepth:\t9\nvar:\t-\nbound:\t5.062500
+00:00:23.86 I 50 \inode:\t50 (0x7ffff48275e8)\idepth:\t9\nvar:\tt_z_30,36 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:23.86 N 49 51 3
+00:00:23.86 I 51 \inode:\t51 (0x7ffff482d928)\idepth:\t9\nvar:\t-\nbound:\t5.062500
+00:00:23.86 I 51 \inode:\t51 (0x7ffff482d928)\idepth:\t9\nvar:\tt_z_30,36 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:23.86 I 49 \inode:\t49 (0x7ffff4828d28)\idepth:\t8\nvar:\tt_z_14,10 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t25
+00:00:23.86 P 49 2
+00:00:23.90 I 51 \inode:\t51 (0x7ffff482d928)\idepth:\t9\nvar:\tt_z_30,36 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:23.90 N 51 52 3
+00:00:23.90 I 52 \inode:\t52 (0x7ffff482cc28)\idepth:\t10\nvar:\t-\nbound:\t5.062500
+00:00:23.90 I 52 \inode:\t52 (0x7ffff482cc28)\idepth:\t10\nvar:\tt_z_36,11 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:23.90 N 51 53 3
+00:00:23.90 I 53 \inode:\t53 (0x7ffff48275a8)\idepth:\t10\nvar:\t-\nbound:\t5.062500
+00:00:23.90 I 53 \inode:\t53 (0x7ffff48275a8)\idepth:\t10\nvar:\tt_z_36,11 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:23.90 I 51 \inode:\t51 (0x7ffff482d928)\idepth:\t9\nvar:\tt_z_30,36 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t26
+00:00:23.90 P 51 2
+00:00:24.06 I 52 \inode:\t52 (0x7ffff482cc28)\idepth:\t10\nvar:\tt_z_36,11 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:24.06 N 52 54 3
+00:00:24.06 I 54 \inode:\t54 (0x7ffff482c768)\idepth:\t11\nvar:\t-\nbound:\t5.062500
+00:00:24.06 I 54 \inode:\t54 (0x7ffff482c768)\idepth:\t11\nvar:\tt_z_42,17 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.06 N 52 55 3
+00:00:24.06 I 55 \inode:\t55 (0x7ffff482cf68)\idepth:\t11\nvar:\t-\nbound:\t5.062500
+00:00:24.06 I 55 \inode:\t55 (0x7ffff482cf68)\idepth:\t11\nvar:\tt_z_42,17 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.06 I 52 \inode:\t52 (0x7ffff482cc28)\idepth:\t10\nvar:\tt_z_36,11 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t27
+00:00:24.06 P 52 2
+00:00:24.13 I 55 \inode:\t55 (0x7ffff482cf68)\idepth:\t11\nvar:\tt_z_42,17 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.13 N 55 56 3
+00:00:24.13 I 56 \inode:\t56 (0x7ffff482b3e8)\idepth:\t12\nvar:\t-\nbound:\t5.062500
+00:00:24.13 I 56 \inode:\t56 (0x7ffff482b3e8)\idepth:\t12\nvar:\tt_z_20,17 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.13 N 55 57 3
+00:00:24.13 I 57 \inode:\t57 (0x7ffff482d968)\idepth:\t12\nvar:\t-\nbound:\t5.062500
+00:00:24.13 I 57 \inode:\t57 (0x7ffff482d968)\idepth:\t12\nvar:\tt_z_20,17 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.13 I 55 \inode:\t55 (0x7ffff482cf68)\idepth:\t11\nvar:\tt_z_42,17 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t28
+00:00:24.13 P 55 2
+00:00:24.17 I 57 \inode:\t57 (0x7ffff482d968)\idepth:\t12\nvar:\tt_z_20,17 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.17 N 57 58 3
+00:00:24.17 I 58 \inode:\t58 (0x7ffff4828ce8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
+00:00:24.17 I 58 \inode:\t58 (0x7ffff4828ce8)\idepth:\t13\nvar:\tt_z_36,3 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.17 N 57 59 3
+00:00:24.17 I 59 \inode:\t59 (0x7ffff482d9a8)\idepth:\t13\nvar:\t-\nbound:\t5.062500
+00:00:24.17 I 59 \inode:\t59 (0x7ffff482d9a8)\idepth:\t13\nvar:\tt_z_36,3 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.17 I 57 \inode:\t57 (0x7ffff482d968)\idepth:\t12\nvar:\tt_z_20,17 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t29
+00:00:24.17 P 57 2
+00:00:24.22 I 59 \inode:\t59 (0x7ffff482d9a8)\idepth:\t13\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.22 N 59 60 3
+00:00:24.22 I 60 \inode:\t60 (0x7ffff4827968)\idepth:\t14\nvar:\t-\nbound:\t5.062500
+00:00:24.22 I 60 \inode:\t60 (0x7ffff4827968)\idepth:\t14\nvar:\tt_z_1,11 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.22 N 59 61 3
+00:00:24.22 I 61 \inode:\t61 (0x7ffff4827768)\idepth:\t14\nvar:\t-\nbound:\t5.062500
+00:00:24.22 I 61 \inode:\t61 (0x7ffff4827768)\idepth:\t14\nvar:\tt_z_1,11 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.22 I 59 \inode:\t59 (0x7ffff482d9a8)\idepth:\t13\nvar:\tt_z_36,3 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t30
+00:00:24.22 P 59 2
+00:00:24.26 I 61 \inode:\t61 (0x7ffff4827768)\idepth:\t14\nvar:\tt_z_1,11 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.26 N 61 62 3
+00:00:24.26 I 62 \inode:\t62 (0x7ffff4827668)\idepth:\t15\nvar:\t-\nbound:\t5.062500
+00:00:24.26 I 62 \inode:\t62 (0x7ffff4827668)\idepth:\t15\nvar:\tt_z_34,11 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.26 N 61 63 3
+00:00:24.26 I 63 \inode:\t63 (0x7ffff4827628)\idepth:\t15\nvar:\t-\nbound:\t5.062500
+00:00:24.26 I 63 \inode:\t63 (0x7ffff4827628)\idepth:\t15\nvar:\tt_z_34,11 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.26 I 61 \inode:\t61 (0x7ffff4827768)\idepth:\t14\nvar:\tt_z_1,11 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t31
+00:00:24.26 P 61 2
+00:00:24.28 I 63 \inode:\t63 (0x7ffff4827628)\idepth:\t15\nvar:\tt_z_34,11 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.28 N 63 64 3
+00:00:24.28 I 64 \inode:\t64 (0x7ffff482b268)\idepth:\t16\nvar:\t-\nbound:\t5.062500
+00:00:24.28 I 64 \inode:\t64 (0x7ffff482b268)\idepth:\t16\nvar:\tt_z_27,50 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.28 N 63 65 3
+00:00:24.28 I 65 \inode:\t65 (0x7ffff48277a8)\idepth:\t16\nvar:\t-\nbound:\t5.062500
+00:00:24.28 I 65 \inode:\t65 (0x7ffff48277a8)\idepth:\t16\nvar:\tt_z_27,50 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.28 I 63 \inode:\t63 (0x7ffff4827628)\idepth:\t15\nvar:\tt_z_34,11 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t32
+00:00:24.28 P 63 2
+00:00:24.30 I 64 \inode:\t64 (0x7ffff482b268)\idepth:\t16\nvar:\tt_z_27,50 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:24.30 N 64 66 3
+00:00:24.30 I 66 \inode:\t66 (0x7ffff4827c68)\idepth:\t17\nvar:\t-\nbound:\t5.062500
+00:00:24.30 I 66 \inode:\t66 (0x7ffff4827c68)\idepth:\t17\nvar:\tt_z_5,4 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.30 N 64 67 3
+00:00:24.30 I 67 \inode:\t67 (0x7ffff4827ca8)\idepth:\t17\nvar:\t-\nbound:\t5.062500
+00:00:24.30 I 67 \inode:\t67 (0x7ffff4827ca8)\idepth:\t17\nvar:\tt_z_5,4 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.30 I 64 \inode:\t64 (0x7ffff482b268)\idepth:\t16\nvar:\tt_z_27,50 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t33
+00:00:24.30 P 64 2
+00:00:24.38 I 67 \inode:\t67 (0x7ffff4827ca8)\idepth:\t17\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.38 N 67 68 3
+00:00:24.38 I 68 \inode:\t68 (0x7ffff4827ce8)\idepth:\t18\nvar:\t-\nbound:\t5.062500
+00:00:24.38 I 68 \inode:\t68 (0x7ffff4827ce8)\idepth:\t18\nvar:\tt_z_1,50 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.38 N 67 69 3
+00:00:24.38 I 69 \inode:\t69 (0x7ffff4827d28)\idepth:\t18\nvar:\t-\nbound:\t5.062500
+00:00:24.38 I 69 \inode:\t69 (0x7ffff4827d28)\idepth:\t18\nvar:\tt_z_1,50 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.38 I 67 \inode:\t67 (0x7ffff4827ca8)\idepth:\t17\nvar:\tt_z_5,4 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t34
+00:00:24.39 P 67 2
+00:00:24.42 I 69 \inode:\t69 (0x7ffff4827d28)\idepth:\t18\nvar:\tt_z_1,50 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.42 N 69 70 3
+00:00:24.42 I 70 \inode:\t70 (0x7ffff4827d68)\idepth:\t19\nvar:\t-\nbound:\t5.062500
+00:00:24.42 I 70 \inode:\t70 (0x7ffff4827d68)\idepth:\t19\nvar:\tt_z_36,32 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.42 N 69 71 3
+00:00:24.42 I 71 \inode:\t71 (0x7ffff4827da8)\idepth:\t19\nvar:\t-\nbound:\t5.062500
+00:00:24.42 I 71 \inode:\t71 (0x7ffff4827da8)\idepth:\t19\nvar:\tt_z_36,32 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.42 I 69 \inode:\t69 (0x7ffff4827d28)\idepth:\t18\nvar:\tt_z_1,50 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t35
+00:00:24.42 P 69 2
+00:00:24.45 I 71 \inode:\t71 (0x7ffff4827da8)\idepth:\t19\nvar:\tt_z_36,32 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.45 N 71 72 3
+00:00:24.45 I 72 \inode:\t72 (0x7ffff4827de8)\idepth:\t20\nvar:\t-\nbound:\t5.062500
+00:00:24.45 I 72 \inode:\t72 (0x7ffff4827de8)\idepth:\t20\nvar:\tt_z_37,48 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.45 N 71 73 3
+00:00:24.45 I 73 \inode:\t73 (0x7ffff4827e28)\idepth:\t20\nvar:\t-\nbound:\t5.062500
+00:00:24.45 I 73 \inode:\t73 (0x7ffff4827e28)\idepth:\t20\nvar:\tt_z_37,48 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.45 I 71 \inode:\t71 (0x7ffff4827da8)\idepth:\t19\nvar:\tt_z_36,32 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t36
+00:00:24.45 P 71 2
+00:00:24.55 I 73 \inode:\t73 (0x7ffff4827e28)\idepth:\t20\nvar:\tt_z_37,48 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:24.55 N 73 74 3
+00:00:24.55 I 74 \inode:\t74 (0x7ffff4827e68)\idepth:\t21\nvar:\t-\nbound:\t5.062500
+00:00:24.55 I 74 \inode:\t74 (0x7ffff4827e68)\idepth:\t21\nvar:\tt_z_47,48 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:24.55 N 73 75 3
+00:00:24.55 I 75 \inode:\t75 (0x7ffff4827ea8)\idepth:\t21\nvar:\t-\nbound:\t5.062500
+00:00:24.55 I 75 \inode:\t75 (0x7ffff4827ea8)\idepth:\t21\nvar:\tt_z_47,48 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:24.55 I 73 \inode:\t73 (0x7ffff4827e28)\idepth:\t20\nvar:\tt_z_37,48 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t37
+00:00:24.55 P 73 2
+00:00:24.84 U 333.000000
+00:00:27.30 I 75 \inode:\t75 (0x7ffff4827ea8)\idepth:\t21\nvar:\tt_z_47,48 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.30 N 75 76 3
+00:00:27.30 I 76 \inode:\t76 (0x7ffff4827f28)\idepth:\t22\nvar:\t-\nbound:\t5.062500
+00:00:27.30 I 76 \inode:\t76 (0x7ffff4827f28)\idepth:\t22\nvar:\tt_z_43,47 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.30 N 75 77 3
+00:00:27.30 I 77 \inode:\t77 (0x7ffff4827ee8)\idepth:\t22\nvar:\t-\nbound:\t5.062500
+00:00:27.30 I 77 \inode:\t77 (0x7ffff4827ee8)\idepth:\t22\nvar:\tt_z_43,47 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.30 I 75 \inode:\t75 (0x7ffff4827ea8)\idepth:\t21\nvar:\tt_z_47,48 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t38
+00:00:27.30 P 75 2
+00:00:27.43 I 77 \inode:\t77 (0x7ffff4827ee8)\idepth:\t22\nvar:\tt_z_43,47 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.43 N 77 78 3
+00:00:27.43 I 78 \inode:\t78 (0x7ffff4827f68)\idepth:\t23\nvar:\t-\nbound:\t5.062500
+00:00:27.43 I 78 \inode:\t78 (0x7ffff4827f68)\idepth:\t23\nvar:\tt_z_12,16 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.43 N 77 79 3
+00:00:27.43 I 79 \inode:\t79 (0x7ffff4827fa8)\idepth:\t23\nvar:\t-\nbound:\t5.062500
+00:00:27.43 I 79 \inode:\t79 (0x7ffff4827fa8)\idepth:\t23\nvar:\tt_z_12,16 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.43 I 77 \inode:\t77 (0x7ffff4827ee8)\idepth:\t22\nvar:\tt_z_43,47 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t39
+00:00:27.43 P 77 2
+00:00:27.50 I 79 \inode:\t79 (0x7ffff4827fa8)\idepth:\t23\nvar:\tt_z_12,16 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.50 N 79 80 3
+00:00:27.50 I 80 \inode:\t80 (0x7ffff4827fe8)\idepth:\t24\nvar:\t-\nbound:\t5.062500
+00:00:27.50 I 80 \inode:\t80 (0x7ffff4827fe8)\idepth:\t24\nvar:\tt_z_45,43 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.50 N 79 81 3
+00:00:27.50 I 81 \inode:\t81 (0x7ffff4828028)\idepth:\t24\nvar:\t-\nbound:\t5.062500
+00:00:27.50 I 81 \inode:\t81 (0x7ffff4828028)\idepth:\t24\nvar:\tt_z_45,43 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.50 I 79 \inode:\t79 (0x7ffff4827fa8)\idepth:\t23\nvar:\tt_z_12,16 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t40
+00:00:27.50 P 79 2
+00:00:27.55 I 81 \inode:\t81 (0x7ffff4828028)\idepth:\t24\nvar:\tt_z_45,43 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.55 N 81 82 3
+00:00:27.55 I 82 \inode:\t82 (0x7ffff4828068)\idepth:\t25\nvar:\t-\nbound:\t5.062500
+00:00:27.55 I 82 \inode:\t82 (0x7ffff4828068)\idepth:\t25\nvar:\tt_z_34,38 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.55 N 81 83 3
+00:00:27.55 I 83 \inode:\t83 (0x7ffff48280a8)\idepth:\t25\nvar:\t-\nbound:\t5.062500
+00:00:27.55 I 83 \inode:\t83 (0x7ffff48280a8)\idepth:\t25\nvar:\tt_z_34,38 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.55 I 81 \inode:\t81 (0x7ffff4828028)\idepth:\t24\nvar:\tt_z_45,43 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t41
+00:00:27.55 P 81 2
+00:00:27.73 I 83 \inode:\t83 (0x7ffff48280a8)\idepth:\t25\nvar:\tt_z_34,38 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.73 N 83 84 3
+00:00:27.73 I 84 \inode:\t84 (0x7ffff481d1a8)\idepth:\t26\nvar:\t-\nbound:\t5.062500
+00:00:27.73 I 84 \inode:\t84 (0x7ffff481d1a8)\idepth:\t26\nvar:\tt_z_26,46 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.73 N 83 85 3
+00:00:27.73 I 85 \inode:\t85 (0x7ffff481d168)\idepth:\t26\nvar:\t-\nbound:\t5.062500
+00:00:27.73 I 85 \inode:\t85 (0x7ffff481d168)\idepth:\t26\nvar:\tt_z_26,46 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.73 I 83 \inode:\t83 (0x7ffff48280a8)\idepth:\t25\nvar:\tt_z_34,38 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t42
+00:00:27.73 P 83 2
+00:00:27.78 I 85 \inode:\t85 (0x7ffff481d168)\idepth:\t26\nvar:\tt_z_26,46 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.78 N 85 86 3
+00:00:27.78 I 86 \inode:\t86 (0x7ffff4828128)\idepth:\t27\nvar:\t-\nbound:\t5.062500
+00:00:27.78 I 86 \inode:\t86 (0x7ffff4828128)\idepth:\t27\nvar:\tt_z_41,45 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.78 N 85 87 3
+00:00:27.78 I 87 \inode:\t87 (0x7ffff48280e8)\idepth:\t27\nvar:\t-\nbound:\t5.062500
+00:00:27.78 I 87 \inode:\t87 (0x7ffff48280e8)\idepth:\t27\nvar:\tt_z_41,45 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.78 I 85 \inode:\t85 (0x7ffff481d168)\idepth:\t26\nvar:\tt_z_26,46 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t43
+00:00:27.78 P 85 2
+00:00:27.82 I 87 \inode:\t87 (0x7ffff48280e8)\idepth:\t27\nvar:\tt_z_41,45 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.82 N 87 88 3
+00:00:27.82 I 88 \inode:\t88 (0x7ffff4828168)\idepth:\t28\nvar:\t-\nbound:\t5.062500
+00:00:27.82 I 88 \inode:\t88 (0x7ffff4828168)\idepth:\t28\nvar:\tt_z_38,42 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.82 N 87 89 3
+00:00:27.82 I 89 \inode:\t89 (0x7ffff48281a8)\idepth:\t28\nvar:\t-\nbound:\t5.062500
+00:00:27.82 I 89 \inode:\t89 (0x7ffff48281a8)\idepth:\t28\nvar:\tt_z_38,42 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.82 I 87 \inode:\t87 (0x7ffff48280e8)\idepth:\t27\nvar:\tt_z_41,45 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t44
+00:00:27.82 P 87 2
+00:00:27.93 I 89 \inode:\t89 (0x7ffff48281a8)\idepth:\t28\nvar:\tt_z_38,42 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.93 N 89 90 3
+00:00:27.93 I 90 \inode:\t90 (0x7ffff48281e8)\idepth:\t29\nvar:\t-\nbound:\t5.062500
+00:00:27.93 I 90 \inode:\t90 (0x7ffff48281e8)\idepth:\t29\nvar:\tt_z_33,37 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.93 N 89 91 3
+00:00:27.93 I 91 \inode:\t91 (0x7ffff4828228)\idepth:\t29\nvar:\t-\nbound:\t5.062500
+00:00:27.93 I 91 \inode:\t91 (0x7ffff4828228)\idepth:\t29\nvar:\tt_z_33,37 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.93 I 89 \inode:\t89 (0x7ffff48281a8)\idepth:\t28\nvar:\tt_z_38,42 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t45
+00:00:27.93 P 89 2
+00:00:27.95 I 91 \inode:\t91 (0x7ffff4828228)\idepth:\t29\nvar:\tt_z_33,37 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:27.95 N 91 92 3
+00:00:27.95 I 92 \inode:\t92 (0x7ffff4828268)\idepth:\t30\nvar:\t-\nbound:\t5.062500
+00:00:27.95 I 92 \inode:\t92 (0x7ffff4828268)\idepth:\t30\nvar:\tt_z_39,35 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:27.95 N 91 93 3
+00:00:27.95 I 93 \inode:\t93 (0x7ffff48282a8)\idepth:\t30\nvar:\t-\nbound:\t5.062500
+00:00:27.95 I 93 \inode:\t93 (0x7ffff48282a8)\idepth:\t30\nvar:\tt_z_39,35 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:27.95 I 91 \inode:\t91 (0x7ffff4828228)\idepth:\t29\nvar:\tt_z_33,37 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t46
+00:00:27.95 P 91 2
+00:00:28.06 I 93 \inode:\t93 (0x7ffff48282a8)\idepth:\t30\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.06 N 93 94 3
+00:00:28.06 I 94 \inode:\t94 (0x7ffff4828328)\idepth:\t31\nvar:\t-\nbound:\t5.062500
+00:00:28.06 I 94 \inode:\t94 (0x7ffff4828328)\idepth:\t31\nvar:\tt_z_42,41 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.06 N 93 95 3
+00:00:28.06 I 95 \inode:\t95 (0x7ffff48282e8)\idepth:\t31\nvar:\t-\nbound:\t5.062500
+00:00:28.06 I 95 \inode:\t95 (0x7ffff48282e8)\idepth:\t31\nvar:\tt_z_42,41 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.06 I 93 \inode:\t93 (0x7ffff48282a8)\idepth:\t30\nvar:\tt_z_39,35 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t47
+00:00:28.06 P 93 2
+00:00:28.08 I 95 \inode:\t95 (0x7ffff48282e8)\idepth:\t31\nvar:\tt_z_42,41 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.08 N 95 96 3
+00:00:28.08 I 96 \inode:\t96 (0x7ffff4828368)\idepth:\t32\nvar:\t-\nbound:\t5.062500
+00:00:28.08 I 96 \inode:\t96 (0x7ffff4828368)\idepth:\t32\nvar:\tt_z_36,39 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.08 N 95 97 3
+00:00:28.08 I 97 \inode:\t97 (0x7ffff48283a8)\idepth:\t32\nvar:\t-\nbound:\t5.062500
+00:00:28.08 I 97 \inode:\t97 (0x7ffff48283a8)\idepth:\t32\nvar:\tt_z_36,39 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.08 I 95 \inode:\t95 (0x7ffff48282e8)\idepth:\t31\nvar:\tt_z_42,41 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t48
+00:00:28.08 P 95 2
+00:00:28.12 I 97 \inode:\t97 (0x7ffff48283a8)\idepth:\t32\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.12 N 97 98 3
+00:00:28.12 I 98 \inode:\t98 (0x7ffff48283e8)\idepth:\t33\nvar:\t-\nbound:\t5.062500
+00:00:28.12 I 98 \inode:\t98 (0x7ffff48283e8)\idepth:\t33\nvar:\tt_z_33,34 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.12 N 97 99 3
+00:00:28.12 I 99 \inode:\t99 (0x7ffff4828428)\idepth:\t33\nvar:\t-\nbound:\t5.062500
+00:00:28.12 I 99 \inode:\t99 (0x7ffff4828428)\idepth:\t33\nvar:\tt_z_33,34 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.12 I 97 \inode:\t97 (0x7ffff48283a8)\idepth:\t32\nvar:\tt_z_36,39 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t49
+00:00:28.12 P 97 2
+00:00:28.22 I 99 \inode:\t99 (0x7ffff4828428)\idepth:\t33\nvar:\tt_z_33,34 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.22 N 99 100 3
+00:00:28.22 I 100 \inode:\t100 (0x7ffff4828468)\idepth:\t34\nvar:\t-\nbound:\t5.062500
+00:00:28.22 I 100 \inode:\t100 (0x7ffff4828468)\idepth:\t34\nvar:\tt_z_32,33 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.22 N 99 101 3
+00:00:28.22 I 101 \inode:\t101 (0x7ffff48284a8)\idepth:\t34\nvar:\t-\nbound:\t5.062500
+00:00:28.22 I 101 \inode:\t101 (0x7ffff48284a8)\idepth:\t34\nvar:\tt_z_32,33 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.22 I 99 \inode:\t99 (0x7ffff4828428)\idepth:\t33\nvar:\tt_z_33,34 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t50
+00:00:28.22 P 99 2
+00:00:28.31 I 101 \inode:\t101 (0x7ffff48284a8)\idepth:\t34\nvar:\tt_z_32,33 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.31 N 101 102 3
+00:00:28.31 I 102 \inode:\t102 (0x7ffff48284e8)\idepth:\t35\nvar:\t-\nbound:\t5.062500
+00:00:28.31 I 102 \inode:\t102 (0x7ffff48284e8)\idepth:\t35\nvar:\tt_z_31,34 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.31 N 101 103 3
+00:00:28.31 I 103 \inode:\t103 (0x7ffff4828528)\idepth:\t35\nvar:\t-\nbound:\t5.062500
+00:00:28.31 I 103 \inode:\t103 (0x7ffff4828528)\idepth:\t35\nvar:\tt_z_31,34 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.31 I 101 \inode:\t101 (0x7ffff48284a8)\idepth:\t34\nvar:\tt_z_32,33 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t51
+00:00:28.31 P 101 2
+00:00:28.45 I 103 \inode:\t103 (0x7ffff4828528)\idepth:\t35\nvar:\tt_z_31,34 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.45 N 103 104 3
+00:00:28.45 I 104 \inode:\t104 (0x7ffff48285a8)\idepth:\t36\nvar:\t-\nbound:\t5.062500
+00:00:28.45 I 104 \inode:\t104 (0x7ffff48285a8)\idepth:\t36\nvar:\tt_z_49,1 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.45 N 103 105 3
+00:00:28.45 I 105 \inode:\t105 (0x7ffff4828568)\idepth:\t36\nvar:\t-\nbound:\t5.062500
+00:00:28.45 I 105 \inode:\t105 (0x7ffff4828568)\idepth:\t36\nvar:\tt_z_49,1 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.45 I 103 \inode:\t103 (0x7ffff4828528)\idepth:\t35\nvar:\tt_z_31,34 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t52
+00:00:28.45 P 103 2
+00:00:28.47 I 105 \inode:\t105 (0x7ffff4828568)\idepth:\t36\nvar:\tt_z_49,1 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.47 N 105 106 3
+00:00:28.47 I 106 \inode:\t106 (0x7ffff48285e8)\idepth:\t37\nvar:\t-\nbound:\t5.062500
+00:00:28.47 I 106 \inode:\t106 (0x7ffff48285e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.47 N 105 107 3
+00:00:28.47 I 107 \inode:\t107 (0x7ffff48278e8)\idepth:\t37\nvar:\t-\nbound:\t5.062500
+00:00:28.47 I 107 \inode:\t107 (0x7ffff48278e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.47 I 105 \inode:\t105 (0x7ffff4828568)\idepth:\t36\nvar:\tt_z_49,1 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t53
+00:00:28.47 P 105 2
+00:00:28.66 I 107 \inode:\t107 (0x7ffff48278e8)\idepth:\t37\nvar:\tt_z_35,38 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.66 N 107 108 3
+00:00:28.66 I 108 \inode:\t108 (0x7ffff48286a8)\idepth:\t38\nvar:\t-\nbound:\t5.062500
+00:00:28.66 I 108 \inode:\t108 (0x7ffff48286a8)\idepth:\t38\nvar:\tt_z_35,31 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.66 N 107 109 3
+00:00:28.66 I 109 \inode:\t109 (0x7ffff4828668)\idepth:\t38\nvar:\t-\nbound:\t5.062500
+00:00:28.66 I 109 \inode:\t109 (0x7ffff4828668)\idepth:\t38\nvar:\tt_z_35,31 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.66 I 107 \inode:\t107 (0x7ffff48278e8)\idepth:\t37\nvar:\tt_z_35,38 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t54
+00:00:28.66 P 107 2
+00:00:28.77 I 109 \inode:\t109 (0x7ffff4828668)\idepth:\t38\nvar:\tt_z_35,31 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:28.77 N 109 110 3
+00:00:28.77 I 110 \inode:\t110 (0x7ffff48286e8)\idepth:\t39\nvar:\t-\nbound:\t5.062500
+00:00:28.77 I 110 \inode:\t110 (0x7ffff48286e8)\idepth:\t39\nvar:\tt_z_14,18 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:28.77 N 109 111 3
+00:00:28.77 I 111 \inode:\t111 (0x7ffff4828728)\idepth:\t39\nvar:\t-\nbound:\t5.062500
+00:00:28.77 I 111 \inode:\t111 (0x7ffff4828728)\idepth:\t39\nvar:\tt_z_14,18 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:28.77 I 109 \inode:\t109 (0x7ffff4828668)\idepth:\t38\nvar:\tt_z_35,31 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t55
+00:00:28.77 P 109 2
+00:00:29.03 I 111 \inode:\t111 (0x7ffff4828728)\idepth:\t39\nvar:\tt_z_14,18 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:29.04 N 111 112 3
+00:00:29.04 I 112 \inode:\t112 (0x7ffff48287a8)\idepth:\t40\nvar:\t-\nbound:\t5.062500
+00:00:29.04 I 112 \inode:\t112 (0x7ffff48287a8)\idepth:\t40\nvar:\tt_z_21,24 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:29.04 N 111 113 3
+00:00:29.04 I 113 \inode:\t113 (0x7ffff4828768)\idepth:\t40\nvar:\t-\nbound:\t5.062500
+00:00:29.04 I 113 \inode:\t113 (0x7ffff4828768)\idepth:\t40\nvar:\tt_z_21,24 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:29.04 I 111 \inode:\t111 (0x7ffff4828728)\idepth:\t39\nvar:\tt_z_14,18 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t56
+00:00:29.04 P 111 2
+00:00:30.51 I 113 \inode:\t113 (0x7ffff4828768)\idepth:\t40\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:30.51 N 113 114 3
+00:00:30.51 I 114 \inode:\t114 (0x7ffff482dfa8)\idepth:\t41\nvar:\t-\nbound:\t5.062500
+00:00:30.51 I 114 \inode:\t114 (0x7ffff482dfa8)\idepth:\t41\nvar:\tt_z_28,26 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:30.51 N 113 115 3
+00:00:30.51 I 115 \inode:\t115 (0x7ffff4837ee8)\idepth:\t41\nvar:\t-\nbound:\t5.062500
+00:00:30.51 I 115 \inode:\t115 (0x7ffff4837ee8)\idepth:\t41\nvar:\tt_z_28,26 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:30.51 I 113 \inode:\t113 (0x7ffff4828768)\idepth:\t40\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t57
+00:00:30.51 P 113 2
+00:00:30.61 I 115 \inode:\t115 (0x7ffff4837ee8)\idepth:\t41\nvar:\tt_z_28,26 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:30.61 N 115 116 3
+00:00:30.61 I 116 \inode:\t116 (0x7ffff4836ce8)\idepth:\t42\nvar:\t-\nbound:\t5.062500
+00:00:30.61 I 116 \inode:\t116 (0x7ffff4836ce8)\idepth:\t42\nvar:\tt_z_29,28 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:30.61 N 115 117 3
+00:00:30.61 I 117 \inode:\t117 (0x7ffff482c4e8)\idepth:\t42\nvar:\t-\nbound:\t5.062500
+00:00:30.61 I 117 \inode:\t117 (0x7ffff482c4e8)\idepth:\t42\nvar:\tt_z_29,28 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:30.61 I 115 \inode:\t115 (0x7ffff4837ee8)\idepth:\t41\nvar:\tt_z_28,26 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t58
+00:00:30.61 P 115 2
+00:00:30.75 I 117 \inode:\t117 (0x7ffff482c4e8)\idepth:\t42\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:30.75 N 117 118 3
+00:00:30.75 I 118 \inode:\t118 (0x7ffff4828ee8)\idepth:\t43\nvar:\t-\nbound:\t5.062500
+00:00:30.75 I 118 \inode:\t118 (0x7ffff4828ee8)\idepth:\t43\nvar:\tt_z_30,29 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:30.75 N 117 119 3
+00:00:30.75 I 119 \inode:\t119 (0x7ffff4828ea8)\idepth:\t43\nvar:\t-\nbound:\t5.062500
+00:00:30.75 I 119 \inode:\t119 (0x7ffff4828ea8)\idepth:\t43\nvar:\tt_z_30,29 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:30.75 I 117 \inode:\t117 (0x7ffff482c4e8)\idepth:\t42\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t59
+00:00:30.75 P 117 2
+00:00:30.82 I 119 \inode:\t119 (0x7ffff4828ea8)\idepth:\t43\nvar:\tt_z_30,29 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:30.82 N 119 120 3
+00:00:30.82 I 120 \inode:\t120 (0x7ffff4828f28)\idepth:\t44\nvar:\t-\nbound:\t5.062500
+00:00:30.82 I 120 \inode:\t120 (0x7ffff4828f28)\idepth:\t44\nvar:\tt_z_27,25 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:30.82 N 119 121 3
+00:00:30.82 I 121 \inode:\t121 (0x7ffff4828f68)\idepth:\t44\nvar:\t-\nbound:\t5.062500
+00:00:30.82 I 121 \inode:\t121 (0x7ffff4828f68)\idepth:\t44\nvar:\tt_z_27,25 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:30.82 I 119 \inode:\t119 (0x7ffff4828ea8)\idepth:\t43\nvar:\tt_z_30,29 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t60
+00:00:30.82 P 119 2
+00:00:30.90 I 121 \inode:\t121 (0x7ffff4828f68)\idepth:\t44\nvar:\tt_z_27,25 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:30.90 N 121 122 3
+00:00:30.90 I 122 \inode:\t122 (0x7ffff4828fa8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
+00:00:30.90 I 122 \inode:\t122 (0x7ffff4828fa8)\idepth:\t45\nvar:\tt_z_23,27 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:30.90 N 121 123 3
+00:00:30.90 I 123 \inode:\t123 (0x7ffff4828fe8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
+00:00:30.90 I 123 \inode:\t123 (0x7ffff4828fe8)\idepth:\t45\nvar:\tt_z_23,27 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:30.90 I 121 \inode:\t121 (0x7ffff4828f68)\idepth:\t44\nvar:\tt_z_27,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t61
+00:00:30.90 P 121 2
+00:00:30.99 I 123 \inode:\t123 (0x7ffff4828fe8)\idepth:\t45\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:30.99 N 123 124 3
+00:00:30.99 I 124 \inode:\t124 (0x7ffff4829028)\idepth:\t46\nvar:\t-\nbound:\t5.062500
+00:00:30.99 I 124 \inode:\t124 (0x7ffff4829028)\idepth:\t46\nvar:\tt_z_24,23 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:30.99 N 123 125 3
+00:00:30.99 I 125 \inode:\t125 (0x7ffff4829068)\idepth:\t46\nvar:\t-\nbound:\t5.062500
+00:00:30.99 I 125 \inode:\t125 (0x7ffff4829068)\idepth:\t46\nvar:\tt_z_24,23 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:30.99 I 123 \inode:\t123 (0x7ffff4828fe8)\idepth:\t45\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t62
+00:00:30.99 P 123 2
+00:00:31.02 I 125 \inode:\t125 (0x7ffff4829068)\idepth:\t46\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t63
+00:00:31.02 P 125 2
+00:00:31.02 I 125 \inode:\t125 (0x7ffff4829068)\idepth:\t46\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t63
+00:00:31.02 P 125 4
+00:00:31.09 I 124 \inode:\t124 (0x7ffff4829028)\idepth:\t46\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:31.09 N 124 126 3
+00:00:31.09 I 126 \inode:\t126 (0x7ffff4829068)\idepth:\t47\nvar:\t-\nbound:\t5.062500
+00:00:31.09 I 126 \inode:\t126 (0x7ffff4829068)\idepth:\t47\nvar:\tt_z_20,23 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:31.09 N 124 127 3
+00:00:31.09 I 127 \inode:\t127 (0x7ffff48290e8)\idepth:\t47\nvar:\t-\nbound:\t5.062500
+00:00:31.09 I 127 \inode:\t127 (0x7ffff48290e8)\idepth:\t47\nvar:\tt_z_20,23 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:31.09 I 124 \inode:\t124 (0x7ffff4829028)\idepth:\t46\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t64
+00:00:31.09 P 124 2
+00:00:31.15 I 127 \inode:\t127 (0x7ffff48290e8)\idepth:\t47\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:31.15 N 127 128 3
+00:00:31.15 I 128 \inode:\t128 (0x7ffff48290a8)\idepth:\t48\nvar:\t-\nbound:\t5.062500
+00:00:31.15 I 128 \inode:\t128 (0x7ffff48290a8)\idepth:\t48\nvar:\tt_z_41,23 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:31.15 N 127 129 3
+00:00:31.15 I 129 \inode:\t129 (0x7ffff4829128)\idepth:\t48\nvar:\t-\nbound:\t5.062500
+00:00:31.15 I 129 \inode:\t129 (0x7ffff4829128)\idepth:\t48\nvar:\tt_z_41,23 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:31.15 I 127 \inode:\t127 (0x7ffff48290e8)\idepth:\t47\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t65
+00:00:31.15 P 127 2
+00:00:31.19 I 129 \inode:\t129 (0x7ffff4829128)\idepth:\t48\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:31.19 N 129 130 3
+00:00:31.19 I 130 \inode:\t130 (0x7ffff4829168)\idepth:\t49\nvar:\t-\nbound:\t5.062500
+00:00:31.19 I 130 \inode:\t130 (0x7ffff4829168)\idepth:\t49\nvar:\tt_z_21,20 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:31.19 N 129 131 3
+00:00:31.19 I 131 \inode:\t131 (0x7ffff48291a8)\idepth:\t49\nvar:\t-\nbound:\t5.062500
+00:00:31.19 I 131 \inode:\t131 (0x7ffff48291a8)\idepth:\t49\nvar:\tt_z_21,20 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:31.19 I 129 \inode:\t129 (0x7ffff4829128)\idepth:\t48\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t66
+00:00:31.19 P 129 2
+00:00:31.21 I 131 \inode:\t131 (0x7ffff48291a8)\idepth:\t49\nvar:\tt_z_21,20 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:31.21 N 131 132 3
+00:00:31.21 I 132 \inode:\t132 (0x7ffff48291e8)\idepth:\t50\nvar:\t-\nbound:\t5.062500
+00:00:31.21 I 132 \inode:\t132 (0x7ffff48291e8)\idepth:\t50\nvar:\tt_z_17,19 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:31.21 N 131 133 3
+00:00:31.21 I 133 \inode:\t133 (0x7ffff4829228)\idepth:\t50\nvar:\t-\nbound:\t5.062500
+00:00:31.21 I 133 \inode:\t133 (0x7ffff4829228)\idepth:\t50\nvar:\tt_z_17,19 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:31.21 I 131 \inode:\t131 (0x7ffff48291a8)\idepth:\t49\nvar:\tt_z_21,20 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t67
+00:00:31.21 P 131 2
+00:00:31.23 I 133 \inode:\t133 (0x7ffff4829228)\idepth:\t50\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t68
+00:00:31.23 P 133 2
+00:00:31.23 I 133 \inode:\t133 (0x7ffff4829228)\idepth:\t50\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t68
+00:00:31.23 P 133 4
+00:00:31.25 I 132 \inode:\t132 (0x7ffff48291e8)\idepth:\t50\nvar:\tt_z_17,19 [-0,0] <= 0.000000\nbound:\t100000000000000000000.000000\nnr:\t69
+00:00:31.25 P 132 2
+00:00:31.25 I 132 \inode:\t132 (0x7ffff48291e8)\idepth:\t50\nvar:\tt_z_17,19 [-0,0] <= 0.000000\nbound:\t100000000000000000000.000000\nnr:\t69
+00:00:31.25 P 132 4
+00:00:31.44 I 106 \inode:\t106 (0x7ffff48285e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:31.44 N 106 134 3
+00:00:31.44 I 134 \inode:\t134 (0x7ffff48291a8)\idepth:\t38\nvar:\t-\nbound:\t5.062500
+00:00:31.44 I 134 \inode:\t134 (0x7ffff48291a8)\idepth:\t38\nvar:\tt_z_4,1 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:31.44 N 106 135 3
+00:00:31.44 I 135 \inode:\t135 (0x7ffff48291e8)\idepth:\t38\nvar:\t-\nbound:\t5.062500
+00:00:31.44 I 135 \inode:\t135 (0x7ffff48291e8)\idepth:\t38\nvar:\tt_z_4,1 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:31.44 I 106 \inode:\t106 (0x7ffff48285e8)\idepth:\t37\nvar:\tt_z_35,38 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t70
+00:00:31.44 P 106 2
+00:00:31.55 I 135 \inode:\t135 (0x7ffff48291e8)\idepth:\t38\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:31.55 N 135 136 3
+00:00:31.55 I 136 \inode:\t136 (0x7ffff4829228)\idepth:\t39\nvar:\t-\nbound:\t5.062500
+00:00:31.55 I 136 \inode:\t136 (0x7ffff4829228)\idepth:\t39\nvar:\tt_z_32,34 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:31.55 N 135 137 3
+00:00:31.55 I 137 \inode:\t137 (0x7ffff48292a8)\idepth:\t39\nvar:\t-\nbound:\t5.062500
+00:00:31.55 I 137 \inode:\t137 (0x7ffff48292a8)\idepth:\t39\nvar:\tt_z_32,34 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:31.55 I 135 \inode:\t135 (0x7ffff48291e8)\idepth:\t38\nvar:\tt_z_4,1 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t71
+00:00:31.55 P 135 2
+00:00:31.59 I 137 \inode:\t137 (0x7ffff48292a8)\idepth:\t39\nvar:\tt_z_32,34 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:31.59 N 137 138 3
+00:00:31.59 I 138 \inode:\t138 (0x7ffff48292e8)\idepth:\t40\nvar:\t-\nbound:\t5.062500
+00:00:31.59 I 138 \inode:\t138 (0x7ffff48292e8)\idepth:\t40\nvar:\tt_z_39,38 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:31.59 N 137 139 3
+00:00:31.59 I 139 \inode:\t139 (0x7ffff4829268)\idepth:\t40\nvar:\t-\nbound:\t5.062500
+00:00:31.59 I 139 \inode:\t139 (0x7ffff4829268)\idepth:\t40\nvar:\tt_z_39,38 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:31.59 I 137 \inode:\t137 (0x7ffff48292a8)\idepth:\t39\nvar:\tt_z_32,34 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t72
+00:00:31.59 P 137 2
+00:00:33.54 I 139 \inode:\t139 (0x7ffff4829268)\idepth:\t40\nvar:\tt_z_39,38 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:33.54 N 139 140 3
+00:00:33.54 I 140 \inode:\t140 (0x7ffff48320a8)\idepth:\t41\nvar:\t-\nbound:\t5.062500
+00:00:33.54 I 140 \inode:\t140 (0x7ffff48320a8)\idepth:\t41\nvar:\tt_z_23,26 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:33.54 N 139 141 3
+00:00:33.54 I 141 \inode:\t141 (0x7ffff4831f28)\idepth:\t41\nvar:\t-\nbound:\t5.062500
+00:00:33.54 I 141 \inode:\t141 (0x7ffff4831f28)\idepth:\t41\nvar:\tt_z_23,26 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:33.54 I 139 \inode:\t139 (0x7ffff4829268)\idepth:\t40\nvar:\tt_z_39,38 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t73
+00:00:33.54 P 139 2
+00:00:33.84 U 292.500000
+00:00:36.28 I 141 \inode:\t141 (0x7ffff4831f28)\idepth:\t41\nvar:\tt_z_23,26 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.28 N 141 142 3
+00:00:36.28 I 142 \inode:\t142 (0x7ffff4829628)\idepth:\t42\nvar:\t-\nbound:\t5.062500
+00:00:36.28 I 142 \inode:\t142 (0x7ffff4829628)\idepth:\t42\nvar:\tt_z_21,24 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.28 N 141 143 3
+00:00:36.28 I 143 \inode:\t143 (0x7ffff4831fa8)\idepth:\t42\nvar:\t-\nbound:\t5.062500
+00:00:36.28 I 143 \inode:\t143 (0x7ffff4831fa8)\idepth:\t42\nvar:\tt_z_21,24 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.28 I 141 \inode:\t141 (0x7ffff4831f28)\idepth:\t41\nvar:\tt_z_23,26 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t74
+00:00:36.29 P 141 2
+00:00:36.35 I 143 \inode:\t143 (0x7ffff4831fa8)\idepth:\t42\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.35 N 143 144 3
+00:00:36.35 I 144 \inode:\t144 (0x7ffff482e268)\idepth:\t43\nvar:\t-\nbound:\t5.062500
+00:00:36.35 I 144 \inode:\t144 (0x7ffff482e268)\idepth:\t43\nvar:\tt_z_22,25 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.35 N 143 145 3
+00:00:36.35 I 145 \inode:\t145 (0x7ffff48316e8)\idepth:\t43\nvar:\t-\nbound:\t5.062500
+00:00:36.35 I 145 \inode:\t145 (0x7ffff48316e8)\idepth:\t43\nvar:\tt_z_22,25 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.35 I 143 \inode:\t143 (0x7ffff4831fa8)\idepth:\t42\nvar:\tt_z_21,24 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t75
+00:00:36.35 P 143 2
+00:00:36.38 I 145 \inode:\t145 (0x7ffff48316e8)\idepth:\t43\nvar:\tt_z_22,25 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.38 N 145 146 3
+00:00:36.38 I 146 \inode:\t146 (0x7ffff48316a8)\idepth:\t44\nvar:\t-\nbound:\t5.062500
+00:00:36.38 I 146 \inode:\t146 (0x7ffff48316a8)\idepth:\t44\nvar:\tt_z_28,25 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.38 N 145 147 3
+00:00:36.38 I 147 \inode:\t147 (0x7ffff48315a8)\idepth:\t44\nvar:\t-\nbound:\t5.062500
+00:00:36.38 I 147 \inode:\t147 (0x7ffff48315a8)\idepth:\t44\nvar:\tt_z_28,25 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.38 I 145 \inode:\t145 (0x7ffff48316e8)\idepth:\t43\nvar:\tt_z_22,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t76
+00:00:36.38 P 145 2
+00:00:36.40 I 147 \inode:\t147 (0x7ffff48315a8)\idepth:\t44\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.40 N 147 148 3
+00:00:36.40 I 148 \inode:\t148 (0x7ffff4830ea8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
+00:00:36.40 I 148 \inode:\t148 (0x7ffff4830ea8)\idepth:\t45\nvar:\tt_z_29,28 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.40 N 147 149 3
+00:00:36.40 I 149 \inode:\t149 (0x7ffff48310e8)\idepth:\t45\nvar:\t-\nbound:\t5.062500
+00:00:36.40 I 149 \inode:\t149 (0x7ffff48310e8)\idepth:\t45\nvar:\tt_z_29,28 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.40 I 147 \inode:\t147 (0x7ffff48315a8)\idepth:\t44\nvar:\tt_z_28,25 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t77
+00:00:36.40 P 147 2
+00:00:36.53 I 149 \inode:\t149 (0x7ffff48310e8)\idepth:\t45\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.53 N 149 150 3
+00:00:36.53 I 150 \inode:\t150 (0x7ffff4830f68)\idepth:\t46\nvar:\t-\nbound:\t5.062500
+00:00:36.53 I 150 \inode:\t150 (0x7ffff4830f68)\idepth:\t46\nvar:\tt_z_14,11 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.53 N 149 151 3
+00:00:36.53 I 151 \inode:\t151 (0x7ffff4830f28)\idepth:\t46\nvar:\t-\nbound:\t5.062500
+00:00:36.53 I 151 \inode:\t151 (0x7ffff4830f28)\idepth:\t46\nvar:\tt_z_14,11 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.53 I 149 \inode:\t149 (0x7ffff48310e8)\idepth:\t45\nvar:\tt_z_29,28 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t78
+00:00:36.53 P 149 2
+00:00:36.60 I 151 \inode:\t151 (0x7ffff4830f28)\idepth:\t46\nvar:\tt_z_14,11 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.60 N 151 152 3
+00:00:36.60 I 152 \inode:\t152 (0x7ffff48295e8)\idepth:\t47\nvar:\t-\nbound:\t5.062500
+00:00:36.60 I 152 \inode:\t152 (0x7ffff48295e8)\idepth:\t47\nvar:\tt_z_25,26 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.60 N 151 153 3
+00:00:36.60 I 153 \inode:\t153 (0x7ffff4830828)\idepth:\t47\nvar:\t-\nbound:\t5.062500
+00:00:36.60 I 153 \inode:\t153 (0x7ffff4830828)\idepth:\t47\nvar:\tt_z_25,26 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.60 I 151 \inode:\t151 (0x7ffff4830f28)\idepth:\t46\nvar:\tt_z_14,11 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t79
+00:00:36.60 P 151 2
+00:00:36.68 I 153 \inode:\t153 (0x7ffff4830828)\idepth:\t47\nvar:\tt_z_25,26 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.68 N 153 154 3
+00:00:36.68 I 154 \inode:\t154 (0x7ffff48304e8)\idepth:\t48\nvar:\t-\nbound:\t5.062500
+00:00:36.68 I 154 \inode:\t154 (0x7ffff48304e8)\idepth:\t48\nvar:\tt_z_23,22 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.68 N 153 155 3
+00:00:36.68 I 155 \inode:\t155 (0x7ffff4830ee8)\idepth:\t48\nvar:\t-\nbound:\t5.062500
+00:00:36.68 I 155 \inode:\t155 (0x7ffff4830ee8)\idepth:\t48\nvar:\tt_z_23,22 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.68 I 153 \inode:\t153 (0x7ffff4830828)\idepth:\t47\nvar:\tt_z_25,26 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t80
+00:00:36.68 P 153 2
+00:00:36.71 I 155 \inode:\t155 (0x7ffff4830ee8)\idepth:\t48\nvar:\tt_z_23,22 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.71 N 155 156 3
+00:00:36.71 I 156 \inode:\t156 (0x7ffff48313a8)\idepth:\t49\nvar:\t-\nbound:\t5.062500
+00:00:36.71 I 156 \inode:\t156 (0x7ffff48313a8)\idepth:\t49\nvar:\tt_z_17,19 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.71 N 155 157 3
+00:00:36.71 I 157 \inode:\t157 (0x7ffff482fee8)\idepth:\t49\nvar:\t-\nbound:\t5.062500
+00:00:36.71 I 157 \inode:\t157 (0x7ffff482fee8)\idepth:\t49\nvar:\tt_z_17,19 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.71 I 155 \inode:\t155 (0x7ffff4830ee8)\idepth:\t48\nvar:\tt_z_23,22 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t81
+00:00:36.71 P 155 2
+00:00:36.75 I 157 \inode:\t157 (0x7ffff482fee8)\idepth:\t49\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:36.75 N 157 158 3
+00:00:36.75 I 158 \inode:\t158 (0x7ffff4829668)\idepth:\t50\nvar:\t-\nbound:\t5.062500
+00:00:36.75 I 158 \inode:\t158 (0x7ffff4829668)\idepth:\t50\nvar:\tt_z_24,23 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.75 N 157 159 3
+00:00:36.75 I 159 \inode:\t159 (0x7ffff4827868)\idepth:\t50\nvar:\t-\nbound:\t5.062500
+00:00:36.75 I 159 \inode:\t159 (0x7ffff4827868)\idepth:\t50\nvar:\tt_z_24,23 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.75 I 157 \inode:\t157 (0x7ffff482fee8)\idepth:\t49\nvar:\tt_z_17,19 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t82
+00:00:36.75 P 157 2
+00:00:36.77 I 159 \inode:\t159 (0x7ffff4827868)\idepth:\t50\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t83
+00:00:36.77 P 159 2
+00:00:36.77 I 159 \inode:\t159 (0x7ffff4827868)\idepth:\t50\nvar:\tt_z_24,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t83
+00:00:36.77 P 159 4
+00:00:36.96 I 158 \inode:\t158 (0x7ffff4829668)\idepth:\t50\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500
+00:00:36.96 N 158 160 3
+00:00:36.96 I 160 \inode:\t160 (0x7ffff4829428)\idepth:\t51\nvar:\t-\nbound:\t5.062500
+00:00:36.96 I 160 \inode:\t160 (0x7ffff4829428)\idepth:\t51\nvar:\tt_z_23,27 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:36.96 N 158 161 3
+00:00:36.96 I 161 \inode:\t161 (0x7ffff4827868)\idepth:\t51\nvar:\t-\nbound:\t5.062500
+00:00:36.96 I 161 \inode:\t161 (0x7ffff4827868)\idepth:\t51\nvar:\tt_z_23,27 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:36.96 I 158 \inode:\t158 (0x7ffff4829668)\idepth:\t50\nvar:\tt_z_24,23 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t84
+00:00:36.96 P 158 2
+00:00:37.01 I 161 \inode:\t161 (0x7ffff4827868)\idepth:\t51\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:37.01 N 161 162 3
+00:00:37.01 I 162 \inode:\t162 (0x7ffff4831ee8)\idepth:\t52\nvar:\t-\nbound:\t5.062500
+00:00:37.01 I 162 \inode:\t162 (0x7ffff4831ee8)\idepth:\t52\nvar:\tt_z_20,23 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:37.01 N 161 163 3
+00:00:37.01 I 163 \inode:\t163 (0x7ffff48296e8)\idepth:\t52\nvar:\t-\nbound:\t5.062500
+00:00:37.01 I 163 \inode:\t163 (0x7ffff48296e8)\idepth:\t52\nvar:\tt_z_20,23 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:37.01 I 161 \inode:\t161 (0x7ffff4827868)\idepth:\t51\nvar:\tt_z_23,27 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t85
+00:00:37.01 P 161 2
+00:00:37.13 I 163 \inode:\t163 (0x7ffff48296e8)\idepth:\t52\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500
+00:00:37.13 N 163 164 3
+00:00:37.13 I 164 \inode:\t164 (0x7ffff48295a8)\idepth:\t53\nvar:\t-\nbound:\t5.062500
+00:00:37.13 I 164 \inode:\t164 (0x7ffff48295a8)\idepth:\t53\nvar:\tt_z_41,23 [-0,1] <= 0.000000\nbound:\t5.062500
+00:00:37.13 N 163 165 3
+00:00:37.13 I 165 \inode:\t165 (0x7ffff4829528)\idepth:\t53\nvar:\t-\nbound:\t5.062500
+00:00:37.13 I 165 \inode:\t165 (0x7ffff4829528)\idepth:\t53\nvar:\tt_z_41,23 [-0,1] >= 1.000000\nbound:\t5.062500
+00:00:37.13 I 163 \inode:\t163 (0x7ffff48296e8)\idepth:\t52\nvar:\tt_z_20,23 [1,1] >= 1.000000\nbound:\t5.062500\nnr:\t86
+00:00:37.13 P 163 2
+00:00:37.24 I 162 \inode:\t162 (0x7ffff4831ee8)\idepth:\t52\nvar:\tt_z_20,23 [1,1] <= 0.000000\nbound:\t5.500000\nnr:\t87
+00:00:37.24 P 162 4
+00:00:37.24 I 160 \inode:\t160 (0x7ffff4829428)\idepth:\t51\nvar:\tt_z_23,27 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 160 4
+00:00:37.24 I 74 \inode:\t74 (0x7ffff4827e68)\idepth:\t21\nvar:\tt_z_47,48 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 74 4
+00:00:37.24 I 154 \inode:\t154 (0x7ffff48304e8)\idepth:\t48\nvar:\tt_z_23,22 [1,1] <= 0.000000\nbound:\t8.500000\nnr:\t87
+00:00:37.24 P 154 4
+00:00:37.24 I 16 \inode:\t16 (0x7ffff481f1a8)\idepth:\t8\nvar:\tt_z_38,39 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 16 4
+00:00:37.24 I 150 \inode:\t150 (0x7ffff4830f68)\idepth:\t46\nvar:\tt_z_14,11 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 150 4
+00:00:37.24 I 142 \inode:\t142 (0x7ffff4829628)\idepth:\t42\nvar:\tt_z_21,24 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 142 4
+00:00:37.24 I 68 \inode:\t68 (0x7ffff4827ce8)\idepth:\t18\nvar:\tt_z_1,50 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 68 4
+00:00:37.24 I 144 \inode:\t144 (0x7ffff482e268)\idepth:\t43\nvar:\tt_z_22,25 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 144 4
+00:00:37.24 I 34 \inode:\t34 (0x7ffff4827428)\idepth:\t8\nvar:\tt_z_24,28 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 34 4
+00:00:37.24 I 138 \inode:\t138 (0x7ffff48292e8)\idepth:\t40\nvar:\tt_z_39,38 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 138 4
+00:00:37.24 I 32 \inode:\t32 (0x7ffff48273a8)\idepth:\t7\nvar:\tt_z_28,25 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 32 4
+00:00:37.24 I 136 \inode:\t136 (0x7ffff4829228)\idepth:\t39\nvar:\tt_z_32,34 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 136 4
+00:00:37.24 I 134 \inode:\t134 (0x7ffff48291a8)\idepth:\t38\nvar:\tt_z_4,1 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 134 4
+00:00:37.24 I 128 \inode:\t128 (0x7ffff48290a8)\idepth:\t48\nvar:\tt_z_41,23 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 128 4
+00:00:37.24 I 126 \inode:\t126 (0x7ffff4829068)\idepth:\t47\nvar:\tt_z_20,23 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 126 4
+00:00:37.24 I 122 \inode:\t122 (0x7ffff4828fa8)\idepth:\t45\nvar:\tt_z_23,27 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 122 4
+00:00:37.24 I 120 \inode:\t120 (0x7ffff4828f28)\idepth:\t44\nvar:\tt_z_27,25 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 120 4
+00:00:37.24 I 118 \inode:\t118 (0x7ffff4828ee8)\idepth:\t43\nvar:\tt_z_30,29 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 118 4
+00:00:37.24 I 116 \inode:\t116 (0x7ffff4836ce8)\idepth:\t42\nvar:\tt_z_29,28 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 116 4
+00:00:37.24 I 114 \inode:\t114 (0x7ffff482dfa8)\idepth:\t41\nvar:\tt_z_28,26 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 114 4
+00:00:37.24 I 112 \inode:\t112 (0x7ffff48287a8)\idepth:\t40\nvar:\tt_z_21,24 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 112 4
+00:00:37.24 I 54 \inode:\t54 (0x7ffff482c768)\idepth:\t11\nvar:\tt_z_42,17 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 54 4
+00:00:37.24 I 108 \inode:\t108 (0x7ffff48286a8)\idepth:\t38\nvar:\tt_z_35,31 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 108 4
+00:00:37.24 I 2 \inode:\t2 (0x7ffff481c728)\idepth:\t1\nvar:\tt_z_21,18 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 2 4
+00:00:37.24 I 104 \inode:\t104 (0x7ffff48285a8)\idepth:\t36\nvar:\tt_z_49,1 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 104 4
+00:00:37.24 I 50 \inode:\t50 (0x7ffff48275e8)\idepth:\t9\nvar:\tt_z_30,36 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 50 4
+00:00:37.24 I 100 \inode:\t100 (0x7ffff4828468)\idepth:\t34\nvar:\tt_z_32,33 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 100 4
+00:00:37.24 I 98 \inode:\t98 (0x7ffff48283e8)\idepth:\t33\nvar:\tt_z_33,34 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 98 4
+00:00:37.24 I 48 \inode:\t48 (0x7ffff482cfa8)\idepth:\t8\nvar:\tt_z_14,10 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 48 4
+00:00:37.24 I 94 \inode:\t94 (0x7ffff4828328)\idepth:\t31\nvar:\tt_z_42,41 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 94 4
+00:00:37.24 I 46 \inode:\t46 (0x7ffff481d068)\idepth:\t7\nvar:\tt_z_10,13 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 46 4
+00:00:37.24 I 90 \inode:\t90 (0x7ffff48281e8)\idepth:\t29\nvar:\tt_z_33,37 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 90 4
+00:00:37.24 I 22 \inode:\t22 (0x7ffff481c1e8)\idepth:\t11\nvar:\tt_z_36,3 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 22 4
+00:00:37.24 I 42 \inode:\t42 (0x7ffff481cca8)\idepth:\t12\nvar:\tt_z_36,39 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 42 4
+00:00:37.24 I 84 \inode:\t84 (0x7ffff481d1a8)\idepth:\t26\nvar:\tt_z_26,46 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 84 4
+00:00:37.24 I 82 \inode:\t82 (0x7ffff4828068)\idepth:\t25\nvar:\tt_z_34,38 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 82 4
+00:00:37.24 I 40 \inode:\t40 (0x7ffff481d328)\idepth:\t11\nvar:\tt_z_39,35 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 40 4
+00:00:37.24 I 78 \inode:\t78 (0x7ffff4827f68)\idepth:\t23\nvar:\tt_z_12,16 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 78 4
+00:00:37.24 I 39 \inode:\t39 (0x7ffff4827528)\idepth:\t10\nvar:\tt_z_24,47 [-0,1] >= 1.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 39 4
+00:00:37.24 I 66 \inode:\t66 (0x7ffff4827c68)\idepth:\t17\nvar:\tt_z_5,4 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 66 4
+00:00:37.24 I 4 \inode:\t4 (0x7ffff481f2e8)\idepth:\t2\nvar:\tt_z_18,6 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 4 4
+00:00:37.24 I 36 \inode:\t36 (0x7ffff48274a8)\idepth:\t9\nvar:\tt_z_5,4 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 36 4
+00:00:37.24 I 70 \inode:\t70 (0x7ffff4827d68)\idepth:\t19\nvar:\tt_z_36,32 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 70 4
+00:00:37.24 I 140 \inode:\t140 (0x7ffff48320a8)\idepth:\t41\nvar:\tt_z_23,26 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 140 4
+00:00:37.24 I 65 \inode:\t65 (0x7ffff48277a8)\idepth:\t16\nvar:\tt_z_27,50 [-0,0] >= 1.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 65 4
+00:00:37.24 I 60 \inode:\t60 (0x7ffff4827968)\idepth:\t14\nvar:\tt_z_1,11 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 60 4
+00:00:37.24 I 30 \inode:\t30 (0x7ffff4827328)\idepth:\t6\nvar:\tt_z_18,14 [-0,0] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 30 4
+00:00:37.24 I 28 \inode:\t28 (0x7ffff481e5e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 28 4
+00:00:37.24 I 56 \inode:\t56 (0x7ffff482b3e8)\idepth:\t12\nvar:\tt_z_20,17 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 56 4
+00:00:37.24 I 110 \inode:\t110 (0x7ffff48286e8)\idepth:\t39\nvar:\tt_z_14,18 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 110 4
+00:00:37.24 I 29 \inode:\t29 (0x7ffff481f7e8)\idepth:\t14\nvar:\tt_z_23,5 [-0,1] >= 1.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 29 4
+00:00:37.24 I 26 \inode:\t26 (0x7ffff481f768)\idepth:\t13\nvar:\tt_z_27,4 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 26 4
+00:00:37.24 I 6 \inode:\t6 (0x7ffff481f2a8)\idepth:\t3\nvar:\tt_z_25,21 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 6 4
+00:00:37.24 I 92 \inode:\t92 (0x7ffff4828268)\idepth:\t30\nvar:\tt_z_39,35 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 92 4
+00:00:37.24 I 88 \inode:\t88 (0x7ffff4828168)\idepth:\t28\nvar:\tt_z_38,42 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 88 4
+00:00:37.24 I 80 \inode:\t80 (0x7ffff4827fe8)\idepth:\t24\nvar:\tt_z_45,43 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 80 4
+00:00:37.24 I 8 \inode:\t8 (0x7ffff4821468)\idepth:\t4\nvar:\tt_z_50,29 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 8 4
+00:00:37.24 I 76 \inode:\t76 (0x7ffff4827f28)\idepth:\t22\nvar:\tt_z_43,47 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 76 4
+00:00:37.24 I 156 \inode:\t156 (0x7ffff48313a8)\idepth:\t49\nvar:\tt_z_17,19 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 156 4
+00:00:37.24 I 148 \inode:\t148 (0x7ffff4830ea8)\idepth:\t45\nvar:\tt_z_29,28 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 148 4
+00:00:37.24 I 18 \inode:\t18 (0x7ffff4820f28)\idepth:\t9\nvar:\tt_z_47,50 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 18 4
+00:00:37.24 I 53 \inode:\t53 (0x7ffff48275a8)\idepth:\t10\nvar:\tt_z_36,11 [-0,0] >= 1.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 53 4
+00:00:37.24 I 14 \inode:\t14 (0x7ffff481f3a8)\idepth:\t7\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 14 4
+00:00:37.24 I 20 \inode:\t20 (0x7ffff48210e8)\idepth:\t10\nvar:\tt_z_1,47 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 20 4
+00:00:37.24 I 102 \inode:\t102 (0x7ffff48284e8)\idepth:\t35\nvar:\tt_z_31,34 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 102 4
+00:00:37.24 I 45 \inode:\t45 (0x7ffff481c168)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] >= 1.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 45 4
+00:00:37.24 I 86 \inode:\t86 (0x7ffff4828128)\idepth:\t27\nvar:\tt_z_41,45 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 86 4
+00:00:37.24 I 152 \inode:\t152 (0x7ffff48295e8)\idepth:\t47\nvar:\tt_z_25,26 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 152 4
+00:00:37.24 I 130 \inode:\t130 (0x7ffff4829168)\idepth:\t49\nvar:\tt_z_21,20 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 130 4
+00:00:37.24 I 62 \inode:\t62 (0x7ffff4827668)\idepth:\t15\nvar:\tt_z_34,11 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 62 4
+00:00:37.24 I 24 \inode:\t24 (0x7ffff481cda8)\idepth:\t12\nvar:\tt_z_4,1 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 24 4
+00:00:37.24 I 44 \inode:\t44 (0x7ffff481c1a8)\idepth:\t13\nvar:\tt_z_37,35 [-0,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 44 4
+00:00:37.24 I 146 \inode:\t146 (0x7ffff48316a8)\idepth:\t44\nvar:\tt_z_28,25 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 146 4
+00:00:37.24 I 96 \inode:\t96 (0x7ffff4828368)\idepth:\t32\nvar:\tt_z_36,39 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 96 4
+00:00:37.24 I 58 \inode:\t58 (0x7ffff4828ce8)\idepth:\t13\nvar:\tt_z_36,3 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 58 4
+00:00:37.24 I 72 \inode:\t72 (0x7ffff4827de8)\idepth:\t20\nvar:\tt_z_37,48 [1,1] <= 0.000000\nbound:\t5.062500\nnr:\t87
+00:00:37.24 P 72 4
+00:00:37.24 I 164 \inode:\t164 (0x7ffff48295a8)\idepth:\t53\nvar:\tt_z_41,23 [1,1] <= 0.000000\nbound:\t7.500000\nnr:\t87
+00:00:37.24 P 164 4
+00:00:37.24 U 6.750000
+00:00:37.32 I 165 \inode:\t165 (0x7ffff4829528)\idepth:\t53\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t87
+00:00:37.32 P 165 2
+00:00:37.32 I 165 \inode:\t165 (0x7ffff4829528)\idepth:\t53\nvar:\tt_z_41,23 [1,1] >= 1.000000\nbound:\t100000000000000000000.000000\nnr:\t87
+00:00:37.32 P 165 4

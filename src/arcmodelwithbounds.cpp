@@ -6,6 +6,9 @@
 #include "binary_branch.h"
 #include "extended_dualbound.h"
 
+/* #define SCIP_DEBUG
+#define PRINTDUALSOLS */
+
 //desabling SCIP's default presolvers
 SCIP_RETCODE disableDefaultPresol(SCIP *scip)
 {
@@ -52,14 +55,20 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     SCIP *scip;
     SCIP_CALL(SCIPcreate(&scip));
 
+    SCIPenableDebugSol(scip);
+
     //set some parameters
     SCIP_CALL(SCIPincludeDefaultPlugins(scip));
 
     // create an empty problem
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
-    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 3));
-    SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "../bnb_viewer/bnb.vbc"));
+    SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 5));
+    //SCIP_CALL(SCIPsetIntParam(scip, "display/dualbound/active", 2));
+    //SCIP_CALL(SCIPsetBoolParam(scip, "display/lpinfo", true));
+    //SCIP_CALL(SCIPsetIntParam(scip, "display/freq", 10));
+    //SCIP_CALL(SCIPsetBoolParam(scip, "display/allviols", true));
+    //SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "../bnb_viewer/bnb.vbc"));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
     SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
@@ -162,7 +171,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
 
     //include combinatorial relaxation
     //SCIP_CALL(SCIPincludeObjRelax(scip, new HeurDualBound(scip, instance, x, z), TRUE));
-    SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
+    //SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
     //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z, xip), TRUE));
 
