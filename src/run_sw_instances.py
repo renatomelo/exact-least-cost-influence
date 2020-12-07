@@ -31,7 +31,7 @@ for alpha in alphas:
     print("network \talg \ttime \tnodes \tdualbound \tprimalbound \tgap")
     while i < len(instances):
         for a in algorithms:
-            values = list([0] * 6)
+            values = list([0] * 5)
             for j in range(5):
                 #print(a, instances[i + j])
                 name = instances[i + j]

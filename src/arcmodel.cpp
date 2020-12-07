@@ -16,7 +16,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPcreateProb(scip, "GLCIP Problem", NULL, NULL, NULL, NULL, NULL, NULL, NULL));
     //SCIP_CALL(SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE));
     SCIP_CALL(SCIPsetIntParam(scip, "display/verblevel", 0));
-    SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "branchandbound.vbc"));
+    //SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "../bnb_viewer/bnb.vbc"));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
     SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);

@@ -65,6 +65,7 @@ MAINOBJ		=	mycolor.o \
 				heur_ordering.o \
 				heur_greedy_construction.o \
 				binary_branch.o \
+				basic_binary_branch.o \
 				presolver_glcip.o \
 				extended_dualbound.o \
 				main.o
