@@ -19,7 +19,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     //SCIP_CALL(SCIPsetStringParam(scip, "visual/vbcfilename", "../bnb_viewer/bnb.vbc"));
 
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
-    SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
+    //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     //SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
 
     // add variables to the model
@@ -107,7 +107,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     /* HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
     SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE)); */
 
-    SCIP_CALL(SCIPincludeObjBranchrule(scip, new BasicBinaryBranch(scip, instance, x, z), TRUE));
+    //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BasicBinaryBranch(scip, instance, x, z), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

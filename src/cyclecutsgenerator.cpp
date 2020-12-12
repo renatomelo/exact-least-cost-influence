@@ -78,7 +78,7 @@ SCIP_DECL_CONSSEPALP(CycleCutsGenerator::scip_sepalp)
 // separation method of constraint handler for arbitrary primal solution
 SCIP_DECL_CONSSEPASOL(CycleCutsGenerator::scip_sepasol)
 {
-    cout << "consepasol\n";
+    //cout << "consepasol\n";
     //bool feasible = true;
     SCIP_CALL(findCycleCuts(scip, conshdlr, sol, result));
     return SCIP_OKAY;
@@ -162,6 +162,29 @@ SCIP_DECL_CONSLOCK(CycleCutsGenerator::scip_lock)
 
     return SCIP_OKAY;
 } /*lint !e715*/
+
+SCIP_DECL_CONSENFORELAX(CycleCutsGenerator::scip_enforelax)
+{
+    //cout << "SCIP_DECL_CONSENFORELAX\n";
+    if (isValid(scip, sol))
+    {
+        //cout << "FEASIBLE\n";
+        *result = SCIP_FEASIBLE;
+    }
+    else
+    {
+        //cout << "INFEASIBLE\n";
+        *result = SCIP_INFEASIBLE;
+
+        SCIP_CALL(findCycleCuts(scip, conshdlr, sol, result));
+
+        if (*result == SCIP_DIDNOTFIND)
+            *result = SCIP_INFEASIBLE;
+    }
+    
+    
+    return SCIP_OKAY;
+}
 
 // get value of x_i
 double CycleCutsGenerator::getXValue(SCIP *scip, SCIP_SOL *sol, DNode v)

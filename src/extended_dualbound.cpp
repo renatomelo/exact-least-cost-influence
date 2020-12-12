@@ -8,14 +8,13 @@ ExtendedDualBound::ExtendedDualBound(
     DNodeSCIPVarsMap &p_xip) : ObjRelax(scip,
                                         "extended-dual-bound",
                                         "Extended dual bound for LCIP",
-                                        -1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
-                                        2,      //frequency for calling relaxator
-                                        FALSE), //Does the relaxator contain all cuts in the LP?
+                                        1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
+                                        2,     //frequency for calling relaxator
+                                        TRUE), //Does the relaxator contain all cuts in the LP?
                                instance(p_instance),
                                x(p_x),
                                z(p_z),
-                               xip(p_xip),
-                               sol_(NULL)
+                               xip(p_xip)
 {
     env = new GRBEnv();
 }
@@ -255,7 +254,7 @@ double ExtendedDualBound::getCostInTopologicalOrdering(
         //cout << "sum = " << sum << " thr = " << thr[i] << endl;
         if (sum < thr[v])
         {
-            /* double p = 0;
+            double p = 0;
             for (double j : incentives)
             {
                 if (sum + j >= thr[v])
@@ -265,9 +264,9 @@ double ExtendedDualBound::getCostInTopologicalOrdering(
                 }
             }
 
-            total += p; */
+            total += p;
             //cout << "paying incentive of: " << p << " to " << i << endl;
-            total += thr[v] - sum;
+            //total += thr[v] - sum;
         }
     }
 
@@ -485,52 +484,6 @@ double ExtendedDualBound::exactWLCIPonDAG(
     return obj;
 }
 
-SCIP_RETCODE ExtendedDualBound::setRelaxedSol(
-    SCIP *scip,
-    set<DNode> seeds)
-{
-    //cout << "setRelaxedSol()\n";
-    //cout << "Setting LP relaxation solution, which improved upon earlier solution\n";
-    SCIP_CALL(SCIPclearRelaxSolVals(scip));
-
-    //it is necessary to set the new solution? I think so
-    for (DNode u : seeds)
-    {
-        SCIP_CALL(SCIPsetRelaxSolVal(scip, x[u], 1.0));
-
-        //int index = getIndexOfChepeastIncentive(instance, u);
-        int index = 0;
-        for (size_t i = 0; i < instance.incentives[u].size(); i++)
-        {
-            if (instance.incentives[u][i] >= instance.threshold[u])
-            {
-                //cout << "incentive paid: " << instance.incentives[node][i] << endl;
-                index = i;
-                break;
-            }
-        }
-
-        SCIP_CALL(SCIPsetRelaxSolVal(scip, xip[u][index], 1.0));
-
-        for (DNodeIt v(instance.g); v != INVALID; ++v)
-            if (v != u)
-                SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], 1));
-
-        for (ArcIt a(instance.g); a != INVALID; ++a)
-        {
-            //arcs pointing to the seed node are not selected
-            if (instance.g.target(a) != u)
-                SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], 1));
-        }
-    }
-
-    //TODO: if we found a strongly connected component add a cuting plane
-
-    //mark relaxation solution to be valid and inform SCIP that the relaxation include all LP rows
-    SCIP_CALL(SCIPmarkRelaxSolValid(scip, FALSE));
-    return SCIP_OKAY;
-}
-
 double ExtendedDualBound::getMinIncentiveNode(
     set<DNode> actives,
     DNode &node)
@@ -574,7 +527,7 @@ double ExtendedDualBound::getMinIncentiveNode(
     return minCost;
 }
 
-SCIP_RETCODE ExtendedDualBound::setRelaxedSol2(
+SCIP_RETCODE ExtendedDualBound::setRelaxedSol(
     SCIP *scip,
     set<DNode> seeds)
 {
@@ -585,7 +538,7 @@ SCIP_RETCODE ExtendedDualBound::setRelaxedSol2(
     //it is necessary to set the new solution? I think so
     for (DNode u : seeds)
     {
-        SCIP_CALL(SCIPsetRelaxSolVal(scip, x[u], 1.0));
+        SCIP_CALL(SCIPsetRelaxSolVal(scip, SCIPvarGetTransVar(x[u]), 1.0));
 
         //int index = getIndexOfChepeastIncentive(instance, u);
         int index = 0;
@@ -599,13 +552,7 @@ SCIP_RETCODE ExtendedDualBound::setRelaxedSol2(
             }
         }
 
-        SCIP_CALL(SCIPsetRelaxSolVal(scip, xip[u][index], 1.0));
-
-        //construct a subgraph of propagation to test if it is a dag
-        Digraph graph;
-
-        for (int i = 0; i < instance.n; i++)
-            graph.addNode();
+        SCIP_CALL(SCIPsetRelaxSolVal(scip, SCIPvarGetTransVar(xip[u][index]), 1.0));
 
         double totalCost = instance.incentives[u][index];
         set<DNode> actives = seeds;
@@ -618,23 +565,19 @@ SCIP_RETCODE ExtendedDualBound::setRelaxedSol2(
             totalCost += getMinIncentiveNode(actives, v);
 
             // set the relaxed
-            SCIP_CALL(SCIPsetRelaxSolVal(scip, x[v], 1));
+            SCIP_CALL(SCIPsetRelaxSolVal(scip, SCIPvarGetTransVar(x[v]), 1));
 
             for (InArcIt a(instance.g, v); a != INVALID; ++a)
             {
                 if (actives.count(instance.g.source(a)))
                 {
-                    SCIP_CALL(SCIPsetRelaxSolVal(scip, z[a], 1));
-                    DNode s = instance.g.source(a);
-                    graph.addArc(graph.nodeFromId(instance.g.id(s)), graph.nodeFromId(instance.g.id(v)));
+                    SCIP_CALL(SCIPsetRelaxSolVal(scip, SCIPvarGetTransVar(z[a]), 1));
+                    //DNode s = instance.g.source(a);
+                    //graph.addArc(graph.nodeFromId(instance.g.id(s)), graph.nodeFromId(instance.g.id(v)));
                 }
             }
 
             actives.insert(v);
-        }
-        if (!dag(graph))
-        {
-            cout << "the propagation graph is NOT a DAG\n";
         }
 
         //cout << "cost of heurMinIncentive() = " << totalCost << endl;
@@ -643,8 +586,7 @@ SCIP_RETCODE ExtendedDualBound::setRelaxedSol2(
     //TODO: if we found a strongly connected component add a cuting plane
 
     //mark relaxation solution to be valid and inform SCIP that the relaxation include all LP rows
-    //cout << "SCIPmarkRelaxSolValid(scip, TRUE) = " << SCIPmarkRelaxSolValid(scip, TRUE) << endl;
-    SCIP_CALL(SCIPmarkRelaxSolValid(scip, FALSE));
+    SCIP_CALL(SCIPmarkRelaxSolValid(scip, TRUE));
     return SCIP_OKAY;
 }
 
@@ -656,12 +598,6 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
 
     *result = SCIP_DIDNOTRUN;
     *lowerbound = -SCIPinfinity(scip);
-
-    /* if (SCIPgetFocusDepth(scip) == 0)
-    {
-        cout << "skiping the root node\n";
-        return SCIP_OKAY;
-    } */
 
     //get the support graph of the current feasible solution
     Digraph graph;
@@ -685,27 +621,25 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
         double minThr = getMinimumThreshold(node);
 
         relaxval = minThr;
-        /* for (double j : incentives)
+        for (double j : incentives)
         {
             if (j >= minThr)
             {
                 relaxval = j;
                 break;
             }
-        } */
-
-        //TODO construct here a relaxed solution
-        // add to the solution every arc except the incoming arcs of a node with minimum threshold
+        }
 
         //store relaxation solution in original SCIP if it improves the best relaxation solution thus far
         /* if ((!SCIPisRelaxSolValid(scip)) || SCIPisGT(scip, relaxval, SCIPgetRelaxSolObj(scip)))
         {
             set<DNode> seed;
             seed.insert(node);
-            SCIP_CALL(setRelaxedSol2(scip, seed));
-
-            //printf("lower bound = %g\n", relaxval);
-            *lowerbound = relaxval;
+            //construct here a relaxed solution
+            //SCIP_CALL(setRelaxedSol(scip, seed));
+            
+            *lowerbound = SCIPtransformObj(scip, relaxval);
+            //printf("lower bound = %g\n", *lowerbound);
             *result = SCIP_SUCCESS;
         } */
     }
@@ -742,8 +676,8 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
             }
 
             //implement the ILP model in gurobi to solve the subproblem
-            relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w);
-            //relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w, incentives);
+            //relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w);
+            relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w, incentives);
 
             //TODO compare this relaxval with the obtained by the minimum threshold
             /*  DNode node = INVALID;
@@ -776,8 +710,8 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
     if (dag(graph))
         cout << "subgraph is a DAG" << endl; */
 
-    //printf("lower bound = %g\n", relaxval);
-    *lowerbound = relaxval;
+    *lowerbound = SCIPtransformObj(scip, relaxval);
+    //printf("lower bound = %g, relaxval = %g\n", *lowerbound, relaxval);
     *result = SCIP_SUCCESS;
 
     return SCIP_OKAY;

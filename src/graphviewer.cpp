@@ -94,3 +94,28 @@ void GraphViewer::ViewGLCIPSupportGraph(GLCIPInstance &instance, Digraph &g, str
     GA.SetLabel(title);
     GA.View();
 }
+
+void GraphViewer::ViewGLCIPSubGraph(GLCIPInstance &instance, Digraph &g, string title){
+    // assign names to the nodes
+    DNodeStringMap nodeNames(g);
+    for(DNodeIt v(g); v != INVALID; ++v){
+        nodeNames[v] = "\"" + instance.nodeName[instance.g.nodeFromId(g.id(v))] + "\"";
+    }
+    
+    DNodePosMap posx(g);
+    DNodePosMap posy(g);
+    for(DNodeIt v(g); v != INVALID; ++v){
+        posx[v] = instance.posx[instance.g.nodeFromId(g.id(v))];
+        posy[v] = instance.posy[instance.g.nodeFromId(g.id(v))];
+    }
+
+    // set graph attributes for the visualizer
+    DigraphAttributes GA(g, nodeNames, posx, posy);
+
+    GA.SetDefaultDNodeAttrib("color = Gray shape = ellipse style = bold fontsize = 20");
+
+    // set arcs label according to weights
+
+    GA.SetLabel(title);
+    GA.View();
+}

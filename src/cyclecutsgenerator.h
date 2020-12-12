@@ -45,6 +45,7 @@ class CycleCutsGenerator: public scip::ObjConshdlr{
         virtual SCIP_DECL_CONSENFOPS(scip_enfops);
         virtual SCIP_DECL_CONSCHECK(scip_check);
         virtual SCIP_DECL_CONSLOCK(scip_lock);
+        virtual SCIP_DECL_CONSENFORELAX(scip_enforelax);
 
 
         SCIP_RETCODE createCycleCuts(

@@ -73,10 +73,10 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     //SCIP_CALL(SCIPsetBoolParam(scip, "lp/presolving", FALSE));
     //SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     //SCIPsetPresolving(scip, SCIP_PARAMSETTING_FAST, TRUE);
-    if (instance.alpha < 1)
+    /* if (instance.alpha < 1)
         SCIPsetPresolving(scip, SCIP_PARAMSETTING_OFF, TRUE);
     else
-        disableDefaultPresol(scip);
+        disableDefaultPresol(scip); */
 
     /* SCIPincludeConshdlrLinear(scip);
     SCIPincludeNodeselBfs(scip);
@@ -132,7 +132,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     // coupling variables xip and x
     for (DNodeIt v(instance.g); v != INVALID; ++v)
     {
-        ScipCons *cons = new ScipCons(scip, 0.0, 0.0, "linking cons");
+        ScipCons *cons = new ScipCons(scip, 0.0, 0.0, "coupling cons");
 
         for (unsigned int p = 0; p < instance.incentives[v].size(); p++)
         {

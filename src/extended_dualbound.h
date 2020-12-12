@@ -12,7 +12,6 @@ class ExtendedDualBound : public scip::ObjRelax
     DNodeSCIPVarMap &x;
     ArcSCIPVarMap &z;
     DNodeSCIPVarsMap &xip;
-    SCIP_SOL *sol_; /**< current solution */
     GRBEnv *env;
 
 public:
@@ -84,10 +83,6 @@ public:
         DNodeIntMap &w);
 
     SCIP_RETCODE setRelaxedSol(
-        SCIP *scip,
-        set<DNode> seeds);
-
-    SCIP_RETCODE setRelaxedSol2(
         SCIP *scip,
         set<DNode> seeds);
 
