@@ -285,6 +285,36 @@ double GLCIPBase::cheapestIncentive(const GLCIPInstance &instance,
     return cost;
 }
 
+int GLCIPBase::getIndexOfChepeastIncentive(GLCIPInstance &instance, DNode &node)
+{
+    int index = 0;
+    for (size_t i = 0; i < instance.incentives[node].size(); i++)
+    {
+        if (instance.incentives[node][i] >= instance.threshold[node])
+        {
+            //cout << "incentive paid: " << instance.incentives[node][i] << endl;
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
+int GLCIPBase::getIndexOfChepeastIncentive(GLCIPInstance &instance, DNode &node, double exertedInf)
+{
+    int index = 0;
+    for (size_t i = 0; i < instance.incentives[node].size(); i++)
+    {
+        if (instance.incentives[node][i] + exertedInf >= instance.threshold[node])
+        {
+            //cout << "incentive paid: " << instance.incentives[node][i] << endl;
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
 /**
  * Computes the cost paid to activate a vertex v with a given set of incoming neigobors
  */

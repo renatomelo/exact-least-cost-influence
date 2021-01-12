@@ -93,6 +93,9 @@ public:
         const DNode &v,
         double exertedInfluence);
 
+    static int getIndexOfChepeastIncentive(GLCIPInstance &instance, DNode &node);
+    static int getIndexOfChepeastIncentive(GLCIPInstance &instance, DNode &node, double exertedInf);
+
     static double costInfluencingSet(
         const GLCIPInstance &instance,
         const DNode &v,

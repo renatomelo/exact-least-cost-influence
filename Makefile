@@ -68,6 +68,7 @@ MAINOBJ		=	mycolor.o \
 				basic_binary_branch.o \
 				presolver_glcip.o \
 				extended_dualbound.o \
+				heur_minincentive.o \
 				main.o
 MAINSRC		=	$(addprefix $(SRCDIR)/,$(MAINOBJ:.o=.cpp))
 MAINDEP		=	$(SRCDIR)/depend.cppmain.$(OPT)

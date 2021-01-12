@@ -9,7 +9,7 @@ ExtendedDualBound::ExtendedDualBound(
                                         "extended-dual-bound",
                                         "Extended dual bound for LCIP",
                                         1.0,   //priority of the relaxator (negative: after LP, non-negative: before LP)
-                                        2,     //frequency for calling relaxator
+                                        20,     //frequency for calling relaxator
                                         TRUE), //Does the relaxator contain all cuts in the LP?
                                instance(p_instance),
                                x(p_x),
@@ -180,21 +180,6 @@ double ExtendedDualBound::getMinimumThreshold(DNode &node)
 
     return minimum;
 }
-
-/* int ExtendedDualBound::getIndexOfChepeastIncentive(GLCIPInstance &instance, DNode &node)
-{
-    int index = 0;
-    for (size_t i = 0; i < instance.incentives[node].size(); i++)
-    {
-        if (instance.incentives[node][i] >= instance.threshold[node])
-        {
-            //cout << "incentive paid: " << instance.incentives[node][i] << endl;
-            index = i;
-            break;
-        }
-    }
-    return index;
-} */
 
 void ExtendedDualBound::getSubGraph(
     SCIP *scip,
@@ -613,7 +598,7 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
         break; // only one arbitrary vertex is needed
     }
 
-    if (stronglyConnected(graph))
+    if (stronglyConnected(graph) || instance.alpha < 1)
     {
         //cout << "assossiated subgraph is strongly connected\n";
         //find minimum threshold vertex
@@ -662,7 +647,7 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
         getCondensedThresholds(condensed, listOfComponents, nComponents, thr);
         //printCondensedArcs(condensed, arcWeight);
 
-        if (instance.alpha < 1)
+        /* if (instance.alpha < 1)
         {
             //cout << "alpha < 1 AND G'\n";
 
@@ -677,10 +662,9 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
 
             //implement the ILP model in gurobi to solve the subproblem
             //relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w);
-            relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w, incentives);
+            //relaxval = exactWLCIPonDAG(scip, condensed, arcWeight, thr, w, incentives);
 
-            //TODO compare this relaxval with the obtained by the minimum threshold
-            /*  DNode node = INVALID;
+             DNode node = INVALID;
             double minThr = getMinimumThreshold(node);
 
             double m = minThr;
@@ -693,12 +677,12 @@ SCIP_DECL_RELAXEXEC(ExtendedDualBound::scip_exec)
                 }
             }
 
-            relaxval = m; */
+            relaxval = m;
 
-            /* if (relaxval > m)
-                cout << "the solution of the ILP model is greater than the incentive to the minimum threshol vertex\n"; */
+            if (relaxval > m)
+                cout << "the solution of the ILP model is greater than the incentive to the minimum threshol vertex\n";
         }
-        else
+        else */
         {
             //linear time algorithm to solve the problem in DAGs for alpha = 1
             relaxval = getCostInTopologicalOrdering(condensed, nComponents, thr, arcWeight, incentives);

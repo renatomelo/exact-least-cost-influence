@@ -5,6 +5,7 @@
 #include "presolver_glcip.h"
 #include "binary_branch.h"
 #include "extended_dualbound.h"
+#include "heur_minincentive.h"
 
 /* #define SCIP_DEBUG
 #define PRINTDUALSOLS */
@@ -174,6 +175,7 @@ bool ArcModelWithBounds::run(GLCIPInstance &instance, GLCIPSolution &solution, i
     SCIP_CALL(SCIPincludeObjPresol(scip, new PresolverGLCIP(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjBranchrule(scip, new BinaryBranch(scip, instance, x, z), TRUE));
     SCIP_CALL(SCIPincludeObjRelax(scip, new ExtendedDualBound(scip, instance, x, z, xip), TRUE));
+    SCIP_CALL(SCIPincludeObjHeur(scip, new HeurMinIncentive(scip, instance, x, z, xip), TRUE));
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

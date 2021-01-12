@@ -1,8 +1,6 @@
 #include "GLCIPBase.h"
 #include "dualbound.h"
-#include "heur_ordering.h"
-#include "basic_binary_branch.h"
-
+#include "heur_minincentive.h"
 bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLimit)
 {
     //SCIP variables and initialization
@@ -103,11 +101,7 @@ bool ArcModel::run(GLCIPInstance &instance, GLCIPSolution &solution, int timeLim
     SCIP_CALL(SCIPaddCons(scip, cons));
     SCIP_CALL(SCIPreleaseCons(scip, &cons));
 
-    //primal heuristic
-    /* HeurOrdering *ordering = new HeurOrdering(scip, instance, x, z, xip);
-    SCIP_CALL(SCIPincludeObjHeur(scip, ordering, TRUE)); */
-
-    //SCIP_CALL(SCIPincludeObjBranchrule(scip, new BasicBinaryBranch(scip, instance, x, z), TRUE));
+    SCIP_CALL(SCIPincludeObjHeur(scip, new HeurMinIncentive(scip, instance, x, z, xip), TRUE)); //primal heuristic
 
     // bound the execution time
     SCIP_CALL(SCIPsetRealParam(scip, "limits/time", timeLimit));

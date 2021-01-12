@@ -10,7 +10,7 @@ instances.append("adolescent_health.lcip")
 instances.append("advogato.lcip")
 instances.append("dblp.lcip")
 instances.append("cora.lcip")
-instances.append("HepTh.lcip")
+#instances.append("HepTh.lcip")
 
 #paremeters to vary
 alphas = list()
