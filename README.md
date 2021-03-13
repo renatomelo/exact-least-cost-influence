@@ -11,8 +11,10 @@ Callbacks:
 1. Cycle elimination constraints (separation problem)
     - Exact separation
 2. Generalized propagation constraints (separation problem)
-    - Exact and heuristic separation
-3. Pricing problem for column generation (dynamic programming algorithm)
+    - Exact separation
+    - Heuristic separation
+3. Pricing problem for column generation
+    - Dynamic programming algorithm
 
 In addition to the algorithms and models of the paper above, this project contains additional ideas of algorithms to solve the problem, such as:
 1. Branching rules
